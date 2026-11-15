@@ -32,6 +32,7 @@ export type CommentItem = {
 export type VideoDetail = VideoItem & {
   likedByMe: boolean;
   subscribedByMe: boolean;
+  subscriberCount: number;
   comments: CommentItem[];
 };
 

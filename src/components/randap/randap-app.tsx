@@ -89,8 +89,9 @@ export function RandapApp() {
   const navigate = useCallback(
     (next: ViewName) => {
       setView(next);
+      setQuery("");
       window.scrollTo({ top: 0 });
-      if (next === "subs" || next === "home" || next === "videos") {
+      if (next === "subs" || next === "home" || next === "videos" || next === "shorts") {
         void loadFeed(true);
       }
       if (next === "profile") {
