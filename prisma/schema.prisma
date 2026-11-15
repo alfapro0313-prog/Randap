@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,11 +7,59 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model ContactMessage {
-  id        String   @id @default(cuid())
+model User {
+  id        String      @id @default(cuid())
+  deviceKey String      @unique
   name      String
-  phone     String
-  course    String?
-  message   String?
+  handle    String      @unique
+  createdAt DateTime    @default(now())
+  videos    Video[]
+  comments  Comment[]
+}
+
+model Video {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  thumbPath     String
+  videoPath     String
+  hash          String    @unique
+  kind          String    @default("video")
+  durationSec   Int       @default(0)
+  allowComments Boolean   @default(true)
+  views         Int       @default(0)
+  uploaderId    String
+  uploader      User      @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  comments      Comment[]
+  likes         Like[]
+  createdAt     DateTime  @default(now())
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  body      String
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  deviceId  String
+  createdAt DateTime @default(now())
+
+  @@unique([videoId, deviceId])
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  channelId String
+  deviceId  String
+  createdAt DateTime @default(now())
+
+  @@unique([channelId, deviceId])
 }

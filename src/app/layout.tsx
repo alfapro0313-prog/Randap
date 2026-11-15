@@ -14,33 +14,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ZamonBilim — O'quv markazi | Ingliz tili, IELTS, Matematika, Dasturlash",
+  title: "Randap — Video platforma",
   description:
-    "ZamonBilim o'quv markazi: ingliz tili, IELTS 6.5+, matematika, abituriyent kurslari (DTM), frontend dasturlash va mental arifmetika. Kichik guruhlar, tajribali ustozlar, birinchi dars bepul.",
-  keywords: [
-    "o'quv markazi",
-    "ingliz tili kursi",
-    "IELTS",
-    "matematika",
-    "abituriyent",
-    "dasturlash o'rganish",
-    "Toshkent o'quv markazi",
-  ],
-  authors: [{ name: "ZamonBilim" }],
+    "Randap — videolar va shorts joylash, ko'rish, layk bosish, izoh qoldirish va obuna bo'lish mumkin bo'lgan video platforma.",
+  keywords: ["Randap", "video", "shorts", "video platforma", "layk", "obuna"],
+  authors: [{ name: "Randap" }],
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
   },
   openGraph: {
-    title: "ZamonBilim — O'quv markazi",
-    description:
-      "Zamonaviy bilim — kelajak kaliti. Birinchi sinov darsi bepul!",
-    siteName: "ZamonBilim",
+    title: "Randap — Video platforma",
+    description: "Videolar va shorts — hammasi bir joyda.",
+    siteName: "Randap",
     type: "website",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#059669",
+  themeColor: "#0a0a0a",
 };
 
 export default function RootLayout({
@@ -49,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="uz" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="uz" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
