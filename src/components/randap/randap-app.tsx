@@ -12,6 +12,7 @@ import { UploadView } from "./upload";
 import { ProfileView } from "./profile";
 import { ChannelView } from "./channel";
 import { SectionsGrid, SectionDetail } from "./sections";
+import { OrganishView, TopicDetailView } from "./organish";
 import { QuizView } from "./quiz";
 import { LessonView } from "./lesson";
 import { BallarView } from "./ballar";
@@ -44,6 +45,7 @@ export function RandapApp() {
   const [sections, setSections] = useState<SectionItem[] | null>(null);
   const [subs, setSubs] = useState<SubscribedChannel[]>([]);
   const [currentSection, setCurrentSection] = useState<SectionItem | null>(null);
+  const [topicId, setTopicId] = useState("");
   const [quizId, setQuizId] = useState("");
   const [currentLesson, setCurrentLesson] = useState<LessonItem | null>(null);
 
@@ -206,6 +208,12 @@ export function RandapApp() {
     window.scrollTo({ top: 0 });
   }, []);
 
+  const openTopic = useCallback((id: string) => {
+    setTopicId(id);
+    setView("organishTopic");
+    window.scrollTo({ top: 0 });
+  }, []);
+
   const openLesson = useCallback(
     (lessonId: string) => {
       if (!currentSection) return;
@@ -335,6 +343,7 @@ export function RandapApp() {
                 loading={feed.loading || sections === null}
                 onEnterVideos={() => navigate("home")}
                 onEnterTests={() => navigate("sections")}
+                onEnterOrganish={() => navigate("organish")}
                 onOpenBallar={() => navigate("ballar")}
               />
             ) : null}
@@ -479,6 +488,17 @@ export function RandapApp() {
                 subject={currentSection}
                 onBack={() => navigate("section")}
                 onNextLesson={openLesson}
+              />
+            ) : null}
+
+            {view === "organish" ? (
+              <OrganishView onOpenTopic={openTopic} />
+            ) : null}
+
+            {view === "organishTopic" ? (
+              <TopicDetailView
+                topicId={topicId}
+                onBack={() => navigate("organish")}
               />
             ) : null}
 

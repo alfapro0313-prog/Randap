@@ -2,6 +2,7 @@
 
 import {
   ArrowRight,
+  BookOpen,
   CirclePlay,
   GraduationCap,
   ListChecks,
@@ -17,6 +18,7 @@ type PortalProps = {
   loading: boolean;
   onEnterVideos: () => void;
   onEnterTests: () => void;
+  onEnterOrganish: () => void;
   onOpenBallar: () => void;
 };
 
@@ -27,6 +29,7 @@ export function PortalView({
   loading,
   onEnterVideos,
   onEnterTests,
+  onEnterOrganish,
   onOpenBallar,
 }: PortalProps) {
   const quizCount = sections.reduce((sum, s) => sum + s.quizzes.length, 0);
@@ -44,8 +47,8 @@ export function PortalView({
         </h1>
       </div>
 
-      {/* Ikkita kichik bo'lim */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {/* Uchta kichik bo'lim */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {/* 1-bo'lim: Randap Video — YouTubega o'xshagan */}
         <button
           onClick={onEnterVideos}
@@ -129,6 +132,46 @@ export function PortalView({
           </span>
 
           <span className="mt-4 flex h-9 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground transition-colors group-hover:bg-primary/90">
+            Kirish
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </span>
+        </button>
+
+        {/* 3-bo'lim: O'rganish — uzun maqolalar + din va hayot burchlari */}
+        <button
+          onClick={onEnterOrganish}
+          aria-label="O'rganish bo'limiga kirish"
+          className="group flex flex-col rounded-2xl border border-border bg-card p-5 text-left transition-all hover:border-violet-300 hover:shadow-md"
+        >
+          <span className="flex items-center gap-3">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
+              <BookOpen className="size-6" aria-hidden="true" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-base font-extrabold text-foreground">
+                O&apos;rganish
+              </span>
+              <span className="block text-xs text-muted-foreground">
+                Uzun ma&apos;qolalar bo&apos;limi
+              </span>
+            </span>
+          </span>
+
+          <span className="mt-3 block text-sm leading-relaxed text-muted-foreground">
+            Ingliz tili, xotira, matematika va tarix haqida uzun ma&apos;lumotlar.
+            Pastida din va hayot burchlari yozilgan.
+          </span>
+
+          <span className="mt-3 flex flex-wrap items-center gap-1.5">
+            <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
+              4 mavzu
+            </span>
+            <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
+              Din va hayot burchlari
+            </span>
+          </span>
+
+          <span className="mt-4 flex h-9 items-center justify-center gap-1.5 rounded-full bg-violet-600 px-4 text-sm font-bold text-white transition-colors group-hover:bg-violet-700">
             Kirish
             <ArrowRight className="size-4" aria-hidden="true" />
           </span>

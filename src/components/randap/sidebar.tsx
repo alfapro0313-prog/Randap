@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import {
+  BookOpen,
   CirclePlay,
   GraduationCap,
   Home,
@@ -30,6 +31,8 @@ export type ViewName =
   | "section"
   | "quiz"
   | "lesson"
+  | "organish"
+  | "organishTopic"
   | "ballar"
   | "search";
 
@@ -52,6 +55,7 @@ const NAV_ITEMS: Array<{
   { key: "shorts", label: "Shorts", icon: Zap },
   { key: "videos", label: "Videos", icon: ListVideo },
   { key: "sections", label: "Testlar", icon: GraduationCap },
+  { key: "organish", label: "O'rganish", icon: BookOpen },
   { key: "ballar", label: "Ballar", icon: Trophy },
   { key: "profile", label: "Profil", icon: User },
 ];
@@ -78,6 +82,8 @@ function isActive(
   if (item === "home" && current === "watch" && watchKind !== "short")
     return true;
   if (item === "sections" && (current === "section" || current === "quiz" || current === "lesson"))
+    return true;
+  if (item === "organish" && current === "organishTopic")
     return true;
   if (item === "shorts" && current === "watch" && watchKind === "short")
     return true;
