@@ -2,6 +2,7 @@
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { AvatarBubble } from "./avatar";
+import { useLang } from "./lang-provider";
 import { formatCount, formatDuration, timeAgo } from "@/lib/randap-client";
 import type { VideoItem } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,7 @@ type VideoCardProps = {
 };
 
 export function VideoCard({ video, onOpen, onOpenChannel, compact }: VideoCardProps) {
+  const { t, lang } = useLang();
   return (
     <article className={cn("group flex flex-col", compact && "gap-2")}>
       <button
@@ -67,7 +69,7 @@ export function VideoCard({ video, onOpen, onOpenChannel, compact }: VideoCardPr
             {video.uploader.name}
           </button>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {formatCount(video.views)} ko&apos;rildi · {timeAgo(video.createdAt)}
+            {formatCount(video.views, lang)} {t("viewsUnit")} · {timeAgo(video.createdAt, lang)}
           </p>
         </div>
       </div>
@@ -80,7 +82,7 @@ export function VideoGrid({
   loading,
   onOpen,
   onOpenChannel,
-  emptyText = "Hozircha video yo'q. Birinchisi siz bo'ling!",
+  emptyText,
 }: {
   videos: VideoItem[];
   loading?: boolean;
@@ -88,6 +90,8 @@ export function VideoGrid({
   onOpenChannel: (uploaderId: string) => void;
   emptyText?: string;
 }) {
+  const { t } = useLang();
+  const emptyFallback = t("emptyHome");
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-x-4 gap-y-7 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -105,8 +109,8 @@ export function VideoGrid({
   if (videos.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-16 text-center">
-        <p className="text-base font-semibold text-foreground">Bo&apos;sh</p>
-        <p className="mt-1 max-w-sm text-sm text-muted-foreground">{emptyText}</p>
+        <p className="text-base font-semibold text-foreground">{t("empty")}</p>
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">{emptyText ?? emptyFallback}</p>
       </div>
     );
   }

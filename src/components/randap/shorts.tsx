@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { AvatarBubble } from "./avatar";
+import { useLang } from "./lang-provider";
 import { formatCount } from "@/lib/randap-client";
 import type { VideoItem } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,7 @@ function ShortItem({
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
+  const { t, lang } = useLang();
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(short.likeCount);
   const [commentCount] = useState(short.commentCount);
@@ -85,10 +87,10 @@ function ShortItem({
         setLiked(data.liked);
         setLikeCount(data.count);
       } else {
-        toast({ title: "Xatolik", description: data.error, variant: "destructive" });
+        toast({ title: t("error"), description: data.error, variant: "destructive" });
       }
     } catch {
-      toast({ title: "Xatolik", description: "Layk yuborilmadi", variant: "destructive" });
+      toast({ title: t("error"), description: t("likeFail"), variant: "destructive" });
     }
   }
 
@@ -107,14 +109,14 @@ function ShortItem({
       });
       const data = await res.json();
       if (data.ok) {
-        toast({ title: "Izoh qo'shildi" });
+        toast({ title: t("commentAdded") });
         setCommentText("");
         setShowComments(false);
       } else {
-        toast({ title: "Xatolik", description: data.error, variant: "destructive" });
+        toast({ title: t("error"), description: data.error, variant: "destructive" });
       }
     } catch {
-      toast({ title: "Xatolik", description: "Izoh yuborilmadi", variant: "destructive" });
+      toast({ title: t("error"), description: t("commentFail"), variant: "destructive" });
     }
   }
 
@@ -168,7 +170,7 @@ function ShortItem({
           <button
             onClick={toggleLike}
             aria-pressed={liked}
-            aria-label="Layk bosish"
+            aria-label={t("likeAria")}
             className="flex flex-col items-center gap-1"
           >
             <span
@@ -180,21 +182,21 @@ function ShortItem({
               <ThumbsUp className={cn("size-5", liked && "fill-current")} aria-hidden="true" />
             </span>
             <span className="text-[11px] font-semibold text-white">
-              {formatCount(likeCount)}
+              {formatCount(likeCount, lang)}
             </span>
           </button>
 
           {short.allowComments ? (
             <button
               onClick={() => setShowComments(true)}
-              aria-label="Izohlar"
+              aria-label={t("commentsAria")}
               className="flex flex-col items-center gap-1"
             >
               <span className="flex size-11 items-center justify-center rounded-full bg-white/20 text-white">
                 <MessageSquare className="size-5" aria-hidden="true" />
               </span>
               <span className="text-[11px] font-semibold text-white">
-                {formatCount(commentCount)}
+                {formatCount(commentCount, lang)}
               </span>
             </button>
           ) : null}
@@ -208,20 +210,20 @@ function ShortItem({
             onSubmit={postComment}
             className="w-full max-w-[420px] rounded-2xl border border-border bg-card p-4"
           >
-            <p className="text-sm font-semibold text-foreground">Izoh yozish</p>
+            <p className="text-sm font-semibold text-foreground">{t("writeComment")}</p>
             <div className="mt-2 flex gap-2">
               <input
                 autoFocus
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Fikringiz..."
+                placeholder={t("yourThoughts")}
                 maxLength={1000}
-                aria-label="Shorts izohi"
+                aria-label={t("shortsCommentAria")}
                 className="h-10 flex-1 rounded-full border border-border bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
               />
               <button
                 type="submit"
-                aria-label="Yuborish"
+                aria-label={t("sendAria")}
                 disabled={!commentText.trim()}
                 className="flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-50"
               >
@@ -234,14 +236,14 @@ function ShortItem({
                 onClick={() => onOpenWatch(short.id)}
                 className="text-xs font-semibold text-muted-foreground hover:text-foreground"
               >
-                Barcha izohlarni videoda ko&apos;rish
+                {t("seeAllComments")}
               </button>
               <button
                 type="button"
                 onClick={() => setShowComments(false)}
                 className="text-xs font-semibold text-muted-foreground hover:text-foreground"
               >
-                Yopish
+                {t("close")}
               </button>
             </div>
           </form>
@@ -259,6 +261,7 @@ export function ShortsView({
   onOpenChannel,
   onOpenWatch,
 }: ShortsViewProps) {
+  const { t } = useLang();
   const [muted, setMuted] = useState(true);
 
   if (loading) {
@@ -272,10 +275,9 @@ export function ShortsView({
   if (shorts.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
-        <p className="text-base font-semibold">Shorts hozircha yo&apos;q</p>
+        <p className="text-base font-semibold">{t("shortsEmpty")}</p>
         <p className="max-w-sm text-sm text-muted-foreground">
-          &laquo;+&raquo; tugmasini bosib, 1:20 (80 soniya) gacha bo&apos;lgan
-          video yuklang — u Shorts bo&apos;limida paydo bo&apos;ladi.
+          {t("shortsEmptyDesc")}
         </p>
       </div>
     );
@@ -286,7 +288,7 @@ export function ShortsView({
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
-          aria-label="Orqaga qaytish"
+          aria-label={t("back")}
           className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80"
         >
           <ArrowLeft className="size-5" aria-hidden="true" />
@@ -296,7 +298,7 @@ export function ShortsView({
           onClick={() => setMuted((m) => !m)}
           className="ml-auto rounded-full border border-border bg-secondary px-4 py-1.5 text-xs font-semibold text-foreground hover:bg-secondary/80"
         >
-          {muted ? "Ovozni yoqish" : "Ovozni o'chirish"}
+          {muted ? t("unmute") : t("mute")}
         </button>
       </div>
 

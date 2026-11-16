@@ -10,6 +10,7 @@ import {
   Trophy,
   Users,
 } from "lucide-react";
+import { useLang } from "./lang-provider";
 import type { SectionItem } from "@/lib/randap-types";
 
 type PortalProps = {
@@ -35,6 +36,7 @@ export function PortalView({
   onEnterChat,
   onOpenBallar,
 }: PortalProps) {
+  const { t } = useLang();
   const quizCount = sections.reduce((sum, s) => sum + s.quizzes.length, 0);
   const lessonCount = sections.reduce((sum, s) => sum + s.lessons.length, 0);
 
@@ -43,10 +45,10 @@ export function PortalView({
       {/* Kichik kirish matni */}
       <div className="flex flex-col items-center gap-1 text-center">
         <p className="text-sm font-semibold text-muted-foreground">
-          Randap platformasiga xush kelibsiz
+          {t("portalWelcome")}
         </p>
         <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
-          Qaysi bo&apos;limdan boshlaysiz?
+          {t("portalChoose")}
         </h1>
       </div>
 
@@ -55,7 +57,7 @@ export function PortalView({
         {/* 1-bo'lim: Randap Video — YouTubega o'xshagan */}
         <button
           onClick={onEnterVideos}
-          aria-label="Randap Video bo'limiga kirish"
+          aria-label={t("enterVideoAria")}
           className="group flex flex-col rounded-2xl border border-border bg-card p-5 text-left transition-all hover:border-red-300 hover:shadow-md"
         >
           <span className="flex items-center gap-3">
@@ -67,31 +69,30 @@ export function PortalView({
                 Randap Video
               </span>
               <span className="block text-xs text-muted-foreground">
-                YouTubega o&apos;xshagan
+                {t("portalVideoSub")}
               </span>
             </span>
           </span>
 
           <span className="mt-3 block text-sm leading-relaxed text-muted-foreground">
-            Videolar va Shorts ko&apos;rish — layk, komment, obuna bo&apos;lish
-            bilan.
+            {t("portalVideoDesc")}
           </span>
 
           <span className="mt-3 flex flex-wrap items-center gap-1.5">
             <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
-              {loading ? "..." : `${videosCount} video`}
+              {loading ? "..." : `${videosCount} ${t("videoUnit")}`}
             </span>
             <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
-              {loading ? "..." : `${shortsCount} shorts`}
+              {loading ? "..." : `${shortsCount} ${t("shortsUnit")}`}
             </span>
             <span className="flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
               <Users className="size-3" aria-hidden="true" />
-              Obunalar
+              {t("subs")}
             </span>
           </span>
 
           <span className="mt-4 flex h-9 items-center justify-center gap-1.5 rounded-full bg-red-600 px-4 text-sm font-bold text-white transition-colors group-hover:bg-red-700">
-            Kirish
+            {t("enter")}
             <ArrowRight className="size-4" aria-hidden="true" />
           </span>
         </button>
@@ -99,7 +100,7 @@ export function PortalView({
         {/* 2-bo'lim: Testlar — hamma fandan, ballari alohida */}
         <button
           onClick={onEnterTests}
-          aria-label="Testlar bo'limiga kirish"
+          aria-label={t("enterTestsAria")}
           className="group flex flex-col rounded-2xl border border-border bg-card p-5 text-left transition-all hover:border-primary/50 hover:shadow-md"
         >
           <span className="flex items-center gap-3">
@@ -108,34 +109,36 @@ export function PortalView({
             </span>
             <span className="min-w-0">
               <span className="block text-base font-extrabold text-foreground">
-                Testlar
+                {t("navSections")}
               </span>
               <span className="block text-xs text-muted-foreground">
-                Hamma fandan, alohida bo&apos;lim
+                {t("portalTestsSub")}
               </span>
             </span>
           </span>
 
           <span className="mt-3 block text-sm leading-relaxed text-muted-foreground">
-            Barcha fanlardan testlar va o&apos;rgatuvlar. Ballari{" "}
-            <span className="font-semibold text-foreground">alohida</span>{" "}
-            hisoblanadi.
+            {t("portalTestsA")}
+            <span className="font-semibold text-foreground">
+              {t("portalTestsBold")}
+            </span>
+            {t("portalTestsB")}
           </span>
 
           <span className="mt-3 flex flex-wrap items-center gap-1.5">
             <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
-              {loading ? "..." : `${sections.length} fan`}
+              {loading ? "..." : `${sections.length} ${t("fanUnit")}`}
             </span>
             <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
-              {loading ? "..." : `${quizCount} test`}
+              {loading ? "..." : `${quizCount} ${t("navSections").toLowerCase()}`}
             </span>
             <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
-              {loading ? "..." : `${lessonCount} o'rgatuv`}
+              {loading ? "..." : `${lessonCount} ${t("orgatuvUnit")}`}
             </span>
           </span>
 
           <span className="mt-4 flex h-9 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground transition-colors group-hover:bg-primary/90">
-            Kirish
+            {t("enter")}
             <ArrowRight className="size-4" aria-hidden="true" />
           </span>
         </button>
@@ -143,7 +146,7 @@ export function PortalView({
         {/* 3-bo'lim: O'rganish — uzun maqolalar + din va hayot burchlari */}
         <button
           onClick={onEnterOrganish}
-          aria-label="O'rganish bo'limiga kirish"
+          aria-label={t("enterOrganishAria")}
           className="group flex flex-col rounded-2xl border border-border bg-card p-5 text-left transition-all hover:border-violet-300 hover:shadow-md"
         >
           <span className="flex items-center gap-3">
@@ -152,30 +155,29 @@ export function PortalView({
             </span>
             <span className="min-w-0">
               <span className="block text-base font-extrabold text-foreground">
-                O&apos;rganish
+                {t("navOrganish")}
               </span>
               <span className="block text-xs text-muted-foreground">
-                Uzun ma&apos;qolalar bo&apos;limi
+                {t("portalOrganishSub")}
               </span>
             </span>
           </span>
 
           <span className="mt-3 block text-sm leading-relaxed text-muted-foreground">
-            Ingliz tili, xotira, matematika va tarix haqida uzun ma&apos;lumotlar.
-            Pastida din va hayot burchlari yozilgan.
+            {t("portalOrganishDesc")}
           </span>
 
           <span className="mt-3 flex flex-wrap items-center gap-1.5">
             <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
-              4 mavzu
+              {t("fourTopics")}
             </span>
             <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
-              Din va hayot burchlari
+              {t("dinBadge")}
             </span>
           </span>
 
           <span className="mt-4 flex h-9 items-center justify-center gap-1.5 rounded-full bg-violet-600 px-4 text-sm font-bold text-white transition-colors group-hover:bg-violet-700">
-            Kirish
+            {t("enter")}
             <ArrowRight className="size-4" aria-hidden="true" />
           </span>
         </button>
@@ -183,7 +185,7 @@ export function PortalView({
         {/* 4-bo'lim: Chat — Telegramga o'xshagan */}
         <button
           onClick={onEnterChat}
-          aria-label="Chat bo'limiga kirish"
+          aria-label={t("enterChatAria")}
           className="group flex flex-col rounded-2xl border border-border bg-card p-5 text-left transition-all hover:border-sky-300 hover:shadow-md"
         >
           <span className="flex items-center gap-3">
@@ -192,33 +194,32 @@ export function PortalView({
             </span>
             <span className="min-w-0">
               <span className="block text-base font-extrabold text-foreground">
-                Chat
+                {t("navChat")}
               </span>
               <span className="block text-xs text-muted-foreground">
-                Telegramga o&apos;xshagan
+                {t("portalChatSub")}
               </span>
             </span>
           </span>
 
           <span className="mt-3 block text-sm leading-relaxed text-muted-foreground">
-            Odamlar bilan yozishing, stiker va rasm tashishing mumkin.
-            Random chat ham bor.
+            {t("portalChatDesc")}
           </span>
 
           <span className="mt-3 flex flex-wrap items-center gap-1.5">
             <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
-              Random chat
+              {t("randomChatBadge")}
             </span>
             <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
-              Stikerlar
+              {t("stickersBadge")}
             </span>
             <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
-              Rasm
+              {t("photoBadge")}
             </span>
           </span>
 
           <span className="mt-4 flex h-9 items-center justify-center gap-1.5 rounded-full bg-sky-600 px-4 text-sm font-bold text-white transition-colors group-hover:bg-sky-700">
-            Kirish
+            {t("enter")}
             <ArrowRight className="size-4" aria-hidden="true" />
           </span>
         </button>
@@ -232,10 +233,10 @@ export function PortalView({
         <Trophy className="size-5 shrink-0 text-amber-600" aria-hidden="true" />
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-bold text-amber-900">
-            Ballar — alohida reyting
+            {t("ballarBarTitle")}
           </span>
           <span className="block text-xs text-amber-700">
-            Test yechib ball to&apos;plang, boshqalar bilan raqobat qiling
+            {t("ballarBarDesc")}
           </span>
         </span>
         <ListChecks className="size-4 shrink-0 text-amber-600" aria-hidden="true" />

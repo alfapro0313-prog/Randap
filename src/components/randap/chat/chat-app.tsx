@@ -13,19 +13,18 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { ChatAvatar } from "./chat-avatar";
 import { ChatWindow } from "./chat-window";
+import { useLang } from "../lang-provider";
 import {
   CHAT_EMOJIS,
   CHAT_LANGS,
-  CHAT_LANG_STORAGE,
   CHAT_COLORS,
   CHAT_AVATAR_COLORS,
   chatLocale,
   getChatStrings,
-  isChatLang,
 } from "@/lib/chat-i18n";
+import type { Lang } from "@/lib/randap-i18n";
 import type {
   ChatConversationItem,
-  ChatLang,
   ChatProfileItem,
 } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
@@ -38,7 +37,8 @@ type ChatAppProps = {
 type RandomState = "idle" | "waiting" | "matched";
 
 export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
-  const [lang, setLang] = useState<ChatLang>("en");
+  // Til — global (hamma bo'limlar uchun bitta tanlov)
+  const { lang, setLang } = useLang();
   const [profile, setProfile] = useState<ChatProfileItem | null>(null);
   const [conversations, setConversations] = useState<ChatConversationItem[]>([]);
   const [people, setPeople] = useState<ChatProfileItem[]>([]);
@@ -70,12 +70,6 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
       // ignore
     }
   }, [deviceKey]);
-
-  // Til — localStorage'dan (default: inglizcha)
-  useEffect(() => {
-    const stored = window.localStorage.getItem(CHAT_LANG_STORAGE);
-    if (isChatLang(stored)) setLang(stored);
-  }, []);
 
   // Profil + suhbatlar
   useEffect(() => {
@@ -168,9 +162,8 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
     };
   }, [randomState, deviceKey, loadConversations]);
 
-  function changeLang(next: ChatLang) {
+  function changeLang(next: Lang) {
     setLang(next);
-    window.localStorage.setItem(CHAT_LANG_STORAGE, next);
   }
 
   async function openWithPeer(peerKey: string) {
@@ -563,7 +556,6 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
             <ChatWindow
               key={activeConvId}
               deviceKey={deviceKey}
-              lang={lang}
               conversationId={activeConvId}
               initialIsRandom={
                 randomState === "matched" || Boolean(activeConversation?.isRandom)
@@ -654,7 +646,7 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
                 />
               </label>
 
-              <p className="mt-1 text-xs text-muted-foreground">Emoji</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t.emoji}</p>
               <div className="grid grid-cols-6 gap-1">
                 {CHAT_EMOJIS.map((e) => (
                   <button
@@ -671,7 +663,7 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
                 ))}
               </div>
 
-              <p className="mt-1 text-xs text-muted-foreground">Color</p>
+              <p className="mt-1 text-xs text-muted-foreground">{t.color}</p>
               <div className="flex gap-2">
                 {CHAT_COLORS.map((c) => (
                   <button

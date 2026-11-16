@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { CirclePlay, Loader2, Search, UserRound } from "lucide-react";
 import { AvatarBubble } from "./avatar";
+import { SettingsGear } from "./settings-dialog";
+import { useLang } from "./lang-provider";
 import type { Me, SearchData } from "@/lib/randap-types";
 import type { ViewName } from "./sidebar";
 
@@ -23,6 +25,7 @@ export function Header({
   onOpenChannel,
   onOpenVideo,
 }: HeaderProps) {
+  const { t } = useLang();
   const [q, setQ] = useState(initialQuery);
   const [suggestions, setSuggestions] = useState<SearchData | null>(null);
   const [suggesting, setSuggesting] = useState(false);
@@ -64,18 +67,13 @@ export function Header({
     return () => document.removeEventListener("mousedown", onDocMouseDown);
   }, []);
 
-  const hasSuggestions =
-    open &&
-    suggestions !== null &&
-    (suggestions.users.length > 0 || suggestions.videos.length > 0);
-
   return (
     <header className="sticky top-0 z-50 flex h-14 items-center gap-3 border-b border-border bg-background/95 backdrop-blur px-3 sm:px-4">
       <button
         onClick={() => onNavigate("portal")}
         className="flex shrink-0 items-center gap-1.5"
-        aria-label="Randap — asosiy menyuga o'tish"
-        title="Randap — asosiy menyu"
+        aria-label={t("logoAria")}
+        title={t("logoTitle")}
       >
         <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
           <CirclePlay className="size-5" aria-hidden="true" />
@@ -105,8 +103,8 @@ export function Header({
               value={q}
               onChange={(e) => setQ(e.target.value)}
               onFocus={() => suggestions && setOpen(true)}
-              placeholder="Videolar va odamlarni qidirish..."
-              aria-label="Qidiruv"
+              placeholder={t("searchPlaceholder")}
+              aria-label={t("searchAria")}
               className="h-9 w-full rounded-full border border-border bg-secondary/60 pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/40"
             />
           </div>
@@ -114,7 +112,7 @@ export function Header({
             type="submit"
             className="h-9 shrink-0 rounded-full border border-border bg-secondary px-4 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/80"
           >
-            Qidirish
+            {t("searchButton")}
           </button>
         </form>
 
@@ -122,20 +120,20 @@ export function Header({
         {open && (suggestions !== null || suggesting) ? (
           <div
             role="listbox"
-            aria-label="Qidiruv takliflari"
+            aria-label={t("searchAria")}
             className="absolute inset-x-0 top-11 z-50 mx-auto max-w-xl overflow-hidden rounded-xl border border-border bg-background shadow-lg"
           >
             {suggesting && !suggestions ? (
               <div className="flex items-center justify-center gap-2 px-4 py-4 text-sm text-muted-foreground">
                 <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-                Qidirilmoqda...
+                {t("searching")}
               </div>
             ) : null}
 
             {suggestions?.users.length ? (
               <div className="border-b border-border py-1.5">
                 <p className="px-4 pb-1 pt-1 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-                  Profillar
+                  {t("profiles")}
                 </p>
                 {suggestions.users.slice(0, 4).map((u) => (
                   <button
@@ -157,7 +155,7 @@ export function Header({
                         {u.name}
                       </span>
                       <span className="block truncate text-xs text-muted-foreground">
-                        {u.handle} · {u.videoCount} video
+                        {u.handle} · {u.videoCount} {t("videoUnit")}
                       </span>
                     </span>
                     <UserRound
@@ -172,7 +170,7 @@ export function Header({
             {suggestions?.videos.length ? (
               <div className="py-1.5">
                 <p className="px-4 pb-1 pt-1 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-                  Videolar
+                  {t("videosHeading")}
                 </p>
                 {suggestions.videos.slice(0, 4).map((v) => (
                   <button
@@ -204,18 +202,21 @@ export function Header({
             suggestions.videos.length === 0 &&
             !suggesting ? (
               <p className="px-4 py-3 text-sm text-muted-foreground">
-                Hech narsa topilmadi — boshqa so&apos;z bilan urinib ko&apos;ring.
+                {t("nothingFoundHint")}
               </p>
             ) : null}
           </div>
         ) : null}
       </div>
 
+      {/* Profil yonida gildirak — global sozlamalar (til tanlash) */}
+      <SettingsGear />
+
       <button
         onClick={() => onNavigate("profile")}
-        aria-label="Profilga o'tish"
+        aria-label={t("profileGoAria")}
         className="shrink-0 transition-transform hover:scale-105"
-        title={me ? `${me.name} (${me.handle})` : "Profil"}
+        title={me ? `${me.name} (${me.handle})` : t("navProfile")}
       >
         <AvatarBubble
           name={me?.name ?? "R"}

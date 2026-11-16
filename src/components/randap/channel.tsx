@@ -3,6 +3,7 @@
 import { Bell } from "lucide-react";
 import { AvatarBubble } from "./avatar";
 import { VideoGrid } from "./video-card";
+import { useLang } from "./lang-provider";
 import { formatCount } from "@/lib/randap-client";
 import type { ChannelInfo, VideoItem } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
@@ -25,10 +26,11 @@ export function ChannelView({
   onOpenChannel,
   onBack,
 }: ChannelViewProps) {
+  const { t, lang } = useLang();
   if (loading || !channel) {
     return (
       <div className="flex items-center justify-center py-24 text-muted-foreground">
-        Yuklanmoqda...
+        {t("loading")}
       </div>
     );
   }
@@ -44,8 +46,12 @@ export function ChannelView({
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold text-foreground">{channel.name}</h1>
           <p className="text-sm text-muted-foreground">
-            {channel.handle} · {formatCount(channel.subscriberCount)} obunachi ·{" "}
-            {channel.videoCount} video · {formatCount(channel.points)} ball
+            {channel.handle} ·{" "}
+            {t("channelStats", {
+              subs: formatCount(channel.subscriberCount, lang),
+              v: channel.videoCount,
+              p: formatCount(channel.points, lang),
+            })}
           </p>
         </div>
         <button
@@ -58,17 +64,17 @@ export function ChannelView({
           )}
         >
           <Bell className="size-4" aria-hidden="true" />
-          {channel.subscribedByMe ? "Obuna bo'lingan" : "Obuna bo'lish"}
+          {channel.subscribedByMe ? t("subscribed") : t("subscribe")}
         </button>
       </div>
 
-      <section aria-label="Kanal videolari" className="flex flex-col gap-4">
-        <h2 className="text-base font-bold text-foreground">Videolar</h2>
+      <section aria-label={t("videosHeading")} className="flex flex-col gap-4">
+        <h2 className="text-base font-bold text-foreground">{t("videosHeading")}</h2>
         <VideoGrid
           videos={channel.videos}
           onOpen={onOpen}
           onOpenChannel={onOpenChannel}
-          emptyText="Bu kanalda hozircha video yo'q."
+          emptyText={t("emptyChannel")}
         />
       </section>
 
@@ -76,7 +82,7 @@ export function ChannelView({
         onClick={onBack}
         className="mx-auto rounded-full border border-border bg-secondary px-5 py-2 text-sm font-semibold hover:bg-secondary/80"
       >
-        Orqaga
+        {t("back")}
       </button>
     </div>
   );

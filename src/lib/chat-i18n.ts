@@ -54,6 +54,8 @@ const en = {
   unknownUser: "Unknown",
   nameRequired: "Name must be 2-40 characters",
   saved: "Saved",
+  emoji: "Emoji",
+  color: "Color",
 } as const;
 
 type ChatStrings = typeof en;
@@ -104,6 +106,8 @@ const ru: ChatStrings = {
   unknownUser: "Неизвестный",
   nameRequired: "Имя должно быть 2-40 символов",
   saved: "Сохранено",
+  emoji: "Эмодзи",
+  color: "Цвет",
 };
 
 const uz: ChatStrings = {
@@ -152,6 +156,8 @@ const uz: ChatStrings = {
   unknownUser: "Noma'lum",
   nameRequired: "Ism 2-40 belgi orasida bo'lishi kerak",
   saved: "Saqlandi",
+  emoji: "Emoji",
+  color: "Rang",
 };
 
 export const CHAT_I18N: Record<ChatLang, ChatStrings> = { en, ru, uz };

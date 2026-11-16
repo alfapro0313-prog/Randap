@@ -11,7 +11,13 @@ import {
   Languages,
   ScrollText,
 } from "lucide-react";
-import { HAYOT_BURCHLARI, ORGANISH_TOPICS, type OrganishBullet, type OrganishTopic } from "@/lib/randap-organish";
+import {
+  getOrganishTopics,
+  HAYOT_BURCHLARI,
+  type OrganishBullet,
+  type OrganishTopic,
+} from "@/lib/randap-organish";
+import { useLang } from "./lang-provider";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<string, typeof BookOpen> = {
@@ -86,6 +92,8 @@ function ArticleBody({ topic }: { topic: OrganishTopic }) {
 }
 
 export function OrganishView({ onOpenTopic }: { onOpenTopic: (id: string) => void }) {
+  const { t, lang } = useLang();
+  const topics = getOrganishTopics(lang);
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-7 pb-6">
       <div className="flex items-center gap-3">
@@ -93,20 +101,20 @@ export function OrganishView({ onOpenTopic }: { onOpenTopic: (id: string) => voi
           <BookOpen className="size-5" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
-          <h1 className="text-lg font-bold text-foreground">O&apos;rganish</h1>
+          <h1 className="text-lg font-bold text-foreground">{t("navOrganish")}</h1>
           <p className="text-sm text-muted-foreground">
-            Mavzulalarda bilim boyligi — uzun maqolalar bilan chuqur o&apos;rganing
+            {t("organishHeadSub")}
           </p>
         </div>
       </div>
 
       {/* 4 mavzu maqolalari */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {ORGANISH_TOPICS.map((topic) => (
+        {topics.map((topic) => (
           <button
             key={topic.id}
             onClick={() => onOpenTopic(topic.id)}
-            aria-label={`${topic.title} maqolasini ochish`}
+            aria-label={t("openArticleAria", { title: topic.title })}
             className="group flex flex-col rounded-2xl border border-border bg-card p-5 text-left transition-colors hover:border-primary/50 hover:bg-secondary/40"
           >
             <div className="flex items-center gap-4">
@@ -117,7 +125,7 @@ export function OrganishView({ onOpenTopic }: { onOpenTopic: (id: string) => voi
                 </h2>
                 <p className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Clock className="size-3" aria-hidden="true" />
-                  {topic.readMin} daqiqa o&apos;qish
+                  {t("readMin", { n: topic.readMin })}
                 </p>
               </div>
               <ChevronRight
@@ -134,7 +142,7 @@ export function OrganishView({ onOpenTopic }: { onOpenTopic: (id: string) => voi
 
       {/* Pastida: din va hayot burchlari — to'liq yozilgan matn */}
       <section
-        aria-label="Din va hayot burchlari"
+        aria-label={t("dinSectionAria")}
         className="flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6"
       >
         <div className="flex items-center gap-3">
@@ -211,17 +219,18 @@ export function TopicDetailView({
   topicId: string;
   onBack: () => void;
 }) {
-  const topic = ORGANISH_TOPICS.find((t) => t.id === topicId);
+  const { t, lang } = useLang();
+  const topic = getOrganishTopics(lang).find((tp) => tp.id === topicId);
 
   if (!topic) {
     return (
       <div className="flex flex-col items-center gap-3 py-20 text-center">
-        <p className="text-sm text-muted-foreground">Maqola topilmadi.</p>
+        <p className="text-sm text-muted-foreground">{t("articleNotFound")}</p>
         <button
           onClick={onBack}
           className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:bg-primary/90"
         >
-          O&apos;rganishga qaytish
+          {t("backToOrganish")}
         </button>
       </div>
     );
@@ -232,7 +241,7 @@ export function TopicDetailView({
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
-          aria-label="Orqaga qaytish"
+          aria-label={t("back")}
           className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80"
         >
           <ArrowLeft className="size-5" aria-hidden="true" />
@@ -250,7 +259,7 @@ export function TopicDetailView({
         </div>
         <span className="hidden shrink-0 items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-semibold text-secondary-foreground sm:flex">
           <Clock className="size-3" aria-hidden="true" />
-          {topic.readMin} daqiqa
+          {t("readMinShort", { n: topic.readMin })}
         </span>
       </div>
 

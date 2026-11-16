@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ImagePlus, Loader2, SendHorizontal, Shuffle, Smile } from "lucide-react";
 import { ChatAvatar } from "./chat-avatar";
+import { useLang } from "../lang-provider";
 import {
   CHAT_STICKERS,
   chatLocale,
@@ -13,7 +14,6 @@ import { cn } from "@/lib/utils";
 
 type ChatWindowProps = {
   deviceKey: string;
-  lang: ChatLang;
   conversationId: string;
   initialIsRandom: boolean;
   onBack: () => void;
@@ -40,7 +40,6 @@ function formatTime(iso: string, lang: ChatLang): string {
 
 export function ChatWindow({
   deviceKey,
-  lang,
   conversationId,
   initialIsRandom,
   onBack,
@@ -48,6 +47,8 @@ export function ChatWindow({
   onRandomNext,
   onRandomBack,
 }: ChatWindowProps) {
+  // Til global kontekstdan olinadi
+  const { lang } = useLang();
   const t = getChatStrings(lang);
   const [messages, setMessages] = useState<ChatMessageItem[]>([]);
   const [meta, setMeta] = useState<Meta | null>(null);

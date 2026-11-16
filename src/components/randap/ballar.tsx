@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Medal, Trophy } from "lucide-react";
 import { AvatarBubble } from "./avatar";
+import { useLang } from "./lang-provider";
 import { formatCount } from "@/lib/randap-client";
 import type { LeaderEntry, LeaderMe } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
@@ -10,6 +11,7 @@ import { cn } from "@/lib/utils";
 const RANK_CLASSES = ["text-amber-500", "text-zinc-400", "text-amber-700"];
 
 export function BallarView({ deviceKey }: { deviceKey: string }) {
+  const { t, lang } = useLang();
   const [leaders, setLeaders] = useState<LeaderEntry[]>([]);
   const [me, setMe] = useState<LeaderMe | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,9 +55,9 @@ export function BallarView({ deviceKey }: { deviceKey: string }) {
           <Trophy className="size-5" aria-hidden="true" />
         </span>
         <div className="min-w-0 flex-1">
-          <h1 className="text-lg font-bold text-foreground">Ballar</h1>
+          <h1 className="text-lg font-bold text-foreground">{t("ballarTitle")}</h1>
           <p className="text-sm text-muted-foreground">
-            Odamlarning testlardan olgan ballari reytingi
+            {t("ballarSub")}
           </p>
         </div>
       </div>
@@ -71,16 +73,16 @@ export function BallarView({ deviceKey }: { deviceKey: string }) {
             <p className="flex items-center gap-2 font-bold text-foreground">
               <span className="truncate">{me.name}</span>
               <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
-                SIZ
+                {t("you")}
               </span>
             </p>
             <p className="text-xs text-muted-foreground">{me.handle}</p>
           </div>
           <div className="shrink-0 text-right">
             <p className="text-xl font-extrabold text-primary">
-              {formatCount(me.points)}
+              {formatCount(me.points, lang)}
             </p>
-            <p className="text-[11px] text-muted-foreground">ball</p>
+            <p className="text-[11px] text-muted-foreground">{t("pointUnit")}</p>
           </div>
         </div>
       ) : null}
@@ -117,28 +119,26 @@ export function BallarView({ deviceKey }: { deviceKey: string }) {
                 <span className="truncate">{l.name}</span>
                 {l.isMe ? (
                   <span className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
-                    SIZ
+                    {t("you")}
                   </span>
                 ) : null}
               </p>
               <p className="truncate text-xs text-muted-foreground">
-                {l.handle} · {l.videoCount} video
+                {l.handle} · {l.videoCount} {t("videoUnit")}
               </p>
             </div>
             <span className="shrink-0 text-right">
               <span className="block text-base font-extrabold text-foreground">
-                {formatCount(l.points)}
+                {formatCount(l.points, lang)}
               </span>
-              <span className="block text-[11px] text-muted-foreground">ball</span>
+              <span className="block text-[11px] text-muted-foreground">{t("pointUnit")}</span>
             </span>
           </li>
         ))}
       </ol>
 
       <p className="rounded-xl bg-secondary/60 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
-        Ball qanday to&apos;planadi? Bo&apos;limlardagi testlarni yeching — har
-        bir to&apos;g&apos;ri javob uchun 10 ball beriladi. Ballaringiz shu
-        ro&apos;yxatda darhol yangilanadi.
+        {t("ballarHow")}
       </p>
     </div>
   );

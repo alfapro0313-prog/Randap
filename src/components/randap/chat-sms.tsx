@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ChatAvatar } from "./chat/chat-avatar";
+import { useLang } from "./lang-provider";
 import type { ChatNotificationItem } from "@/lib/randap-types";
 
 /**
@@ -15,6 +16,7 @@ export function ChatSms({
   deviceKey: string;
   onOpen: (conversationId: string) => void;
 }) {
+  const { t } = useLang();
   const [items, setItems] = useState<ChatNotificationItem[]>([]);
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export function ChatSms({
 
   return (
     <div
-      aria-label="Yangi chat xabarlar"
+      aria-label={t("newChatAria")}
       className="fixed bottom-20 right-3 z-50 flex w-72 max-w-[85vw] flex-col gap-2 md:bottom-6 md:right-5"
     >
       {items.map((n) => (

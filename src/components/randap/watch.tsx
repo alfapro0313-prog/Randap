@@ -13,6 +13,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AvatarBubble } from "./avatar";
+import { useLang } from "./lang-provider";
 import { formatCount, formatDuration, timeAgo } from "@/lib/randap-client";
 import type { VideoDetail } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,7 @@ export function WatchView({
   onLikeChanged,
   onSubscribedChanged,
 }: WatchViewProps) {
+  const { t, lang } = useLang();
   const [video, setVideo] = useState<VideoDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [liking, setLiking] = useState(false);
@@ -90,7 +92,7 @@ export function WatchView({
         );
         onLikeChanged();
       } else {
-        toast({ title: "Xatolik", description: data.error, variant: "destructive" });
+        toast({ title: t("error"), description: data.error, variant: "destructive" });
       }
     } finally {
       setLiking(false);
@@ -116,11 +118,11 @@ export function WatchView({
         onSubscribedChanged?.();
         toast({
           title: data.subscribed
-            ? `${video.uploader.name} kanaliga obuna bo'ldingiz`
-            : "Obuna bekor qilindi",
+            ? t("subToastOk", { name: video.uploader.name })
+            : t("subToastCancel"),
         });
       } else {
-        toast({ title: "Xatolik", description: data.error, variant: "destructive" });
+        toast({ title: t("error"), description: data.error, variant: "destructive" });
       }
     } finally {
       setSubscribing(false);
@@ -150,9 +152,9 @@ export function WatchView({
         );
         setLocalCommentCount((prev) => (prev ?? video.comments.length) + 1);
         setCommentText("");
-        toast({ title: "Izohingiz qo'shildi" });
+        toast({ title: t("commentAdded") });
       } else {
-        toast({ title: "Xatolik", description: data.error, variant: "destructive" });
+        toast({ title: t("error"), description: data.error, variant: "destructive" });
       }
     } finally {
       setPostingComment(false);
@@ -173,12 +175,12 @@ export function WatchView({
   if (!video) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
-        <p className="text-base font-semibold">Video topilmadi</p>
+        <p className="text-base font-semibold">{t("videoNotFound")}</p>
         <button
           onClick={onBack}
           className="rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold hover:bg-secondary/80"
         >
-          Orqaga
+          {t("back")}
         </button>
       </div>
     );
@@ -192,7 +194,7 @@ export function WatchView({
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
-          aria-label="Orqaga qaytish"
+          aria-label={t("back")}
           className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80"
         >
           <ArrowLeft className="size-5" aria-hidden="true" />
@@ -211,7 +213,7 @@ export function WatchView({
           poster={`/${video.thumbPath}`}
           className="aspect-video w-full"
         >
-          Brauzeringiz video tag&apos;ni qo&apos;llab-quvvatlamaydi.
+          {t("browserNoVideo")}
         </video>
       </div>
 
@@ -222,10 +224,10 @@ export function WatchView({
             {video.title}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {formatCount(video.views)} ko&apos;rildi ·{" "}
-            {timeAgo(video.createdAt)} · {formatDuration(video.durationSec)}
+            {formatCount(video.views, lang)} {t("viewsUnit")} ·{" "}
+            {timeAgo(video.createdAt, lang)} · {formatDuration(video.durationSec)}
             {video.kind === "short" ? " · Shorts" : ""}
-            {!video.allowComments ? " · Chat o'chirilgan" : ""}
+            {!video.allowComments ? t("commentsOffSuffix") : ""}
           </p>
         </div>
 
@@ -251,7 +253,7 @@ export function WatchView({
                 {video.uploader.name}
               </button>
               <p className="text-xs text-muted-foreground">
-                {formatCount(video.subscriberCount ?? 0)} obunachi · {video.uploader.handle}
+                {t("subsCount", { n: formatCount(video.subscriberCount ?? 0, lang) })} · {video.uploader.handle}
               </p>
             </div>
             <button
@@ -267,10 +269,10 @@ export function WatchView({
               {video.subscribedByMe ? (
                 <>
                   <Bell className="size-4" aria-hidden="true" />
-                  Obuna bo&apos;lingan
+                  {t("subscribed")}
                 </>
               ) : (
-                "Obuna bo'lish"
+                t("subscribe")
               )}
             </button>
           </div>
@@ -297,7 +299,7 @@ export function WatchView({
             </button>
             <span
               className="flex h-9 items-center gap-2 rounded-full bg-secondary px-4 text-sm font-semibold text-muted-foreground"
-              title="Yaqinda qo'shiladi"
+              title={t("soon")}
             >
               <ThumbsDown className="size-4" aria-hidden="true" />
               0
@@ -314,10 +316,10 @@ export function WatchView({
       </div>
 
       {/* Izohlar (chat) — yuklashda belgilangan "chat mumkinmi" bo'yicha */}
-      <section aria-label="Izohlar" className="flex flex-col gap-4">
+      <section aria-label={t("commentsHeading")} className="flex flex-col gap-4">
         <h3 className="flex items-center gap-2 text-base font-bold text-foreground">
           <MessageSquare className="size-4" aria-hidden="true" />
-          Izohlar · {formatCount(commentCount)}
+          {t("commentsHeading")} · {formatCount(commentCount, lang)}
         </h3>
 
         {video.allowComments ? (
@@ -327,15 +329,15 @@ export function WatchView({
                 type="text"
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Izoh yozing..."
-                aria-label="Izoh yozish"
+                placeholder={t("commentPlaceholder")}
+                aria-label={t("commentAria")}
                 maxLength={1000}
                 className="h-10 flex-1 rounded-full border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/40"
               />
               <button
                 type="submit"
                 disabled={postingComment || !commentText.trim()}
-                aria-label="Izohni yuborish"
+                aria-label={t("sendCommentAria")}
                 className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
               >
                 {postingComment ? (
@@ -348,7 +350,7 @@ export function WatchView({
           </form>
         ) : (
           <p className="rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">
-            Bu videoda chat o&apos;chirilgan — muallif izohlarni yoqib qo&apos;ymagan.
+            {t("commentsOffNote")}
           </p>
         )}
 

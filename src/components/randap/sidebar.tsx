@@ -15,6 +15,9 @@ import {
   Zap,
 } from "lucide-react";
 import { AvatarBubble } from "./avatar";
+import { SettingsGear } from "./settings-dialog";
+import { useLang } from "./lang-provider";
+import type { TKey } from "@/lib/randap-i18n";
 import type { Me, SubscribedChannel } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
 
@@ -49,29 +52,29 @@ type SidebarProps = {
 
 const NAV_ITEMS: Array<{
   key: ViewName;
-  label: string;
+  labelKey: TKey;
   icon: typeof Home;
 }> = [
-  { key: "portal", label: "Asosiy menyu", icon: Home },
-  { key: "home", label: "Videolar", icon: CirclePlay },
-  { key: "shorts", label: "Shorts", icon: Zap },
-  { key: "videos", label: "Videos", icon: ListVideo },
-  { key: "sections", label: "Testlar", icon: GraduationCap },
-  { key: "organish", label: "O'rganish", icon: BookOpen },
-  { key: "chat", label: "Chat", icon: MessageCircle },
-  { key: "ballar", label: "Ballar", icon: Trophy },
-  { key: "profile", label: "Profil", icon: User },
+  { key: "portal", labelKey: "navPortal", icon: Home },
+  { key: "home", labelKey: "navHome", icon: CirclePlay },
+  { key: "shorts", labelKey: "navShorts", icon: Zap },
+  { key: "videos", labelKey: "navVideos", icon: ListVideo },
+  { key: "sections", labelKey: "navSections", icon: GraduationCap },
+  { key: "organish", labelKey: "navOrganish", icon: BookOpen },
+  { key: "chat", labelKey: "navChat", icon: MessageCircle },
+  { key: "ballar", labelKey: "navBallar", icon: Trophy },
+  { key: "profile", labelKey: "navProfile", icon: User },
 ];
 
 const MOBILE_ITEMS: Array<{
   key: ViewName;
-  label: string;
+  labelKey: TKey;
   icon: typeof Home;
 }> = [
-  { key: "portal", label: "Asosiy", icon: Home },
-  { key: "shorts", label: "Shorts", icon: Zap },
-  { key: "chat", label: "Chat", icon: MessageCircle },
-  { key: "sections", label: "Testlar", icon: GraduationCap },
+  { key: "portal", labelKey: "navPortalMobile", icon: Home },
+  { key: "shorts", labelKey: "navShorts", icon: Zap },
+  { key: "chat", labelKey: "navChat", icon: MessageCircle },
+  { key: "sections", labelKey: "navSections", icon: GraduationCap },
 ];
 
 function isActive(
@@ -101,6 +104,7 @@ export function Sidebar({
   subs,
   onOpenChannel,
 }: SidebarProps) {
+  const { t } = useLang();
   const go = useCallback(
     (key: ViewName) => () => onNavigate(key),
     [onNavigate]
@@ -110,28 +114,40 @@ export function Sidebar({
     <>
       {/* Desktop chap menyu — hamma narsa shu yerda */}
       <aside className="hidden md:flex w-56 shrink-0 flex-col gap-1 border-r border-border bg-background px-2 py-4 sticky top-0 h-screen overflow-y-auto scrollbar-thin">
-        <nav aria-label="Asosiy menyu" className="flex flex-col gap-1">
+        <nav aria-label={t("navPortal")} className="flex flex-col gap-1">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.key, view, watchKind);
+            const isProfile = item.key === "profile";
             return (
-              <button
+              <div
                 key={item.key}
-                onClick={go(item.key)}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex items-center gap-4 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                  active
-                    ? "bg-secondary text-foreground"
-                    : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
-                )}
+                className={cn("flex items-center gap-1", isProfile && "pr-1")}
               >
-                <Icon
-                  className={cn("size-5 shrink-0", active && "text-primary")}
-                  aria-hidden="true"
-                />
-                {item.label}
-              </button>
+                <button
+                  onClick={go(item.key)}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "flex min-w-0 flex-1 items-center gap-4 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                    active
+                      ? "bg-secondary text-foreground"
+                      : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+                  )}
+                >
+                  <Icon
+                    className={cn("size-5 shrink-0", active && "text-primary")}
+                    aria-hidden="true"
+                  />
+                  <span className="truncate">{t(item.labelKey)}</span>
+                </button>
+                {/* Profil yonidagi gildirak (sozlamalar — til tanlash) */}
+                {isProfile ? (
+                  <SettingsGear
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"
+                    iconClassName="size-4"
+                  />
+                ) : null}
+              </div>
             );
           })}
         </nav>
@@ -139,7 +155,7 @@ export function Sidebar({
         {/* OBUNALAR — tepada, obuna bo'lgan kanallar ro'yxati */}
         {subs.length > 0 ? (
           <section
-            aria-label="Obunalar bo'limi"
+            aria-label={t("subsSectionAria")}
             className="mt-4 flex flex-col gap-1 border-t border-border pt-4"
           >
             <button
@@ -147,7 +163,7 @@ export function Sidebar({
               className="flex items-center gap-2 px-3 text-xs font-bold uppercase tracking-wide text-muted-foreground hover:text-foreground"
             >
               <Users className="size-3.5" aria-hidden="true" />
-              Obunalar
+              {t("subs")}
             </button>
             {subs.map((ch) => (
               <button
@@ -159,7 +175,7 @@ export function Sidebar({
                     ? "text-foreground"
                     : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
                 )}
-                title={`${ch.name} kanaliga o'tish`}
+                title={t("goChannelTitle", { name: ch.name })}
               >
                 <AvatarBubble
                   name={ch.name}
@@ -173,11 +189,11 @@ export function Sidebar({
         ) : (
           <button
             onClick={go("subs")}
-            aria-label="Obunalar bo'limiga o'tish"
+            aria-label={t("subsGoAria")}
             className="mt-4 flex items-center gap-2 border-t border-border px-3 pt-4 text-xs font-bold uppercase tracking-wide text-muted-foreground hover:text-foreground"
           >
             <Users className="size-3.5" aria-hidden="true" />
-            Obunalar
+            {t("subs")}
           </button>
         )}
 
@@ -186,7 +202,7 @@ export function Sidebar({
           className="mt-4 flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
         >
           <Plus className="size-5" aria-hidden="true" />
-          Video yuklash
+          {t("uploadVideo")}
         </button>
 
         <div className="mt-auto border-t border-border pt-4 px-3 text-xs text-muted-foreground">
@@ -196,14 +212,14 @@ export function Sidebar({
           >
             Randap
           </button>
-          <p className="mt-1">Videolar, Shorts va Testlar platformasi</p>
+          <p className="mt-1">{t("sidebarTagline")}</p>
           <p className="mt-2">© 2026 Randap</p>
         </div>
       </aside>
 
       {/* Mobil pastki menyu — pastda + turadi */}
       <nav
-        aria-label="Mobil menyu"
+        aria-label={t("navPortalMobile")}
         className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-border bg-background/95 backdrop-blur pb-[env(safe-area-inset-bottom)] md:hidden"
       >
         {MOBILE_ITEMS.slice(0, 2).map((item) => {
@@ -219,14 +235,14 @@ export function Sidebar({
               )}
             >
               <Icon className={cn("size-5", active && "text-primary")} aria-hidden="true" />
-              {item.label}
+              {t(item.labelKey)}
             </button>
           );
         })}
 
         <button
           onClick={go("upload")}
-          aria-label="Video yuklash"
+          aria-label={t("uploadVideo")}
           className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg"
         >
           <Plus className="size-6" aria-hidden="true" />
@@ -245,7 +261,7 @@ export function Sidebar({
               )}
             >
               <Icon className={cn("size-5", active && "text-primary")} aria-hidden="true" />
-              {item.label}
+              {t(item.labelKey)}
             </button>
           );
         })}
@@ -267,7 +283,7 @@ export function Sidebar({
               isActive("profile", view, watchKind) && "ring-2 ring-primary"
             )}
           />
-          Profil
+          {t("navProfile")}
         </button>
       </nav>
     </>

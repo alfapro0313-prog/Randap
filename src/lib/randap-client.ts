@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Me } from "./randap-types";
+import { compactCount, timeAgo as timeAgoRelative } from "./randap-i18n";
 
 const DEVICE_KEY_STORAGE = "randap_device_key";
 
@@ -59,13 +60,19 @@ export function formatDuration(totalSec: number): string {
   return `${m}:${String(sec).padStart(2, "0")}`;
 }
 
-export function formatCount(n: number): string {
+export function formatCount(n: number, lang?: string): string {
+  if (lang === "en" || lang === "ru" || lang === "uz") {
+    return compactCount(n, lang);
+  }
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")} mln`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, "")} ming`;
   return String(n);
 }
 
-export function timeAgo(iso: string): string {
+export function timeAgo(iso: string, lang?: string): string {
+  if (lang === "en" || lang === "ru" || lang === "uz") {
+    return timeAgoRelative(iso, lang);
+  }
   const diff = Date.now() - new Date(iso).getTime();
   const min = Math.floor(diff / 60_000);
   if (min < 1) return "hozir";

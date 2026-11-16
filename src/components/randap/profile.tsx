@@ -11,6 +11,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { AvatarBubble } from "./avatar";
 import { VideoGrid } from "./video-card";
+import { useLang } from "./lang-provider";
 import type { Me, VideoItem } from "@/lib/randap-types";
 
 type ProfileViewProps = {
@@ -38,6 +39,7 @@ export function ProfileView({
   onNavigateUpload,
   onNavigateBallar,
 }: ProfileViewProps) {
+  const { t } = useLang();
   const [name, setName] = useState(me?.name ?? "");
   const [saving, setSaving] = useState(false);
   const [avatarBusy, setAvatarBusy] = useState(false);
@@ -51,11 +53,11 @@ export function ProfileView({
     const ok = await onRename(name.trim());
     setSaving(false);
     if (ok) {
-      toast({ title: "Profil yangilandi" });
+      toast({ title: t("profileUpdated") });
     } else {
       toast({
-        title: "Saqlashda xatolik",
-        description: "Ism 2-40 belgi orasida bo'lishi kerak.",
+        title: t("saveError"),
+        description: t("nameLengthDesc"),
         variant: "destructive",
       });
     }
@@ -66,16 +68,16 @@ export function ProfileView({
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast({
-        title: "Rasm tanlang",
-        description: "Profil rasmi sifatida JPG, PNG yoki WebP yuklang.",
+        title: t("chooseImage"),
+        description: t("chooseImageDesc"),
         variant: "destructive",
       });
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       toast({
-        title: "Rasm juda katta",
-        description: "Rasm hajmi 5 MB dan oshmasligi kerak.",
+        title: t("imageTooBig"),
+        description: t("imageTooBigDesc"),
         variant: "destructive",
       });
       return;
@@ -84,11 +86,11 @@ export function ProfileView({
     const ok = await onAvatarUpload(file);
     setAvatarBusy(false);
     if (ok) {
-      toast({ title: "Profil rasmi yangilandi" });
+      toast({ title: t("avatarUpdated") });
     } else {
       toast({
-        title: "Rasm yuklanmadi",
-        description: "Qayta urinib ko'ring.",
+        title: t("avatarFailed"),
+        description: t("retryDesc"),
         variant: "destructive",
       });
     }
@@ -115,8 +117,8 @@ export function ProfileView({
           />
           <button
             onClick={() => fileRef.current?.click()}
-            aria-label="Profil rasmini o'zgartirish"
-            title="Rasm yuklash"
+            aria-label={t("changeAvatarAria")}
+            title={t("uploadPhotoTitle")}
             className="absolute -bottom-1 -right-1 flex size-8 items-center justify-center rounded-full border-2 border-card bg-primary text-primary-foreground transition-transform hover:scale-110"
           >
             {avatarBusy ? (
@@ -131,7 +133,7 @@ export function ProfileView({
             accept="image/*"
             onChange={pickAvatar}
             className="sr-only"
-            aria-label="Profil rasmi tanlash"
+            aria-label={t("chooseAvatarAria")}
           />
         </div>
 
@@ -139,7 +141,7 @@ export function ProfileView({
           <h1 className="text-xl font-bold text-foreground">{me.name}</h1>
           <p className="text-sm text-muted-foreground">{me.handle}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            {me.videoCount} yuklangan video · sizning profilingiz
+            {t("myVideosInfo", { n: me.videoCount })}
           </p>
         </div>
 
@@ -149,13 +151,13 @@ export function ProfileView({
             className="flex h-9 items-center justify-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 text-sm font-semibold text-amber-700 hover:bg-amber-100"
           >
             <Trophy className="size-4" aria-hidden="true" />
-            {me.points} ball
+            {t("pointsWithValue", { n: me.points })}
           </button>
           <button
             onClick={onNavigateUpload}
             className="h-9 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
           >
-            + Video yuklash
+            + {t("uploadVideo")}
           </button>
         </div>
       </div>
@@ -170,7 +172,7 @@ export function ProfileView({
             className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-foreground"
           >
             <UserRoundPen className="size-4" aria-hidden="true" />
-            Ismni o&apos;zgartirish
+            {t("renameLabel")}
           </label>
           <input
             id="profile-name"
@@ -185,29 +187,25 @@ export function ProfileView({
           disabled={saving || name.trim().length < 2}
           className="h-10 rounded-full bg-foreground px-5 text-sm font-semibold text-background hover:bg-foreground/90 disabled:opacity-50"
         >
-          {saving ? "Saqlanmoqda..." : "Saqlash"}
+          {saving ? t("saving") : t("save")}
         </button>
       </form>
 
-      <section aria-label="Mening videolarim" className="flex flex-col gap-4">
-        <h2 className="text-base font-bold text-foreground">Mening videolarim</h2>
+      <section aria-label={t("myVideos")} className="flex flex-col gap-4">
+        <h2 className="text-base font-bold text-foreground">{t("myVideos")}</h2>
         <VideoGrid
           videos={videos}
           loading={loading}
           onOpen={onOpen}
           onOpenChannel={onOpenChannel}
-          emptyText="Siz hozircha video yuklamagansiz. Pastdagi yoki chap menyudagi + tugmasini bosing."
+          emptyText={t("emptyMyVideos")}
         />
       </section>
 
       <section className="rounded-2xl border border-border bg-card p-5">
-        <h2 className="text-sm font-bold text-foreground">Qurilma profili</h2>
+        <h2 className="text-sm font-bold text-foreground">{t("deviceProfile")}</h2>
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-          Randap ro&apos;yxatdan o&apos;tishni talab qilmaydi: profilingiz shu
-          brauzerdagi qurilma kalitiga bog&apos;langan (
-          <span className="font-mono text-[11px]">{deviceKey.slice(0, 13)}...</span>
-          ). Pastdagi tugmani bossangiz, bu qurilmadagi profil va shu qurilma
-          qo&apos;ygan layklar/obunalar tiklanadi.
+          {t("deviceProfileDesc", { key: deviceKey.slice(0, 13) })}
         </p>
         {confirmReset ? (
           <div className="mt-3 flex gap-2">
@@ -218,13 +216,13 @@ export function ProfileView({
               }}
               className="rounded-full bg-destructive px-4 py-2 text-sm font-semibold text-white hover:bg-destructive/90"
             >
-              Ha, profilni tiklash
+              {t("resetConfirm")}
             </button>
             <button
               onClick={() => setConfirmReset(false)}
               className="rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold hover:bg-secondary/80"
             >
-              Bekor qilish
+              {t("cancel")}
             </button>
           </div>
         ) : (
@@ -233,7 +231,7 @@ export function ProfileView({
             className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-destructive hover:underline"
           >
             <LogOut className="size-4" aria-hidden="true" />
-            Qurilma profilini tiklash
+            {t("resetDevice")}
           </button>
         )}
       </section>

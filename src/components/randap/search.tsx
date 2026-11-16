@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ChevronRight, Loader2, UserRound } from "lucide-react";
 import { AvatarBubble } from "./avatar";
 import { VideoGrid } from "./video-card";
+import { useLang } from "./lang-provider";
 import { formatCount } from "@/lib/randap-client";
 import type { SearchData, SearchUser, VideoItem } from "@/lib/randap-types";
 
@@ -14,6 +15,7 @@ type SearchViewProps = {
 };
 
 export function SearchView({ query, onOpen, onOpenChannel }: SearchViewProps) {
+  const { t, lang } = useLang();
   const [data, setData] = useState<SearchData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -56,7 +58,7 @@ export function SearchView({ query, onOpen, onOpenChannel }: SearchViewProps) {
         <div className="min-w-0 flex-1">
           <p className="truncate font-bold text-foreground">{user.name}</p>
           <p className="truncate text-xs text-muted-foreground">
-            {user.handle} · {user.videoCount} video · {formatCount(user.points)} ball
+            {user.handle} · {t("videoCountLine", { n: user.videoCount, p: formatCount(user.points, lang) })}
           </p>
         </div>
         <button
@@ -64,7 +66,7 @@ export function SearchView({ query, onOpen, onOpenChannel }: SearchViewProps) {
           className="flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-border bg-secondary px-4 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/80"
         >
           <UserRound className="size-4" aria-hidden="true" />
-          Profili
+          {t("profileBtn")}
           <ChevronRight className="size-3.5" aria-hidden="true" />
         </button>
       </div>
@@ -84,26 +86,25 @@ export function SearchView({ query, onOpen, onOpenChannel }: SearchViewProps) {
   return (
     <div className="flex flex-col gap-7">
       <h1 className="text-lg font-bold text-foreground">
-        Qidiruv: &laquo;{query}&raquo;
+        {t("searchTitle", { q: query })}
       </h1>
 
       {nothing ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-16 text-center">
           <p className="text-base font-semibold text-foreground">
-            Hech narsa topilmadi
+            {t("nothingFound")}
           </p>
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            &laquo;{query}&raquo; bo&apos;yicha video yoki profil topilmadi.
-            Boshqa so&apos;z bilan urinib ko&apos;ring.
+            {t("nothingFoundDesc", { q: query })}
           </p>
         </div>
       ) : null}
 
       {data && data.users.length > 0 ? (
-        <section aria-label="Profillar" className="flex flex-col gap-4">
+        <section aria-label={t("profiles")} className="flex flex-col gap-4">
           <h2 className="flex items-center gap-2 text-base font-bold text-foreground">
             <UserRound className="size-5 text-primary" aria-hidden="true" />
-            Profillar
+            {t("profiles")}
           </h2>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {data.users.map((u) => (
@@ -114,8 +115,8 @@ export function SearchView({ query, onOpen, onOpenChannel }: SearchViewProps) {
       ) : null}
 
       {data && data.videos.length > 0 ? (
-        <section aria-label="Videolar" className="flex flex-col gap-4">
-          <h2 className="text-base font-bold text-foreground">Videolar</h2>
+        <section aria-label={t("videosHeading")} className="flex flex-col gap-4">
+          <h2 className="text-base font-bold text-foreground">{t("videosHeading")}</h2>
           <VideoGrid
             videos={data.videos}
             onOpen={onOpen}

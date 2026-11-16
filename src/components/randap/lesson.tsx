@@ -2,6 +2,7 @@
 
 import { ArrowLeft, Clock } from "lucide-react";
 import { SectionTile } from "./sections";
+import { useLang } from "./lang-provider";
 import type { LessonItem, SectionItem } from "@/lib/randap-types";
 
 type LessonViewProps = {
@@ -12,15 +13,16 @@ type LessonViewProps = {
 };
 
 export function LessonView({ lesson, subject, onBack, onNextLesson }: LessonViewProps) {
+  const { t } = useLang();
   if (!lesson) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
-        <p className="text-base font-semibold">Dars topilmadi</p>
+        <p className="text-base font-semibold">{t("lessonNotFound")}</p>
         <button
           onClick={onBack}
           className="rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold hover:bg-secondary/80"
         >
-          Orqaga
+          {t("back")}
         </button>
       </div>
     );
@@ -35,7 +37,7 @@ export function LessonView({ lesson, subject, onBack, onNextLesson }: LessonView
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
-          aria-label="Orqaga qaytish"
+          aria-label={t("back")}
           className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80"
         >
           <ArrowLeft className="size-5" aria-hidden="true" />
@@ -48,16 +50,16 @@ export function LessonView({ lesson, subject, onBack, onNextLesson }: LessonView
           />
         ) : null}
         <span className="truncate text-sm font-semibold text-muted-foreground">
-          {subject?.name ?? "O'rgatuv"}
+          {subject?.name ?? t("orgatuvBadge")}
         </span>
       </div>
 
       <header className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-6">
         <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-primary">
-          O&apos;rgatuv
+          {t("orgatuvBadge")}
           <span className="flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[11px] normal-case text-secondary-foreground">
             <Clock className="size-3" aria-hidden="true" />
-            {lesson.durationMin} daqiqa
+            {lesson.durationMin} {t("minutes")}
           </span>
         </span>
         <h1 className="text-2xl font-extrabold text-foreground">{lesson.title}</h1>
@@ -84,13 +86,13 @@ export function LessonView({ lesson, subject, onBack, onNextLesson }: LessonView
         >
           <span>
             <span className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Keyingi dars
+              {t("nextLesson")}
             </span>
             <span className="mt-1 block font-bold text-foreground">
               {nextLesson.title}
             </span>
           </span>
-          <span className="text-sm font-semibold text-primary">O&apos;tish →</span>
+          <span className="text-sm font-semibold text-primary">{t("go")}</span>
         </button>
       ) : null}
     </article>

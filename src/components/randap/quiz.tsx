@@ -14,6 +14,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { SectionTile } from "./sections";
+import { useLang } from "./lang-provider";
 import type { QuizData, QuizResult } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,7 @@ type QuizViewProps = {
 };
 
 export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProps) {
+  const { t, lang } = useLang();
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [loading, setLoading] = useState(true);
   const [answers, setAnswers] = useState<(number | null)[]>([]);
@@ -37,7 +39,7 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/quiz?id=${encodeURIComponent(quizId)}`);
+      const res = await fetch(`/api/quiz?id=${encodeURIComponent(quizId)}&lang=${lang}`);
       const data = await res.json();
       if (data.ok) {
         setQuiz(data.quiz as QuizData);
@@ -48,7 +50,7 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
     } finally {
       setLoading(false);
     }
-  }, [quizId]);
+  }, [quizId, lang]);
 
   useEffect(() => {
     void load();
@@ -67,8 +69,8 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
     const unanswered = answers.filter((a) => a === null).length;
     if (unanswered > 0) {
       toast({
-        title: `${unanswered} ta savol javobsiz qoldi`,
-        description: "Javobsiz savollar noto'g'ri hisoblanadi.",
+        title: t("unansweredTitle", { n: unanswered }),
+        description: t("unansweredDesc"),
         variant: "destructive",
       });
     }
@@ -89,12 +91,12 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
         onFinished();
         window.scrollTo({ top: 0 });
       } else {
-        toast({ title: "Xatolik", description: data.error, variant: "destructive" });
+        toast({ title: t("error"), description: data.error, variant: "destructive" });
       }
     } catch {
       toast({
-        title: "Xatolik",
-        description: "Natijani yuborib bo'lmadi. Qayta urinib ko'ring.",
+        title: t("error"),
+        description: t("submitFailDesc"),
         variant: "destructive",
       });
     } finally {
@@ -113,12 +115,12 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
   if (!quiz) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
-        <p className="text-base font-semibold">Test topilmadi</p>
+        <p className="text-base font-semibold">{t("quizNotFound")}</p>
         <button
           onClick={onBack}
           className="rounded-full border border-border bg-secondary px-4 py-2 text-sm font-semibold hover:bg-secondary/80"
         >
-          Orqaga
+          {t("back")}
         </button>
       </div>
     );
@@ -138,25 +140,25 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
           </p>
           <p className="text-sm text-muted-foreground">
             {pct >= 80
-              ? "Ajoyib natija! Bilimingiz qattiq ekan."
+              ? t("resultGreat")
               : pct >= 50
-                ? "Yaxshi! Yana bir marta yechsangiz yuqoriga chiqasiz."
-                : "Avval darslarni o'rganing va qayta yechib ko'ring."}
+                ? t("resultGood")
+                : t("resultBad")}
           </p>
 
           <div className="mt-2 flex w-full items-center justify-center gap-3 rounded-xl bg-primary/10 px-4 py-3">
             <Trophy className="size-5 text-primary" aria-hidden="true" />
             <p className="text-base font-bold text-foreground">
-              +{result.pointsEarned} ball qo&apos;shildi
+              {t("pointsAdded", { n: result.pointsEarned })}
             </p>
             <span className="text-sm text-muted-foreground">
-              (jami: {result.userPoints} ball)
+              {t("totalParen", { n: result.userPoints })}
             </span>
           </div>
         </div>
 
         {/* Har bir savol bo'yicha ko'rik */}
-        <section aria-label="Natijalar ko'rigi" className="flex flex-col gap-3">
+        <section aria-label={t("resultReviewAria")} className="flex flex-col gap-3">
           {quiz.questions.map((q, i) => {
             const mine = answers[i];
             const correct = result.correctIndexes[i];
@@ -180,13 +182,13 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
                   {i + 1}. {q.text}
                 </p>
                 <p className="pl-6 text-xs text-muted-foreground">
-                  Sizning javobingiz:{" "}
+                  {t("yourAnswer")}{" "}
                   <span className={ok ? "font-semibold text-emerald-700" : "font-semibold text-rose-700"}>
-                    {mine === null || mine < 0 ? "— (javob yo'q)" : q.options[mine]}
+                    {mine === null || mine < 0 ? t("noAnswer") : q.options[mine]}
                   </span>
                   {!ok ? (
                     <>
-                      {" · "}To&apos;g&apos;ri javob:{" "}
+                      {" · "}{t("correctAnswer")}{" "}
                       <span className="font-semibold text-emerald-700">
                         {q.options[correct]}
                       </span>
@@ -204,14 +206,14 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
             className="h-11 rounded-full px-6 font-bold"
           >
             <RotateCcw className="size-4" aria-hidden="true" />
-            Yana yechish
+            {t("solveAgain")}
           </Button>
           <Button
             variant="secondary"
             onClick={onBack}
             className="h-11 rounded-full px-6 font-bold"
           >
-            Bo&apos;limga qaytish
+            {t("backToSection")}
           </Button>
         </div>
       </div>
@@ -229,7 +231,7 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
-          aria-label="Orqaga qaytish"
+          aria-label={t("back")}
           className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80"
         >
           <ArrowLeft className="size-5" aria-hidden="true" />
@@ -253,9 +255,9 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
           <span>
-            Savol {idx + 1} / {quiz.total}
+            {t("questionN", { a: idx + 1, b: quiz.total })}
           </span>
-          <span>{quiz.total * 10} ballgacha</span>
+          <span>{t("upToPoints", { n: quiz.total * 10 })}</span>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
           <div
@@ -310,10 +312,10 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
           disabled={idx === 0}
           className="h-10 rounded-full border border-border bg-secondary px-5 text-sm font-semibold text-foreground disabled:opacity-40"
         >
-          Oldingi
+          {t("prevQ")}
         </button>
         <p className="text-xs text-muted-foreground">
-          {answered} / {quiz.total} javob berildi
+          {t("answeredCount", { a: answered, b: quiz.total })}
         </p>
         {isLast ? (
           <Button
@@ -326,14 +328,14 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
             ) : (
               <ListChecks className="size-4" aria-hidden="true" />
             )}
-            Yakunlash
+            {t("finish")}
           </Button>
         ) : (
           <button
             onClick={() => setIdx((v) => Math.min(quiz.total - 1, v + 1))}
             className="h-10 rounded-full bg-foreground px-5 text-sm font-semibold text-background hover:bg-foreground/90"
           >
-            Keyingi
+            {t("nextQ")}
           </button>
         )}
       </div>

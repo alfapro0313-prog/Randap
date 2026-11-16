@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { useLang } from "./lang-provider";
 import { formatDuration } from "@/lib/randap-client";
 import { MAX_SHORT_SEC, type VideoKind } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,7 @@ function formatBytes(bytes: number): string {
 }
 
 export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
+  const { t } = useLang();
   const [file, setFile] = useState<File | null>(null);
   const [duration, setDuration] = useState<number>(0);
   const [thumb, setThumb] = useState<File | null>(null);
@@ -68,8 +70,8 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
     if (!picked) return;
     if (!picked.type.startsWith("video/")) {
       toast({
-        title: "Video fayl tanlang",
-        description: "MP4, WebM va shunga o'xshash video formatlar qabul qilinadi.",
+        title: t("toastVideoPick"),
+        description: t("toastVideoPickDesc"),
         variant: "destructive",
       });
       return;
@@ -111,8 +113,8 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
     el.onerror = () => {
       URL.revokeObjectURL(url);
       toast({
-        title: "Fayl o'qilmadi",
-        description: "Bu fayl video sifatida ochilmadi. Boshqa fayl tanlab ko'ring.",
+        title: t("toastFileReadFail"),
+        description: t("toastFileReadFailDesc"),
         variant: "destructive",
       });
     };
@@ -123,8 +125,8 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
     if (!picked) return;
     if (!picked.type.startsWith("image/")) {
       toast({
-        title: "Rasm tanlang",
-        description: "Thumbnail sifatida rasm fayli kerak (JPG, PNG, WebP).",
+        title: t("chooseImage"),
+        description: t("toastThumbPickDesc"),
         variant: "destructive",
       });
       return;
@@ -137,28 +139,28 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
     e.preventDefault();
     if (!deviceKey) {
       toast({
-        title: "Profil tayyorlanmoqda",
-        description: "Bir soniya kutib qayta bosing.",
+        title: t("toastProfilePreparing"),
+        description: t("toastProfilePreparingDesc"),
         variant: "destructive",
       });
       return;
     }
     if (!file) {
-      toast({ title: "Video fayl tanlanmagan", variant: "destructive" });
+      toast({ title: t("toastNoFile"), variant: "destructive" });
       return;
     }
     if (title.trim().length < 2) {
       toast({
-        title: "Nom juda qisqa",
-        description: "Video nomini kiriting (kamida 2 belgi).",
+        title: t("toastTitleShort"),
+        description: t("toastTitleShortDesc"),
         variant: "destructive",
       });
       return;
     }
     if (shortTooLong) {
       toast({
-        title: "Shorts juda uzun",
-        description: `Shorts uchun maksimal 1:20 (80 soniya). Bu video ${duration} soniya — uni oddiy Video sifatida yuklang.`,
+        title: t("toastShortTooLong"),
+        description: t("toastShortTooLongDesc", { n: duration }),
         variant: "destructive",
       });
       return;
@@ -196,11 +198,11 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
 
       if (res.ok && data.ok) {
         toast({
-          title: "Video yuklandi",
+          title: t("toastUploaded"),
           description:
             kind === "short"
-              ? "Shorts bo'limida paydo bo'ldi."
-              : "Videos bo'limida paydo bo'ldi.",
+              ? t("toastUploadedShorts")
+              : t("toastUploadedVideos"),
         });
         resetFile();
         setTitle("");
@@ -214,22 +216,22 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
 
       if (data.duplicate) {
         setDuplicate({
-          message: String(data.error ?? "Bu video allaqachon yuklangan."),
+          message: String(data.error ?? t("duplicateDefault")),
           existingId: String(data.existingId ?? ""),
         });
         toast({
-          title: "Dublikat aniqlandi",
-          description: "Bu video allaqachon Videos bo'limida bor.",
+          title: t("duplicateFound"),
+          description: t("duplicateToastDesc"),
           variant: "destructive",
         });
         return;
       }
 
-      toast({ title: "Yuklashda xatolik", description: data.error, variant: "destructive" });
+      toast({ title: t("toastUploadFail"), description: data.error, variant: "destructive" });
     } catch {
       toast({
-        title: "Yuklash muvaffaqiyatsiz",
-        description: "Internet aloqasini tekshirib qayta urinib ko'ring.",
+        title: t("toastUploadFailed"),
+        description: t("toastUploadFailedDesc"),
         variant: "destructive",
       });
     } finally {
@@ -242,12 +244,12 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
       <div className="flex items-center gap-3">
         <button
           onClick={onBack}
-          aria-label="Orqaga qaytish"
+          aria-label={t("back")}
           className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80"
         >
           <ArrowLeft className="size-5" aria-hidden="true" />
         </button>
-        <h1 className="text-lg font-bold text-foreground">Video yuklash</h1>
+        <h1 className="text-lg font-bold text-foreground">{t("uploadVideo")}</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -255,24 +257,24 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
         <div className="rounded-2xl border border-border bg-card p-5">
           <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
             <FileVideo className="size-4 text-primary" aria-hidden="true" />
-            1. Video fayl
+            {t("uploadStep1")}
           </h2>
 
           {!file ? (
             <label className="mt-4 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border px-6 py-10 text-center transition-colors hover:border-primary/60 hover:bg-secondary/40">
               <UploadCloud className="size-10 text-muted-foreground" aria-hidden="true" />
               <span className="text-sm font-semibold text-foreground">
-                Video tanlash uchun bosing
+                {t("pickVideo")}
               </span>
               <span className="text-xs text-muted-foreground">
-                MP4, WebM, MOV · maksimal 300 MB
+                {t("pickVideoHint")}
               </span>
               <input
                 type="file"
                 accept="video/*"
                 onChange={pickFile}
                 className="sr-only"
-                aria-label="Video fayl tanlash"
+                aria-label={t("pickVideoAria")}
               />
             </label>
           ) : (
@@ -286,7 +288,7 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
                 </p>
                 <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Clock className="size-3" aria-hidden="true" />
-                  {duration > 0 ? formatDuration(duration) : "davomiylik o'qilmoqda..."}
+                  {duration > 0 ? formatDuration(duration) : t("readingDuration")}
                   {" · "}
                   {formatBytes(file.size)}
                 </p>
@@ -294,7 +296,7 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
               <button
                 type="button"
                 onClick={resetFile}
-                aria-label="Faylni olib tashlash"
+                aria-label={t("removeFileAria")}
                 className="flex size-8 items-center justify-center rounded-full bg-secondary text-foreground hover:bg-secondary/80"
               >
                 <X className="size-4" aria-hidden="true" />
@@ -315,9 +317,11 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
                   : "border-border bg-background hover:bg-secondary/50"
               )}
             >
-              <p className="text-sm font-bold text-foreground">Video</p>
+              <p className="text-sm font-bold text-foreground">
+                {t("navVideos")}
+              </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Davomiyligi cheksiz
+                {t("kindVideoDesc")}
               </p>
             </button>
             <button
@@ -331,9 +335,11 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
                   : "border-border bg-background hover:bg-secondary/50"
               )}
             >
-              <p className="text-sm font-bold text-foreground">Shorts</p>
+              <p className="text-sm font-bold text-foreground">
+                {t("navShorts")}
+              </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Maksimal 1:20 (80 soniya)
+                {t("kindShortsDesc")}
               </p>
             </button>
           </div>
@@ -341,34 +347,33 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
           {shortTooLong ? (
             <p className="mt-3 flex items-start gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive">
               <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-              Bu video {duration} soniya — Shorts uchun juda uzun (max 80 soniya).
-              Oddiy &laquo;Video&raquo; sifatida yuklang.
+              {t("shortTooLongNote", { n: duration })}
             </p>
           ) : null}
         </div>
 
         {/* 2. Malumotlar */}
         <div className="rounded-2xl border border-border bg-card p-5">
-          <h2 className="text-sm font-bold text-foreground">2. Ma&apos;lumotlar</h2>
+          <h2 className="text-sm font-bold text-foreground">{t("uploadStep2")}</h2>
 
           <div className="mt-4 flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <label htmlFor="up-title" className="text-sm font-medium text-foreground">
-                Video nomi *
+                {t("titleLabel")}
               </label>
               <input
                 id="up-title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={100}
-                placeholder="Masalan: Toshkent bozoridan kunlik vlog"
+                placeholder={t("titlePlaceholder")}
                 className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <label htmlFor="up-desc" className="text-sm font-medium text-foreground">
-                Description (tavsif)
+                {t("descLabel")}
               </label>
               <textarea
                 id="up-desc"
@@ -376,7 +381,7 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
                 maxLength={5000}
-                placeholder="Video haqida qisqacha yozing..."
+                placeholder={t("descPlaceholder")}
                 className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/40"
               />
             </div>
@@ -384,43 +389,43 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
             {/* Thumbnail */}
             <div className="flex flex-col gap-2">
               <span className="text-sm font-medium text-foreground">
-                Thumbnail (rasm)
+                {t("thumbLabel")}
               </span>
               <div className="flex items-start gap-4">
                 <label className="flex w-44 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-border px-3 py-5 text-center transition-colors hover:border-primary/60 hover:bg-secondary/40">
                   <ImagePlus className="size-6 text-muted-foreground" aria-hidden="true" />
                   <span className="text-xs font-semibold text-foreground">
-                    {thumb ? "Almashtirish" : "Rasm tanlash"}
+                    {thumb ? t("thumbReplace") : t("thumbPick")}
                   </span>
                   <input
                     type="file"
                     accept="image/*"
                     onChange={pickThumb}
                     className="sr-only"
-                    aria-label="Thumbnail rasm tanlash"
+                    aria-label={t("thumbPick")}
                   />
                 </label>
 
                 {thumbPreview ? (
                   <img
                     src={thumbPreview}
-                    alt="Tanlangan thumbnail"
+                    alt={t("thumbLabel")}
                     className="aspect-video w-44 rounded-xl object-cover"
                   />
                 ) : autoThumbPreview ? (
                   <div className="relative">
                     <img
                       src={autoThumbPreview}
-                      alt="Videodan avtomatik olindi"
+                      alt={t("thumbAuto")}
                       className="aspect-video w-44 rounded-xl object-cover"
                     />
                     <span className="absolute bottom-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-white">
-                      avtomatik
+                      {t("thumbAuto")}
                     </span>
                   </div>
                 ) : (
                   <div className="flex aspect-video w-44 items-center justify-center rounded-xl bg-secondary/50 text-xs text-muted-foreground">
-                    Agar rasm tanlanmasa, videodan avtomatik oladi
+                    {t("thumbAutoHint")}
                   </div>
                 )}
               </div>
@@ -436,11 +441,10 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
               />
               <span>
                 <span className="block text-sm font-semibold text-foreground">
-                  Chat / izohlarga ruxsat berish
+                  {t("allowComments")}
                 </span>
                 <span className="mt-0.5 block text-xs text-muted-foreground">
-                  Belgilansa odamlar videoga izoh qoldiradi. Belgilanmasa chat
-                  o&apos;chiriladi.
+                  {t("allowCommentsDesc")}
                 </span>
               </span>
             </label>
@@ -452,7 +456,7 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
           <div className="flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-4">
             <AlertTriangle className="mt-0.5 size-5 shrink-0 text-destructive" aria-hidden="true" />
             <div className="flex-1 text-sm text-foreground">
-              <p className="font-semibold">Dublikat aniqlandi</p>
+              <p className="font-semibold">{t("duplicateFound")}</p>
               <p className="mt-1 text-muted-foreground">{duplicate.message}</p>
               {duplicate.existingId ? (
                 <button
@@ -461,7 +465,7 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
                   className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
                 >
                   <CheckCircle2 className="size-4" aria-hidden="true" />
-                  Mavjud videoni ko&apos;rish
+                  {t("seeExisting")}
                 </button>
               ) : null}
             </div>
@@ -476,12 +480,12 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
           {submitting ? (
             <>
               <Loader2 className="size-5 animate-spin" aria-hidden="true" />
-              Yuklanmoqda...
+              {t("loading")}
             </>
           ) : (
             <>
               <UploadCloud className="size-5" aria-hidden="true" />
-              {kind === "short" ? "Shorts yuklash" : "Video yuklash"}
+              {kind === "short" ? t("uploadShortsBtn") : t("uploadVideo")}
             </>
           )}
         </Button>

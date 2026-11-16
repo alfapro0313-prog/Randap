@@ -21,6 +21,7 @@ import { PortalView } from "./portal";
 import { ChatApp } from "./chat/chat-app";
 import { ChatSms } from "./chat-sms";
 import { useDeviceMe } from "@/lib/randap-client";
+import { useLang } from "./lang-provider";
 import type {
   ChannelInfo,
   LessonItem,
@@ -38,6 +39,7 @@ type Feed = {
 
 export function RandapApp() {
   const { deviceKey, me, setMe } = useDeviceMe();
+  const { t, lang } = useLang();
   const [view, setView] = useState<ViewName>("portal");
   const [videoId, setVideoId] = useState("");
   const [channelId, setChannelId] = useState("");
@@ -83,13 +85,13 @@ export function RandapApp() {
   const fetchSections = useCallback(async (showLoading = false) => {
     try {
       if (showLoading) setSections(null);
-      const res = await fetch("/api/sections");
+      const res = await fetch(`/api/sections?lang=${lang}`);
       const data = await res.json();
       if (data.ok) setSections(data.sections as SectionItem[]);
     } catch {
       // ignore
     }
-  }, []);
+  }, [lang]);
 
   const fetchSubs = useCallback(async () => {
     try {
@@ -262,14 +264,14 @@ export function RandapApp() {
         refreshSubs();
         toast({
           title: data.subscribed
-            ? `${channel.name} kanaliga obuna bo'ldingiz`
-            : "Obuna bekor qilindi",
+            ? t("subToastOk", { name: channel.name })
+            : t("subToastCancel"),
         });
       } else {
-        toast({ title: "Xatolik", description: data.error, variant: "destructive" });
+        toast({ title: t("error"), description: data.error, variant: "destructive" });
       }
     } catch {
-      toast({ title: "Xatolik", description: "Qayta urinib ko'ring", variant: "destructive" });
+      toast({ title: t("error"), description: t("retry"), variant: "destructive" });
     }
   }
 
@@ -357,13 +359,13 @@ export function RandapApp() {
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center justify-between">
                     <h2 className="text-lg font-bold text-foreground">
-                      Hozirgi videolar
+                      {t("homeNow")}
                     </h2>
                     <button
                       onClick={() => navigate("videos")}
                       className="flex items-center text-sm font-semibold text-muted-foreground hover:text-foreground"
                     >
-                      Barchasi
+                      {t("all")}
                       <ChevronRight className="size-4" aria-hidden="true" />
                     </button>
                   </div>
@@ -372,7 +374,7 @@ export function RandapApp() {
                     loading={feed.loading}
                     onOpen={openVideo}
                     onOpenChannel={openChannel}
-                    emptyText="Hozircha video yo'q. Chap menyudagi + tugmasi bilan birinchisini yuklang."
+                    emptyText={t("emptyHome")}
                   />
                 </div>
 
@@ -398,14 +400,14 @@ export function RandapApp() {
             {view === "videos" ? (
               <div className="flex flex-col gap-5">
                 <h1 className="text-lg font-bold text-foreground">
-                  Videos — barcha videolar
+                  {t("videosAllTitle")}
                 </h1>
                 <VideoGrid
                   videos={feed.videos}
                   loading={feed.loading}
                   onOpen={openVideo}
                   onOpenChannel={openChannel}
-                  emptyText="Videos bo'limi hozircha bo'sh. + tugmasi bilan video yuklang."
+                  emptyText={t("emptyVideos")}
                 />
               </div>
             ) : null}
@@ -438,10 +440,10 @@ export function RandapApp() {
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <h1 className="text-lg font-bold text-foreground">
-                      Testlar — hamma fanlar
+                      {t("sectionsTitle")}
                     </h1>
                     <p className="text-sm text-muted-foreground">
-                      Fan tanlang, testlarni yechib ball to&apos;plang
+                      {t("sectionsSub")}
                     </p>
                   </div>
                   <button
@@ -449,7 +451,7 @@ export function RandapApp() {
                     className="flex shrink-0 items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 transition-colors hover:bg-amber-100"
                   >
                     <Trophy className="size-3.5" aria-hidden="true" />
-                    Ballar
+                    {t("navBallar")}
                   </button>
                 </div>
                 <SectionsGrid
@@ -589,6 +591,7 @@ function SubsFeed({
   onOpen: (video: VideoItem) => void;
   onOpenChannel: (uploaderId: string) => void;
 }) {
+  const { t } = useLang();
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -614,14 +617,14 @@ function SubsFeed({
   return (
     <div className="flex flex-col gap-5">
       <h1 className="text-lg font-bold text-foreground">
-        Obuna bo&apos;lgan kanallar videolari
+        {t("subsFeedTitle")}
       </h1>
       <VideoGrid
         videos={videos}
         loading={loading}
         onOpen={onOpen}
         onOpenChannel={onOpenChannel}
-        emptyText="Hozircha obuna yo'q. Video ko'rib, kanalga obuna bo'ling — bu yerda yangi videolari chiqadi."
+        emptyText={t("emptySubs")}
       />
     </div>
   );
