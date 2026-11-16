@@ -16,6 +16,7 @@ import { QuizView } from "./quiz";
 import { LessonView } from "./lesson";
 import { BallarView } from "./ballar";
 import { SearchView } from "./search";
+import { PortalView } from "./portal";
 import { useDeviceMe } from "@/lib/randap-client";
 import type {
   ChannelInfo,
@@ -34,7 +35,7 @@ type Feed = {
 
 export function RandapApp() {
   const { deviceKey, me, setMe } = useDeviceMe();
-  const [view, setView] = useState<ViewName>("home");
+  const [view, setView] = useState<ViewName>("portal");
   const [videoId, setVideoId] = useState("");
   const [channelId, setChannelId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -142,10 +143,16 @@ export function RandapApp() {
     (next: ViewName) => {
       setView(next);
       window.scrollTo({ top: 0 });
-      if (next === "subs" || next === "home" || next === "videos" || next === "shorts") {
+      if (
+        next === "subs" ||
+        next === "portal" ||
+        next === "home" ||
+        next === "videos" ||
+        next === "shorts"
+      ) {
         void loadFeed(true);
       }
-      if (next === "home" || next === "sections") {
+      if (next === "portal" || next === "home" || next === "sections") {
         void fetchSections();
       }
       if (next === "profile") {
@@ -320,6 +327,18 @@ export function RandapApp() {
           />
 
           <main className="flex-1 px-4 pb-24 pt-5 sm:px-6 md:pb-8 md:pl-6 lg:px-8">
+            {view === "portal" ? (
+              <PortalView
+                videosCount={feed.videos.length}
+                shortsCount={feed.shorts.length}
+                sections={sections ?? []}
+                loading={feed.loading || sections === null}
+                onEnterVideos={() => navigate("home")}
+                onEnterTests={() => navigate("sections")}
+                onOpenBallar={() => navigate("ballar")}
+              />
+            ) : null}
+
             {view === "home" ? (
               <div className="flex flex-col gap-10">
                 <div className="flex flex-col gap-4">
@@ -360,49 +379,6 @@ export function RandapApp() {
                     </div>
                   </section>
                 ) : null}
-
-                {/* Bo'limlar — testlar va o'rgatuvlar */}
-                <section aria-label="Bo'limlar" className="flex flex-col gap-4">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-bold text-foreground">
-                      Bo&apos;limlar — testlar va o&apos;rgatuvlar
-                    </h2>
-                    <button
-                      onClick={() => navigate("sections")}
-                      className="flex items-center text-sm font-semibold text-muted-foreground hover:text-foreground"
-                    >
-                      Barchasi
-                      <ChevronRight className="size-4" aria-hidden="true" />
-                    </button>
-                  </div>
-                  <SectionsGrid
-                    sections={sections ?? []}
-                    loading={sections === null}
-                    onOpen={openSection}
-                  />
-                </section>
-
-                {/* Ballar teaserr */}
-                <section aria-label="Ballar bo'limi" className="flex flex-col gap-3">
-                  <button
-                    onClick={() => navigate("ballar")}
-                    className="flex items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-left transition-colors hover:bg-amber-100"
-                  >
-                    <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
-                      <Trophy className="size-6" aria-hidden="true" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block font-bold text-foreground">Ballar</span>
-                      <span className="block text-sm text-muted-foreground">
-                        Testlarda ball to&apos;plang va boshqalar bilan reytingda
-                        raqobat qiling
-                      </span>
-                    </span>
-                    <span className="shrink-0 text-sm font-bold text-amber-700">
-                      Ko&apos;rish →
-                    </span>
-                  </button>
-                </section>
               </div>
             ) : null}
 
@@ -446,13 +422,22 @@ export function RandapApp() {
 
             {view === "sections" ? (
               <div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
-                <div className="flex items-center gap-3">
-                  <h1 className="text-lg font-bold text-foreground">
-                    Bo&apos;limlar
-                  </h1>
-                  <span className="text-sm text-muted-foreground">
-                    Testlarni yechib ball to&apos;plang
-                  </span>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <h1 className="text-lg font-bold text-foreground">
+                      Testlar — hamma fanlar
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                      Fan tanlang, testlarni yechib ball to&apos;plang
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => navigate("ballar")}
+                    className="flex shrink-0 items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 transition-colors hover:bg-amber-100"
+                  >
+                    <Trophy className="size-3.5" aria-hidden="true" />
+                    Ballar
+                  </button>
                 </div>
                 <SectionsGrid
                   sections={sections ?? []}

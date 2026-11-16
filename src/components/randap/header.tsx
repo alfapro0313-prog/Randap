@@ -72,7 +72,7 @@ export function Header({
   return (
     <header className="sticky top-0 z-50 flex h-14 items-center gap-3 border-b border-border bg-background/95 backdrop-blur px-3 sm:px-4">
       <button
-        onClick={() => onNavigate("home")}
+        onClick={() => onNavigate("portal")}
         className="flex shrink-0 items-center gap-1.5"
         aria-label="Randap — asosiy menyuga o'tish"
         title="Randap — asosiy menyu"

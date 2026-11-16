@@ -2,8 +2,9 @@
 
 import { useCallback } from "react";
 import {
+  CirclePlay,
+  GraduationCap,
   Home,
-  LayoutGrid,
   ListVideo,
   Plus,
   Trophy,
@@ -16,6 +17,7 @@ import type { Me, SubscribedChannel } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
 
 export type ViewName =
+  | "portal"
   | "home"
   | "videos"
   | "shorts"
@@ -45,10 +47,11 @@ const NAV_ITEMS: Array<{
   label: string;
   icon: typeof Home;
 }> = [
-  { key: "home", label: "Bosh sahifa", icon: Home },
+  { key: "portal", label: "Asosiy menyu", icon: Home },
+  { key: "home", label: "Videolar", icon: CirclePlay },
   { key: "shorts", label: "Shorts", icon: Zap },
   { key: "videos", label: "Videos", icon: ListVideo },
-  { key: "sections", label: "Bo'limlar", icon: LayoutGrid },
+  { key: "sections", label: "Testlar", icon: GraduationCap },
   { key: "ballar", label: "Ballar", icon: Trophy },
   { key: "profile", label: "Profil", icon: User },
 ];
@@ -58,10 +61,10 @@ const MOBILE_ITEMS: Array<{
   label: string;
   icon: typeof Home;
 }> = [
-  { key: "home", label: "Bosh", icon: Home },
+  { key: "portal", label: "Asosiy", icon: Home },
   { key: "shorts", label: "Shorts", icon: Zap },
   { key: "videos", label: "Videos", icon: ListVideo },
-  { key: "sections", label: "Bo'limlar", icon: LayoutGrid },
+  { key: "sections", label: "Testlar", icon: GraduationCap },
 ];
 
 function isActive(
@@ -71,6 +74,8 @@ function isActive(
 ) {
   if (item === current) return true;
   if (item === "videos" && (current === "channel" || current === "search"))
+    return true;
+  if (item === "home" && current === "watch" && watchKind !== "short")
     return true;
   if (item === "sections" && (current === "section" || current === "quiz" || current === "lesson"))
     return true;
@@ -176,7 +181,12 @@ export function Sidebar({
         </button>
 
         <div className="mt-auto border-t border-border pt-4 px-3 text-xs text-muted-foreground">
-          <p className="font-semibold text-foreground">Randap</p>
+          <button
+            onClick={go("portal")}
+            className="font-semibold text-foreground hover:text-primary"
+          >
+            Randap
+          </button>
           <p className="mt-1">Videolar, Shorts va Testlar platformasi</p>
           <p className="mt-2">© 2026 Randap</p>
         </div>
