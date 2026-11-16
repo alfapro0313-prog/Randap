@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell } from "lucide-react";
+import { AvatarBubble } from "./avatar";
 import { VideoGrid } from "./video-card";
 import { formatCount } from "@/lib/randap-client";
 import type { ChannelInfo, VideoItem } from "@/lib/randap-types";
@@ -35,14 +36,16 @@ export function ChannelView({
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-6">
       <div className="flex flex-col items-start gap-5 rounded-2xl border border-border bg-card p-5 sm:flex-row sm:items-center sm:p-6">
-        <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-secondary text-2xl font-extrabold text-secondary-foreground">
-          {channel.name.slice(0, 1).toUpperCase()}
-        </span>
+        <AvatarBubble
+          name={channel.name}
+          avatar={channel.avatar}
+          className="size-16 text-2xl"
+        />
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold text-foreground">{channel.name}</h1>
           <p className="text-sm text-muted-foreground">
             {channel.handle} · {formatCount(channel.subscriberCount)} obunachi ·{" "}
-            {channel.videoCount} video
+            {channel.videoCount} video · {formatCount(channel.points)} ball
           </p>
         </div>
         <button

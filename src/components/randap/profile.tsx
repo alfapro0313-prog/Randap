@@ -1,8 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { Loader2, LogOut, UserRoundPen } from "lucide-react";
+import { useRef, useState } from "react";
+import {
+  Camera,
+  Loader2,
+  LogOut,
+  Trophy,
+  UserRoundPen,
+} from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { AvatarBubble } from "./avatar";
 import { VideoGrid } from "./video-card";
 import type { Me, VideoItem } from "@/lib/randap-types";
 
@@ -12,9 +19,11 @@ type ProfileViewProps = {
   videos: VideoItem[];
   loading: boolean;
   onRename: (name: string) => Promise<boolean>;
+  onAvatarUpload: (file: File) => Promise<boolean>;
   onOpen: (video: VideoItem) => void;
   onOpenChannel: (uploaderId: string) => void;
   onNavigateUpload: () => void;
+  onNavigateBallar: () => void;
 };
 
 export function ProfileView({
@@ -23,13 +32,17 @@ export function ProfileView({
   videos,
   loading,
   onRename,
+  onAvatarUpload,
   onOpen,
   onOpenChannel,
   onNavigateUpload,
+  onNavigateBallar,
 }: ProfileViewProps) {
   const [name, setName] = useState(me?.name ?? "");
   const [saving, setSaving] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
+  const fileRef = useRef<HTMLInputElement | null>(null);
 
   async function saveName(e: React.FormEvent) {
     e.preventDefault();
@@ -48,6 +61,40 @@ export function ProfileView({
     }
   }
 
+  async function pickAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Rasm tanlang",
+        description: "Profil rasmi sifatida JPG, PNG yoki WebP yuklang.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Rasm juda katta",
+        description: "Rasm hajmi 5 MB dan oshmasligi kerak.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setAvatarBusy(true);
+    const ok = await onAvatarUpload(file);
+    setAvatarBusy(false);
+    if (ok) {
+      toast({ title: "Profil rasmi yangilandi" });
+    } else {
+      toast({
+        title: "Rasm yuklanmadi",
+        description: "Qayta urinib ko'ring.",
+        variant: "destructive",
+      });
+    }
+    e.target.value = "";
+  }
+
   if (!me) {
     return (
       <div className="flex items-center justify-center py-24">
@@ -59,9 +106,35 @@ export function ProfileView({
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-6">
       <div className="flex flex-col items-start gap-5 rounded-2xl border border-border bg-card p-5 sm:flex-row sm:items-center sm:p-6">
-        <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-primary text-2xl font-extrabold text-primary-foreground">
-          {me.name.slice(0, 1).toUpperCase()}
-        </span>
+        {/* Profil rasmi + yuklash tugmasi */}
+        <div className="relative shrink-0">
+          <AvatarBubble
+            name={me.name}
+            avatar={me.avatar}
+            className="size-20 text-3xl"
+          />
+          <button
+            onClick={() => fileRef.current?.click()}
+            aria-label="Profil rasmini o'zgartirish"
+            title="Rasm yuklash"
+            className="absolute -bottom-1 -right-1 flex size-8 items-center justify-center rounded-full border-2 border-card bg-primary text-primary-foreground transition-transform hover:scale-110"
+          >
+            {avatarBusy ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Camera className="size-4" aria-hidden="true" />
+            )}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            onChange={pickAvatar}
+            className="sr-only"
+            aria-label="Profil rasmi tanlash"
+          />
+        </div>
+
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold text-foreground">{me.name}</h1>
           <p className="text-sm text-muted-foreground">{me.handle}</p>
@@ -69,12 +142,22 @@ export function ProfileView({
             {me.videoCount} yuklangan video · sizning profilingiz
           </p>
         </div>
-        <button
-          onClick={onNavigateUpload}
-          className="h-9 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-        >
-          + Video yuklash
-        </button>
+
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+          <button
+            onClick={onNavigateBallar}
+            className="flex h-9 items-center justify-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 text-sm font-semibold text-amber-700 hover:bg-amber-100"
+          >
+            <Trophy className="size-4" aria-hidden="true" />
+            {me.points} ball
+          </button>
+          <button
+            onClick={onNavigateUpload}
+            className="h-9 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+          >
+            + Video yuklash
+          </button>
+        </div>
       </div>
 
       <form
@@ -122,8 +205,8 @@ export function ProfileView({
         <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
           Randap ro&apos;yxatdan o&apos;tishni talab qilmaydi: profilingiz shu
           brauzerdagi qurilma kalitiga bog&apos;langan (
-          <span className="font-mono text-[11px]">{deviceKey.slice(0, 13)}...</span>).
-          Pastdagi tugmani bossangiz, bu qurilmadagi profil va shu qurilma
+          <span className="font-mono text-[11px]">{deviceKey.slice(0, 13)}...</span>
+          ). Pastdagi tugmani bossangiz, bu qurilmadagi profil va shu qurilma
           qo&apos;ygan layklar/obunalar tiklanadi.
         </p>
         {confirmReset ? (

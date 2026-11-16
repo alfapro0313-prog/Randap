@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { CirclePlay, Search } from "lucide-react";
-import type { Me } from "@/lib/randap-types";
+import { useEffect, useRef, useState } from "react";
+import { CirclePlay, Loader2, Search, UserRound } from "lucide-react";
+import { AvatarBubble } from "./avatar";
+import type { Me, SearchData } from "@/lib/randap-types";
 import type { ViewName } from "./sidebar";
 
 type HeaderProps = {
@@ -10,17 +11,71 @@ type HeaderProps = {
   initialQuery?: string;
   onSearch: (q: string) => void;
   onNavigate: (view: ViewName) => void;
+  onOpenChannel: (id: string) => void;
+  onOpenVideo: (videoId: string) => void;
 };
 
-export function Header({ me, initialQuery = "", onSearch, onNavigate }: HeaderProps) {
+export function Header({
+  me,
+  initialQuery = "",
+  onSearch,
+  onNavigate,
+  onOpenChannel,
+  onOpenVideo,
+}: HeaderProps) {
   const [q, setQ] = useState(initialQuery);
+  const [suggestions, setSuggestions] = useState<SearchData | null>(null);
+  const [suggesting, setSuggesting] = useState(false);
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef<HTMLDivElement | null>(null);
+
+  // Live qidiruv takliflari — yozarozic profil va videolar chiqadi
+  useEffect(() => {
+    const term = q.trim();
+    const timer = window.setTimeout(() => {
+      if (term.length < 2) {
+        setSuggestions(null);
+        setSuggesting(false);
+        return;
+      }
+      setSuggesting(true);
+      fetch(`/api/search?q=${encodeURIComponent(term)}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (data?.ok) {
+            setSuggestions({ users: data.users ?? [], videos: data.videos ?? [] });
+            setOpen(true);
+          }
+          setSuggesting(false);
+        })
+        .catch(() => setSuggesting(false));
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [q]);
+
+  // Tashqariga bosilganda yopish
+  useEffect(() => {
+    function onDocMouseDown(e: MouseEvent) {
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onDocMouseDown);
+    return () => document.removeEventListener("mousedown", onDocMouseDown);
+  }, []);
+
+  const hasSuggestions =
+    open &&
+    suggestions !== null &&
+    (suggestions.users.length > 0 || suggestions.videos.length > 0);
 
   return (
     <header className="sticky top-0 z-50 flex h-14 items-center gap-3 border-b border-border bg-background/95 backdrop-blur px-3 sm:px-4">
       <button
         onClick={() => onNavigate("home")}
         className="flex shrink-0 items-center gap-1.5"
-        aria-label="Randap bosh sahifa"
+        aria-label="Randap — asosiy menyuga o'tish"
+        title="Randap — asosiy menyu"
       >
         <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
           <CirclePlay className="size-5" aria-hidden="true" />
@@ -30,15 +85,16 @@ export function Header({ me, initialQuery = "", onSearch, onNavigate }: HeaderPr
         </span>
       </button>
 
-      <form
-        role="search"
-        className="flex min-w-0 flex-1 justify-end"
-        onSubmit={(e) => {
-          e.preventDefault();
-          onSearch(q.trim());
-        }}
-      >
-        <div className="flex w-full max-w-xl items-center gap-2">
+      <div ref={boxRef} className="relative flex min-w-0 flex-1 justify-end">
+        <form
+          role="search"
+          className="flex w-full max-w-xl items-center gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setOpen(false);
+            onSearch(q.trim());
+          }}
+        >
           <div className="relative min-w-0 flex-1">
             <Search
               className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -48,7 +104,8 @@ export function Header({ me, initialQuery = "", onSearch, onNavigate }: HeaderPr
               type="search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Videolarni qidirish..."
+              onFocus={() => suggestions && setOpen(true)}
+              placeholder="Videolar va odamlarni qidirish..."
               aria-label="Qidiruv"
               className="h-9 w-full rounded-full border border-border bg-secondary/60 pl-9 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/40"
             />
@@ -59,16 +116,112 @@ export function Header({ me, initialQuery = "", onSearch, onNavigate }: HeaderPr
           >
             Qidirish
           </button>
-        </div>
-      </form>
+        </form>
+
+        {/* Qidiruv takliflari: profillar + videolar */}
+        {open && (suggestions !== null || suggesting) ? (
+          <div
+            role="listbox"
+            aria-label="Qidiruv takliflari"
+            className="absolute inset-x-0 top-11 z-50 mx-auto max-w-xl overflow-hidden rounded-xl border border-border bg-background shadow-lg"
+          >
+            {suggesting && !suggestions ? (
+              <div className="flex items-center justify-center gap-2 px-4 py-4 text-sm text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                Qidirilmoqda...
+              </div>
+            ) : null}
+
+            {suggestions?.users.length ? (
+              <div className="border-b border-border py-1.5">
+                <p className="px-4 pb-1 pt-1 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Profillar
+                </p>
+                {suggestions.users.slice(0, 4).map((u) => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      onOpenChannel(u.id);
+                    }}
+                    className="flex w-full items-center gap-3 px-4 py-2 text-left hover:bg-secondary/60"
+                  >
+                    <AvatarBubble
+                      name={u.name}
+                      avatar={u.avatar}
+                      className="size-8 text-xs"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold text-foreground">
+                        {u.name}
+                      </span>
+                      <span className="block truncate text-xs text-muted-foreground">
+                        {u.handle} · {u.videoCount} video
+                      </span>
+                    </span>
+                    <UserRound
+                      className="size-4 shrink-0 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {suggestions?.videos.length ? (
+              <div className="py-1.5">
+                <p className="px-4 pb-1 pt-1 text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+                  Videolar
+                </p>
+                {suggestions.videos.slice(0, 4).map((v) => (
+                  <button
+                    key={v.id}
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      onOpenVideo(v.id);
+                    }}
+                    className="flex w-full items-center gap-3 px-4 py-2 text-left hover:bg-secondary/60"
+                  >
+                    <img
+                      src={`/${v.thumbPath}`}
+                      alt=""
+                      aria-hidden="true"
+                      loading="lazy"
+                      className="h-9 w-16 shrink-0 rounded-md object-cover"
+                    />
+                    <span className="min-w-0 flex-1 truncate text-sm text-foreground">
+                      {v.title}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {suggestions &&
+            suggestions.users.length === 0 &&
+            suggestions.videos.length === 0 &&
+            !suggesting ? (
+              <p className="px-4 py-3 text-sm text-muted-foreground">
+                Hech narsa topilmadi — boshqa so&apos;z bilan urinib ko&apos;ring.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
 
       <button
         onClick={() => onNavigate("profile")}
         aria-label="Profilga o'tish"
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground transition-transform hover:scale-105"
+        className="shrink-0 transition-transform hover:scale-105"
         title={me ? `${me.name} (${me.handle})` : "Profil"}
       >
-        {(me?.name ?? "R").slice(0, 1).toUpperCase()}
+        <AvatarBubble
+          name={me?.name ?? "R"}
+          avatar={me?.avatar}
+          className="size-9 text-sm"
+        />
       </button>
     </header>
   );

@@ -1,8 +1,18 @@
 "use client";
 
 import { useCallback } from "react";
-import { Home, ListVideo, Plus, User, Zap, Users } from "lucide-react";
-import type { Me } from "@/lib/randap-types";
+import {
+  Home,
+  LayoutGrid,
+  ListVideo,
+  Plus,
+  Trophy,
+  User,
+  Users,
+  Zap,
+} from "lucide-react";
+import { AvatarBubble } from "./avatar";
+import type { Me, SubscribedChannel } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
 
 export type ViewName =
@@ -13,13 +23,21 @@ export type ViewName =
   | "watch"
   | "upload"
   | "profile"
-  | "channel";
+  | "channel"
+  | "sections"
+  | "section"
+  | "quiz"
+  | "lesson"
+  | "ballar"
+  | "search";
 
 type SidebarProps = {
   view: ViewName;
   onNavigate: (view: ViewName) => void;
   me: Me | null;
   watchKind?: string;
+  subs: SubscribedChannel[];
+  onOpenChannel: (id: string) => void;
 };
 
 const NAV_ITEMS: Array<{
@@ -30,8 +48,20 @@ const NAV_ITEMS: Array<{
   { key: "home", label: "Bosh sahifa", icon: Home },
   { key: "shorts", label: "Shorts", icon: Zap },
   { key: "videos", label: "Videos", icon: ListVideo },
-  { key: "subs", label: "Obunalar", icon: Users },
+  { key: "sections", label: "Bo'limlar", icon: LayoutGrid },
+  { key: "ballar", label: "Ballar", icon: Trophy },
   { key: "profile", label: "Profil", icon: User },
+];
+
+const MOBILE_ITEMS: Array<{
+  key: ViewName;
+  label: string;
+  icon: typeof Home;
+}> = [
+  { key: "home", label: "Bosh", icon: Home },
+  { key: "shorts", label: "Shorts", icon: Zap },
+  { key: "videos", label: "Videos", icon: ListVideo },
+  { key: "sections", label: "Bo'limlar", icon: LayoutGrid },
 ];
 
 function isActive(
@@ -40,13 +70,23 @@ function isActive(
   watchKind?: string
 ) {
   if (item === current) return true;
-  if (item === "videos" && current === "channel") return true;
+  if (item === "videos" && (current === "channel" || current === "search"))
+    return true;
+  if (item === "sections" && (current === "section" || current === "quiz" || current === "lesson"))
+    return true;
   if (item === "shorts" && current === "watch" && watchKind === "short")
     return true;
   return false;
 }
 
-export function Sidebar({ view, onNavigate, me, watchKind }: SidebarProps) {
+export function Sidebar({
+  view,
+  onNavigate,
+  me,
+  watchKind,
+  subs,
+  onOpenChannel,
+}: SidebarProps) {
   const go = useCallback(
     (key: ViewName) => () => onNavigate(key),
     [onNavigate]
@@ -82,9 +122,54 @@ export function Sidebar({ view, onNavigate, me, watchKind }: SidebarProps) {
           })}
         </nav>
 
+        {/* OBUNALAR — tepada, obuna bo'lgan kanallar ro'yxati */}
+        {subs.length > 0 ? (
+          <section
+            aria-label="Obunalar bo'limi"
+            className="mt-4 flex flex-col gap-1 border-t border-border pt-4"
+          >
+            <button
+              onClick={go("subs")}
+              className="flex items-center gap-2 px-3 text-xs font-bold uppercase tracking-wide text-muted-foreground hover:text-foreground"
+            >
+              <Users className="size-3.5" aria-hidden="true" />
+              Obunalar
+            </button>
+            {subs.map((ch) => (
+              <button
+                key={ch.id}
+                onClick={() => onOpenChannel(ch.id)}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors",
+                  view === "channel"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+                )}
+                title={`${ch.name} kanaliga o'tish`}
+              >
+                <AvatarBubble
+                  name={ch.name}
+                  avatar={ch.avatar}
+                  className="size-6 text-[10px]"
+                />
+                <span className="truncate">{ch.name}</span>
+              </button>
+            ))}
+          </section>
+        ) : (
+          <button
+            onClick={go("subs")}
+            aria-label="Obunalar bo'limiga o'tish"
+            className="mt-4 flex items-center gap-2 border-t border-border px-3 pt-4 text-xs font-bold uppercase tracking-wide text-muted-foreground hover:text-foreground"
+          >
+            <Users className="size-3.5" aria-hidden="true" />
+            Obunalar
+          </button>
+        )}
+
         <button
           onClick={go("upload")}
-          className="mt-3 flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
+          className="mt-4 flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
         >
           <Plus className="size-5" aria-hidden="true" />
           Video yuklash
@@ -92,7 +177,7 @@ export function Sidebar({ view, onNavigate, me, watchKind }: SidebarProps) {
 
         <div className="mt-auto border-t border-border pt-4 px-3 text-xs text-muted-foreground">
           <p className="font-semibold text-foreground">Randap</p>
-          <p className="mt-1">Videolar va Shorts platformasi</p>
+          <p className="mt-1">Videolar, Shorts va Testlar platformasi</p>
           <p className="mt-2">© 2026 Randap</p>
         </div>
       </aside>
@@ -102,7 +187,7 @@ export function Sidebar({ view, onNavigate, me, watchKind }: SidebarProps) {
         aria-label="Mobil menyu"
         className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-border bg-background/95 backdrop-blur pb-[env(safe-area-inset-bottom)] md:hidden"
       >
-        {NAV_ITEMS.slice(0, 2).map((item) => {
+        {MOBILE_ITEMS.slice(0, 2).map((item) => {
           const Icon = item.icon;
           const active = isActive(item.key, view, watchKind);
           return (
@@ -128,7 +213,7 @@ export function Sidebar({ view, onNavigate, me, watchKind }: SidebarProps) {
           <Plus className="size-6" aria-hidden="true" />
         </button>
 
-        {NAV_ITEMS.slice(2, 4).map((item) => {
+        {MOBILE_ITEMS.slice(2, 4).map((item) => {
           const Icon = item.icon;
           const active = isActive(item.key, view, watchKind);
           return (
@@ -155,16 +240,14 @@ export function Sidebar({ view, onNavigate, me, watchKind }: SidebarProps) {
               : "text-muted-foreground"
           )}
         >
-          <span
+          <AvatarBubble
+            name={me?.name ?? "R"}
+            avatar={me?.avatar}
             className={cn(
-              "flex size-5 items-center justify-center rounded-full text-[9px] font-bold",
-              isActive("profile", view, watchKind)
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-secondary-foreground"
+              "size-5 text-[9px]",
+              isActive("profile", view, watchKind) && "ring-2 ring-primary"
             )}
-          >
-            {(me?.name ?? "R").slice(0, 1).toUpperCase()}
-          </span>
+          />
           Profil
         </button>
       </nav>

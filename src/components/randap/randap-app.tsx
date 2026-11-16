@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { ChevronRight, Trophy } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Sidebar, type ViewName } from "./sidebar";
 import { Header } from "./header";
@@ -10,8 +11,20 @@ import { ShortsView } from "./shorts";
 import { UploadView } from "./upload";
 import { ProfileView } from "./profile";
 import { ChannelView } from "./channel";
+import { SectionsGrid, SectionDetail } from "./sections";
+import { QuizView } from "./quiz";
+import { LessonView } from "./lesson";
+import { BallarView } from "./ballar";
+import { SearchView } from "./search";
 import { useDeviceMe } from "@/lib/randap-client";
-import type { ChannelInfo, Me, VideoItem } from "@/lib/randap-types";
+import type {
+  ChannelInfo,
+  LessonItem,
+  Me,
+  SectionItem,
+  SubscribedChannel,
+  VideoItem,
+} from "@/lib/randap-types";
 
 type Feed = {
   videos: VideoItem[];
@@ -24,9 +37,14 @@ export function RandapApp() {
   const [view, setView] = useState<ViewName>("home");
   const [videoId, setVideoId] = useState("");
   const [channelId, setChannelId] = useState("");
-  const [query, setQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [feed, setFeed] = useState<Feed>({ videos: [], shorts: [], loading: true });
   const [channel, setChannel] = useState<ChannelInfo | null>(null);
+  const [sections, setSections] = useState<SectionItem[] | null>(null);
+  const [subs, setSubs] = useState<SubscribedChannel[]>([]);
+  const [currentSection, setCurrentSection] = useState<SectionItem | null>(null);
+  const [quizId, setQuizId] = useState("");
+  const [currentLesson, setCurrentLesson] = useState<LessonItem | null>(null);
 
   const fetchFeed = useCallback(async () => {
     try {
@@ -56,10 +74,44 @@ export function RandapApp() {
     [fetchFeed]
   );
 
+  const fetchSections = useCallback(async (showLoading = false) => {
+    try {
+      if (showLoading) setSections(null);
+      const res = await fetch("/api/sections");
+      const data = await res.json();
+      if (data.ok) setSections(data.sections as SectionItem[]);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const fetchSubs = useCallback(async () => {
+    try {
+      if (!deviceKey) return;
+      const res = await fetch(
+        `/api/subscriptions?deviceId=${encodeURIComponent(deviceKey)}`
+      );
+      const data = await res.json();
+      if (data.ok) setSubs(data.channels as SubscribedChannel[]);
+    } catch {
+      // ignore
+    }
+  }, [deviceKey]);
+
   useEffect(() => {
     const t = window.setTimeout(() => void fetchFeed(), 0);
     return () => window.clearTimeout(t);
   }, [fetchFeed]);
+
+  useEffect(() => {
+    const t = window.setTimeout(() => void fetchSections(), 0);
+    return () => window.clearTimeout(t);
+  }, [fetchSections]);
+
+  useEffect(() => {
+    const t = window.setTimeout(() => void fetchSubs(), 0);
+    return () => window.clearTimeout(t);
+  }, [fetchSubs]);
 
   const loadChannel = useCallback(
     async (id: string) => {
@@ -89,20 +141,22 @@ export function RandapApp() {
   const navigate = useCallback(
     (next: ViewName) => {
       setView(next);
-      setQuery("");
       window.scrollTo({ top: 0 });
       if (next === "subs" || next === "home" || next === "videos" || next === "shorts") {
         void loadFeed(true);
+      }
+      if (next === "home" || next === "sections") {
+        void fetchSections();
       }
       if (next === "profile") {
         refreshMe();
         void loadFeed(true);
       }
-      if (next === "channel" && channelId) {
-        loadChannel(channelId);
+      if (next === "ballar") {
+        // BallarView o'zi yuklaydi
       }
     },
-    [channelId, loadChannel, loadFeed, refreshMe]
+    [fetchSections, loadFeed, refreshMe]
   );
 
   const openVideo = useCallback(
@@ -114,6 +168,12 @@ export function RandapApp() {
     []
   );
 
+  const openVideoId = useCallback((id: string) => {
+    setVideoId(id);
+    setView("watch");
+    window.scrollTo({ top: 0 });
+  }, []);
+
   const openChannel = useCallback(
     (id: string) => {
       setChannelId(id);
@@ -123,6 +183,44 @@ export function RandapApp() {
     },
     [loadChannel]
   );
+
+  const openSection = useCallback(
+    (section: SectionItem) => {
+      setCurrentSection(section);
+      setView("section");
+      window.scrollTo({ top: 0 });
+    },
+    []
+  );
+
+  const openQuiz = useCallback((id: string) => {
+    setQuizId(id);
+    setView("quiz");
+    window.scrollTo({ top: 0 });
+  }, []);
+
+  const openLesson = useCallback(
+    (lessonId: string) => {
+      if (!currentSection) return;
+      const lesson = currentSection.lessons.find((l) => l.id === lessonId);
+      if (lesson) {
+        setCurrentLesson(lesson);
+        setView("lesson");
+        window.scrollTo({ top: 0 });
+      }
+    },
+    [currentSection]
+  );
+
+  const search = useCallback((q: string) => {
+    setSearchQuery(q);
+    setView("search");
+    window.scrollTo({ top: 0 });
+  }, []);
+
+  const refreshSubs = useCallback(() => {
+    void fetchSubs();
+  }, [fetchSubs]);
 
   async function toggleChannelSubscribe() {
     if (!channel) return;
@@ -143,6 +241,7 @@ export function RandapApp() {
               }
             : prev
         );
+        refreshSubs();
         toast({
           title: data.subscribed
             ? `${channel.name} kanaliga obuna bo'ldingiz`
@@ -174,25 +273,24 @@ export function RandapApp() {
     }
   }
 
-  const search = useCallback(
-    (q: string) => {
-      setQuery(q);
-      setFeed((prev) => ({ ...prev, loading: true }));
-      fetch(`/api/videos?kind=all&q=${encodeURIComponent(q)}&limit=60`)
-        .then((r) => r.json())
-        .then((data) => {
-          setFeed({
-            videos: data.ok ? data.videos : [],
-            shorts: [],
-            loading: false,
-          });
-          setView("videos");
-          window.scrollTo({ top: 0 });
-        })
-        .catch(() => setFeed((prev) => ({ ...prev, loading: false })));
-    },
-    []
-  );
+  async function uploadAvatar(file: File): Promise<boolean> {
+    try {
+      const form = new FormData();
+      form.set("deviceKey", deviceKey);
+      form.set("file", file);
+      const res = await fetch("/api/upload/avatar", { method: "POST", body: form });
+      const data = await res.json();
+      if (data.ok) {
+        setMe((prev) =>
+          prev ? { ...prev, avatar: data.avatar as string } : prev
+        );
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }
 
   const myVideos = me ? feed.videos.filter((v) => v.uploader.id === me.id) : [];
 
@@ -207,26 +305,44 @@ export function RandapApp() {
             feed.videos.find((v) => v.id === videoId)?.kind ??
             feed.shorts.find((v) => v.id === videoId)?.kind
           }
+          subs={subs}
+          onOpenChannel={openChannel}
         />
 
         <div className="flex min-w-0 flex-1 flex-col">
           <Header
             me={me}
-            initialQuery={query}
+            initialQuery={searchQuery}
             onSearch={search}
             onNavigate={navigate}
+            onOpenChannel={openChannel}
+            onOpenVideo={openVideoId}
           />
 
           <main className="flex-1 px-4 pb-24 pt-5 sm:px-6 md:pb-8 md:pl-6 lg:px-8">
             {view === "home" ? (
-              <div className="flex flex-col gap-8">
-                <VideoGrid
-                  videos={feed.videos}
-                  loading={feed.loading}
-                  onOpen={openVideo}
-                  onOpenChannel={openChannel}
-                  emptyText="Hozircha video yo'q. Chap menyudagi + tugmasi bilan birinchisini yuklang."
-                />
+              <div className="flex flex-col gap-10">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-foreground">
+                      Hozirgi videolar
+                    </h2>
+                    <button
+                      onClick={() => navigate("videos")}
+                      className="flex items-center text-sm font-semibold text-muted-foreground hover:text-foreground"
+                    >
+                      Barchasi
+                      <ChevronRight className="size-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                  <VideoGrid
+                    videos={feed.videos}
+                    loading={feed.loading}
+                    onOpen={openVideo}
+                    onOpenChannel={openChannel}
+                    emptyText="Hozircha video yo'q. Chap menyudagi + tugmasi bilan birinchisini yuklang."
+                  />
+                </div>
 
                 {feed.shorts.length > 0 ? (
                   <section aria-label="Shorts tanlovi" className="flex flex-col gap-4">
@@ -244,24 +360,63 @@ export function RandapApp() {
                     </div>
                   </section>
                 ) : null}
+
+                {/* Bo'limlar — testlar va o'rgatuvlar */}
+                <section aria-label="Bo'limlar" className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-bold text-foreground">
+                      Bo&apos;limlar — testlar va o&apos;rgatuvlar
+                    </h2>
+                    <button
+                      onClick={() => navigate("sections")}
+                      className="flex items-center text-sm font-semibold text-muted-foreground hover:text-foreground"
+                    >
+                      Barchasi
+                      <ChevronRight className="size-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                  <SectionsGrid
+                    sections={sections ?? []}
+                    loading={sections === null}
+                    onOpen={openSection}
+                  />
+                </section>
+
+                {/* Ballar teaserr */}
+                <section aria-label="Ballar bo'limi" className="flex flex-col gap-3">
+                  <button
+                    onClick={() => navigate("ballar")}
+                    className="flex items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-left transition-colors hover:bg-amber-100"
+                  >
+                    <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                      <Trophy className="size-6" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-bold text-foreground">Ballar</span>
+                      <span className="block text-sm text-muted-foreground">
+                        Testlarda ball to&apos;plang va boshqalar bilan reytingda
+                        raqobat qiling
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-sm font-bold text-amber-700">
+                      Ko&apos;rish →
+                    </span>
+                  </button>
+                </section>
               </div>
             ) : null}
 
             {view === "videos" ? (
               <div className="flex flex-col gap-5">
                 <h1 className="text-lg font-bold text-foreground">
-                  {query ? `Qidiruv: "${query}"` : "Videos — barcha videolar"}
+                  Videos — barcha videolar
                 </h1>
                 <VideoGrid
                   videos={feed.videos}
                   loading={feed.loading}
                   onOpen={openVideo}
                   onOpenChannel={openChannel}
-                  emptyText={
-                    query
-                      ? `"${query}" bo'yicha natija topilmadi.`
-                      : "Videos bo'limi hozircha bo'sh. + tugmasi bilan video yuklang."
-                  }
+                  emptyText="Videos bo'limi hozircha bo'sh. + tugmasi bilan video yuklang."
                 />
               </div>
             ) : null}
@@ -273,17 +428,76 @@ export function RandapApp() {
                 deviceKey={deviceKey}
                 onBack={() => navigate("home")}
                 onOpenChannel={openChannel}
-                onOpenWatch={(id) => {
-                  setVideoId(id);
-                  setView("watch");
-                  window.scrollTo({ top: 0 });
-                }}
+                onOpenWatch={openVideoId}
               />
             ) : null}
 
             {view === "subs" ? (
               <SubsFeed deviceKey={deviceKey} onOpen={openVideo} onOpenChannel={openChannel} />
             ) : null}
+
+            {view === "search" ? (
+              <SearchView
+                query={searchQuery}
+                onOpen={openVideo}
+                onOpenChannel={openChannel}
+              />
+            ) : null}
+
+            {view === "sections" ? (
+              <div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
+                <div className="flex items-center gap-3">
+                  <h1 className="text-lg font-bold text-foreground">
+                    Bo&apos;limlar
+                  </h1>
+                  <span className="text-sm text-muted-foreground">
+                    Testlarni yechib ball to&apos;plang
+                  </span>
+                </div>
+                <SectionsGrid
+                  sections={sections ?? []}
+                  loading={sections === null}
+                  onOpen={openSection}
+                  columns={2}
+                />
+              </div>
+            ) : null}
+
+            {view === "section" ? (
+              <SectionDetail
+                subject={currentSection}
+                loading={!currentSection}
+                onBack={() => navigate("sections")}
+                onStartQuiz={openQuiz}
+                onOpenLesson={openLesson}
+              />
+            ) : null}
+
+            {view === "quiz" ? (
+              <QuizView
+                quizId={quizId}
+                deviceKey={deviceKey}
+                onBack={() => {
+                  void fetchSections();
+                  navigate("sections");
+                }}
+                onFinished={() => {
+                  refreshMe();
+                  void fetchSections();
+                }}
+              />
+            ) : null}
+
+            {view === "lesson" ? (
+              <LessonView
+                lesson={currentLesson}
+                subject={currentSection}
+                onBack={() => navigate("section")}
+                onNextLesson={openLesson}
+              />
+            ) : null}
+
+            {view === "ballar" ? <BallarView deviceKey={deviceKey} /> : null}
 
             {view === "watch" ? (
               <WatchView
@@ -292,6 +506,7 @@ export function RandapApp() {
                 onBack={() => navigate("home")}
                 onOpenChannel={openChannel}
                 onLikeChanged={loadFeed}
+                onSubscribedChanged={refreshSubs}
               />
             ) : null}
 
@@ -316,9 +531,11 @@ export function RandapApp() {
                 videos={myVideos}
                 loading={feed.loading}
                 onRename={renameMe}
+                onAvatarUpload={uploadAvatar}
                 onOpen={openVideo}
                 onOpenChannel={openChannel}
                 onNavigateUpload={() => navigate("upload")}
+                onNavigateBallar={() => navigate("ballar")}
               />
             ) : null}
 

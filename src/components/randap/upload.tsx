@@ -178,6 +178,19 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
       form.set("file", file);
       if (thumb) form.set("thumbnail", thumb);
 
+      // Rasm tanlanmasa — videodan olingan avtomatik rasmni yuboramiz
+      if (!thumb && autoThumbPreview) {
+        try {
+          const blob = await (await fetch(autoThumbPreview)).blob();
+          form.set(
+            "thumbnail",
+            new File([blob], "auto-thumbnail.jpg", { type: "image/jpeg" })
+          );
+        } catch {
+          // bo'lmasa server avtomatik placeholder rasm beradi
+        }
+      }
+
       const res = await fetch("/api/upload", { method: "POST", body: form });
       const data = await res.json();
 

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AvatarBubble } from "./avatar";
 import { formatCount, formatDuration, timeAgo } from "@/lib/randap-client";
 import type { VideoDetail } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ type WatchViewProps = {
   onBack: () => void;
   onOpenChannel: (uploaderId: string) => void;
   onLikeChanged: () => void;
+  onSubscribedChanged?: () => void;
 };
 
 export function WatchView({
@@ -30,6 +32,7 @@ export function WatchView({
   onBack,
   onOpenChannel,
   onLikeChanged,
+  onSubscribedChanged,
 }: WatchViewProps) {
   const [video, setVideo] = useState<VideoDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -110,6 +113,7 @@ export function WatchView({
             ? { ...prev, subscribedByMe: data.subscribed, subscriberCount: data.count }
             : prev
         );
+        onSubscribedChanged?.();
         toast({
           title: data.subscribed
             ? `${video.uploader.name} kanaliga obuna bo'ldingiz`
@@ -231,9 +235,13 @@ export function WatchView({
             <button
               onClick={() => onOpenChannel(video.uploader.id)}
               aria-label={`${video.uploader.name} kanaliga o'tish`}
-              className="flex size-10 items-center justify-center rounded-full bg-secondary text-sm font-bold text-secondary-foreground transition-transform hover:scale-105"
+              className="shrink-0 transition-transform hover:scale-105"
             >
-              {video.uploader.name.slice(0, 1).toUpperCase()}
+              <AvatarBubble
+                name={video.uploader.name}
+                avatar={video.uploader.avatar}
+                className="size-10 text-sm"
+              />
             </button>
             <div>
               <button
@@ -347,9 +355,11 @@ export function WatchView({
         <ul className="flex flex-col gap-4">
           {video.comments.map((c) => (
             <li key={c.id} className="flex gap-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold text-secondary-foreground">
-                {c.author.name.slice(0, 1).toUpperCase()}
-              </span>
+              <AvatarBubble
+                name={c.author.name}
+                avatar={c.author.avatar}
+                className="size-9 text-xs"
+              />
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">
                   <span className="font-semibold text-foreground">{c.author.name}</span>{" "}

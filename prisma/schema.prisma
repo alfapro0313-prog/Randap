@@ -8,13 +8,16 @@ datasource db {
 }
 
 model User {
-  id        String      @id @default(cuid())
-  deviceKey String      @unique
+  id        String        @id @default(cuid())
+  deviceKey String        @unique
   name      String
-  handle    String      @unique
-  createdAt DateTime    @default(now())
+  handle    String        @unique
+  avatar    String?
+  points    Int           @default(0)
+  createdAt DateTime      @default(now())
   videos    Video[]
   comments  Comment[]
+  subs      Subscription[] @relation("SubscribedChannels")
 }
 
 model Video {
@@ -58,8 +61,64 @@ model Like {
 model Subscription {
   id        String   @id @default(cuid())
   channelId String
+  channel   User     @relation("SubscribedChannels", fields: [channelId], references: [id], onDelete: Cascade)
   deviceId  String
   createdAt DateTime @default(now())
 
   @@unique([channelId, deviceId])
+}
+
+model Subject {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  description String
+  icon        String        @default("book")
+  color       String        @default("emerald")
+  order       Int           @default(0)
+  lessons     Lesson[]
+  quizzes     Quiz[]
+}
+
+model Lesson {
+  id          String  @id @default(cuid())
+  subjectId   String
+  subject     Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  title       String
+  summary     String
+  content     String
+  durationMin Int     @default(5)
+  order       Int     @default(0)
+}
+
+model Quiz {
+  id          String        @id @default(cuid())
+  subjectId   String
+  subject     Subject       @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  order       Int           @default(0)
+  questions   Question[]
+  attempts    QuizAttempt[]
+}
+
+model Question {
+  id           String  @id @default(cuid())
+  quizId       String
+  quiz         Quiz    @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  text         String
+  options      String
+  correctIndex Int
+  order        Int     @default(0)
+}
+
+model QuizAttempt {
+  id           String   @id @default(cuid())
+  quizId       String
+  quiz         Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  deviceId     String
+  score        Int
+  total        Int
+  pointsEarned Int      @default(0)
+  createdAt    DateTime @default(now())
 }

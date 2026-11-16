@@ -17,7 +17,14 @@ export async function GET(req: Request) {
 
     const channel = await db.user.findUnique({
       where: { id },
-      select: { id: true, name: true, handle: true, createdAt: true },
+      select: {
+        id: true,
+        name: true,
+        handle: true,
+        avatar: true,
+        points: true,
+        createdAt: true,
+      },
     });
 
     if (!channel) {
@@ -31,7 +38,11 @@ export async function GET(req: Request) {
       where: { uploaderId: channel.id },
       orderBy: { createdAt: "desc" },
       take: 60,
-      include: { uploader: { select: { id: true, name: true, handle: true } } },
+      include: {
+        uploader: {
+          select: { id: true, name: true, handle: true, avatar: true },
+        },
+      },
     });
 
     const withCounts = await Promise.all(
@@ -69,6 +80,8 @@ export async function GET(req: Request) {
         id: channel.id,
         name: channel.name,
         handle: channel.handle,
+        avatar: channel.avatar,
+        points: channel.points,
         subscriberCount,
         subscribedByMe: Boolean(subscribedByMe),
         videoCount: withCounts.length,

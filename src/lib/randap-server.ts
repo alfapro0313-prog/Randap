@@ -1,6 +1,7 @@
 import { createHash } from "crypto";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
+import { db } from "@/lib/db";
 
 export const UPLOAD_ROOT = path.join(process.cwd(), "public", "uploads");
 export const VIDEO_DIR = path.join(UPLOAD_ROOT, "videos");
@@ -58,4 +59,26 @@ export function getDeviceKeyFromRequest(
   const header = req.headers.get("x-device-key");
   const fromParam = fallbackFromParam ?? "";
   return (header ?? fromParam ?? "").trim();
+}
+
+/** deviceKey bo'yicha foydalanuvchini topadi/yaratadi (device-identity) */
+export async function ensureUser(deviceKey: string) {
+  const existing = await db.user.findUnique({ where: { deviceKey } });
+  if (existing) return existing;
+
+  const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
+  let handle = `@randap_${suffix.toLowerCase()}`;
+  const handleExists = await db.user.findUnique({ where: { handle } });
+  if (handleExists) handle = `@randap_${Date.now().toString(36).slice(-6)}`;
+
+  return db.user.create({
+    data: { deviceKey, name: `RandapUser ${suffix}`, handle },
+  });
+}
+
+/** Yangi yuklangan fayl uchun unikal fayl nomi (kengaytmasiz) */
+export function uploadBaseName(): string {
+  const a = Math.random().toString(36).slice(2, 10);
+  const b = Math.random().toString(36).slice(2, 8);
+  return `${a}-${b}`;
 }

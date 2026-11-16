@@ -42,7 +42,11 @@ export async function GET(req: Request) {
       where,
       orderBy: { createdAt: "desc" },
       take: limit,
-      include: { uploader: { select: { id: true, name: true, handle: true } } },
+      include: {
+        uploader: {
+          select: { id: true, name: true, handle: true, avatar: true },
+        },
+      },
     });
 
     const withCounts = await Promise.all(

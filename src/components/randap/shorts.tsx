@@ -9,6 +9,7 @@ import {
   ThumbsUp,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { AvatarBubble } from "./avatar";
 import { formatCount } from "@/lib/randap-client";
 import type { VideoItem } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
@@ -148,9 +149,11 @@ function ShortItem({
             onClick={() => onOpenChannel(short.uploader.id)}
             className="flex items-center gap-2 text-left"
           >
-            <span className="flex size-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-              {short.uploader.name.slice(0, 1).toUpperCase()}
-            </span>
+            <AvatarBubble
+              name={short.uploader.name}
+              avatar={short.uploader.avatar}
+              className="size-9 text-sm ring-2 ring-white/40"
+            />
             <span className="text-sm font-semibold text-white">
               {short.uploader.name}
             </span>

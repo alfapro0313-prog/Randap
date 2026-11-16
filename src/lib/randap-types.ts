@@ -4,6 +4,7 @@ export type ChannelBrief = {
   id: string;
   name: string;
   handle: string;
+  avatar: string | null;
 };
 
 export type VideoItem = {
@@ -40,6 +41,8 @@ export type Me = {
   id: string;
   name: string;
   handle: string;
+  avatar: string | null;
+  points: number;
   videoCount: number;
 };
 
@@ -47,9 +50,110 @@ export type ChannelInfo = {
   id: string;
   name: string;
   handle: string;
+  avatar: string | null;
+  points: number;
   subscriberCount: number;
   subscribedByMe: boolean;
   videoCount: number;
+  videos: VideoItem[];
+};
+
+export type SubscribedChannel = {
+  id: string;
+  name: string;
+  handle: string;
+  avatar: string | null;
+};
+
+export type LessonItem = {
+  id: string;
+  title: string;
+  summary: string;
+  content: string;
+  durationMin: number;
+};
+
+export type QuizSummary = {
+  id: string;
+  title: string;
+  description: string;
+  questionCount: number;
+  bestScore: number | null;
+};
+
+export type SectionItem = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  quizzes: QuizSummary[];
+  lessons: LessonItem[];
+};
+
+export type QuizQuestion = {
+  id: string;
+  text: string;
+  options: string[];
+};
+
+export type QuizData = {
+  id: string;
+  title: string;
+  description: string;
+  subject: {
+    id: string;
+    name: string;
+    slug: string;
+    icon: string;
+    color: string;
+  };
+  total: number;
+  questions: QuizQuestion[];
+};
+
+export type QuizResult = {
+  score: number;
+  total: number;
+  pointsEarned: number;
+  userPoints: number;
+  correctIndexes: number[];
+  bestScore: number;
+};
+
+export type LeaderEntry = {
+  id: string;
+  name: string;
+  handle: string;
+  avatar: string | null;
+  points: number;
+  videoCount: number;
+  isMe: boolean;
+};
+
+export type LeaderMe = {
+  id: string;
+  name: string;
+  handle: string;
+  avatar: string | null;
+  points: number;
+  videoCount: number;
+  isMe: boolean;
+  rank: number;
+};
+
+export type SearchUser = {
+  id: string;
+  name: string;
+  handle: string;
+  avatar: string | null;
+  points: number;
+  videoCount: number;
+};
+
+export type SearchData = {
+  users: SearchUser[];
   videos: VideoItem[];
 };
 

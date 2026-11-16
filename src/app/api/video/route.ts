@@ -21,11 +21,17 @@ export async function GET(req: Request) {
     const video = await db.video.findUnique({
       where: { id },
       include: {
-        uploader: { select: { id: true, name: true, handle: true } },
+        uploader: {
+          select: { id: true, name: true, handle: true, avatar: true },
+        },
         comments: {
           orderBy: { createdAt: "desc" },
           take: 100,
-          include: { author: { select: { id: true, name: true, handle: true } } },
+          include: {
+            author: {
+              select: { id: true, name: true, handle: true, avatar: true },
+            },
+          },
         },
       },
     });

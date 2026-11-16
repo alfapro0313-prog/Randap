@@ -32,7 +32,7 @@ export async function GET(req: Request) {
       where: { videoId },
       orderBy: { createdAt: "desc" },
       take: 100,
-      include: { author: { select: { id: true, name: true, handle: true } } },
+      include: { author: { select: { id: true, name: true, handle: true, avatar: true } } },
     });
 
     return NextResponse.json({ ok: true, comments });
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
     const author = await upsertUser(deviceId);
     const created = await db.comment.create({
       data: { videoId, authorId: author.id, body: text },
-      include: { author: { select: { id: true, name: true, handle: true } } },
+      include: { author: { select: { id: true, name: true, handle: true, avatar: true } } },
     });
 
     const count = await db.comment.count({ where: { videoId } });

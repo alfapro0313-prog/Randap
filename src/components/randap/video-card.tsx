@@ -1,6 +1,7 @@
 "use client";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { AvatarBubble } from "./avatar";
 import { formatCount, formatDuration, timeAgo } from "@/lib/randap-client";
 import type { VideoItem } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
@@ -42,9 +43,13 @@ export function VideoCard({ video, onOpen, onOpenChannel, compact }: VideoCardPr
         <button
           onClick={() => onOpenChannel(video.uploader.id)}
           aria-label={`${video.uploader.name} kanaliga o'tish`}
-          className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold text-secondary-foreground transition-transform hover:scale-105"
+          className="mt-0.5 transition-transform hover:scale-105"
         >
-          {video.uploader.name.slice(0, 1).toUpperCase()}
+          <AvatarBubble
+            name={video.uploader.name}
+            avatar={video.uploader.avatar}
+            className="size-8 text-xs"
+          />
         </button>
         <div className="min-w-0 flex-1">
           <button
