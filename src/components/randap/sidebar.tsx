@@ -7,6 +7,7 @@ import {
   GraduationCap,
   Home,
   ListVideo,
+  MessageCircle,
   Plus,
   Trophy,
   User,
@@ -34,6 +35,7 @@ export type ViewName =
   | "organish"
   | "organishTopic"
   | "ballar"
+  | "chat"
   | "search";
 
 type SidebarProps = {
@@ -56,6 +58,7 @@ const NAV_ITEMS: Array<{
   { key: "videos", label: "Videos", icon: ListVideo },
   { key: "sections", label: "Testlar", icon: GraduationCap },
   { key: "organish", label: "O'rganish", icon: BookOpen },
+  { key: "chat", label: "Chat", icon: MessageCircle },
   { key: "ballar", label: "Ballar", icon: Trophy },
   { key: "profile", label: "Profil", icon: User },
 ];
@@ -67,7 +70,7 @@ const MOBILE_ITEMS: Array<{
 }> = [
   { key: "portal", label: "Asosiy", icon: Home },
   { key: "shorts", label: "Shorts", icon: Zap },
-  { key: "videos", label: "Videos", icon: ListVideo },
+  { key: "chat", label: "Chat", icon: MessageCircle },
   { key: "sections", label: "Testlar", icon: GraduationCap },
 ];
 

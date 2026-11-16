@@ -122,3 +122,58 @@ model QuizAttempt {
   pointsEarned Int      @default(0)
   createdAt    DateTime @default(now())
 }
+
+/* ---------- Chat (Telegram-ga o'xshagan) ---------- */
+
+model ChatProfile {
+  id         String   @id @default(cuid())
+  deviceKey  String   @unique
+  name       String
+  emoji      String   @default("🙂")
+  color      String   @default("sky")
+  bio        String   @default("")
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+}
+
+model Conversation {
+  id            String    @id @default(cuid())
+  userAKey      String
+  userBKey      String
+  isRandom      Boolean   @default(false)
+  endedAt       DateTime?
+  lastMessageAt DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  messages      Message[]
+
+  @@index([userAKey])
+  @@index([userBKey])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderKey      String
+  kind           String       @default("text")
+  content        String
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model TypingState {
+  id             String   @id @default(cuid())
+  conversationId String
+  userKey        String
+  updatedAt      DateTime @default(now())
+
+  @@unique([conversationId, userKey])
+}
+
+model RandomQueue {
+  id        String   @id @default(cuid())
+  deviceKey String   @unique
+  joinedAt  DateTime @default(now())
+}

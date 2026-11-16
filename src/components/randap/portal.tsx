@@ -6,6 +6,7 @@ import {
   CirclePlay,
   GraduationCap,
   ListChecks,
+  MessageCircle,
   Trophy,
   Users,
 } from "lucide-react";
@@ -19,6 +20,7 @@ type PortalProps = {
   onEnterVideos: () => void;
   onEnterTests: () => void;
   onEnterOrganish: () => void;
+  onEnterChat: () => void;
   onOpenBallar: () => void;
 };
 
@@ -30,6 +32,7 @@ export function PortalView({
   onEnterVideos,
   onEnterTests,
   onEnterOrganish,
+  onEnterChat,
   onOpenBallar,
 }: PortalProps) {
   const quizCount = sections.reduce((sum, s) => sum + s.quizzes.length, 0);
@@ -47,8 +50,8 @@ export function PortalView({
         </h1>
       </div>
 
-      {/* Uchta kichik bo'lim */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* To'rtta kichik bo'lim */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* 1-bo'lim: Randap Video — YouTubega o'xshagan */}
         <button
           onClick={onEnterVideos}
@@ -172,6 +175,49 @@ export function PortalView({
           </span>
 
           <span className="mt-4 flex h-9 items-center justify-center gap-1.5 rounded-full bg-violet-600 px-4 text-sm font-bold text-white transition-colors group-hover:bg-violet-700">
+            Kirish
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </span>
+        </button>
+
+        {/* 4-bo'lim: Chat — Telegramga o'xshagan */}
+        <button
+          onClick={onEnterChat}
+          aria-label="Chat bo'limiga kirish"
+          className="group flex flex-col rounded-2xl border border-border bg-card p-5 text-left transition-all hover:border-sky-300 hover:shadow-md"
+        >
+          <span className="flex items-center gap-3">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-sky-600">
+              <MessageCircle className="size-6" aria-hidden="true" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-base font-extrabold text-foreground">
+                Chat
+              </span>
+              <span className="block text-xs text-muted-foreground">
+                Telegramga o&apos;xshagan
+              </span>
+            </span>
+          </span>
+
+          <span className="mt-3 block text-sm leading-relaxed text-muted-foreground">
+            Odamlar bilan yozishing, stiker va rasm tashishing mumkin.
+            Random chat ham bor.
+          </span>
+
+          <span className="mt-3 flex flex-wrap items-center gap-1.5">
+            <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
+              Random chat
+            </span>
+            <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
+              Stikerlar
+            </span>
+            <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground">
+              Rasm
+            </span>
+          </span>
+
+          <span className="mt-4 flex h-9 items-center justify-center gap-1.5 rounded-full bg-sky-600 px-4 text-sm font-bold text-white transition-colors group-hover:bg-sky-700">
             Kirish
             <ArrowRight className="size-4" aria-hidden="true" />
           </span>

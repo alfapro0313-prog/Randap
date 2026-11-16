@@ -18,6 +18,8 @@ import { LessonView } from "./lesson";
 import { BallarView } from "./ballar";
 import { SearchView } from "./search";
 import { PortalView } from "./portal";
+import { ChatApp } from "./chat/chat-app";
+import { ChatSms } from "./chat-sms";
 import { useDeviceMe } from "@/lib/randap-client";
 import type {
   ChannelInfo,
@@ -48,6 +50,7 @@ export function RandapApp() {
   const [topicId, setTopicId] = useState("");
   const [quizId, setQuizId] = useState("");
   const [currentLesson, setCurrentLesson] = useState<LessonItem | null>(null);
+  const [chatFocus, setChatFocus] = useState<string | null>(null);
 
   const fetchFeed = useCallback(async () => {
     try {
@@ -344,6 +347,7 @@ export function RandapApp() {
                 onEnterVideos={() => navigate("home")}
                 onEnterTests={() => navigate("sections")}
                 onEnterOrganish={() => navigate("organish")}
+                onEnterChat={() => navigate("chat")}
                 onOpenBallar={() => navigate("ballar")}
               />
             ) : null}
@@ -502,6 +506,10 @@ export function RandapApp() {
               />
             ) : null}
 
+            {view === "chat" ? (
+              <ChatApp deviceKey={deviceKey} focusConversationId={chatFocus} />
+            ) : null}
+
             {view === "ballar" ? <BallarView deviceKey={deviceKey} /> : null}
 
             {view === "watch" ? (
@@ -558,6 +566,16 @@ export function RandapApp() {
           </main>
         </div>
       </div>
+
+      {/* "Kichkina esemes" — o'qilmagan chat xabarlari */}
+      <ChatSms
+        deviceKey={deviceKey}
+        onOpen={(conversationId) => {
+          setChatFocus(conversationId);
+          setView("chat");
+          window.scrollTo({ top: 0 });
+        }}
+      />
     </div>
   );
 }

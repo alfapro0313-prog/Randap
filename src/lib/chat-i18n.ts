@@ -1,0 +1,222 @@
+import type { ChatLang } from "./randap-types";
+
+export const CHAT_LANG_STORAGE = "randap_chat_lang";
+
+export const CHAT_LANGS: Array<{ code: ChatLang; label: string }> = [
+  { code: "en", label: "English" },
+  { code: "ru", label: "Русский" },
+  { code: "uz", label: "O'zbekcha" },
+];
+
+const en = {
+  chatTitle: "Chat",
+  chatSubtitle: "Talk to people",
+  searchPlaceholder: "Search people...",
+  randomChat: "Random chat",
+  randomDesc: "Chat with a random person",
+  chats: "Chats",
+  people: "People",
+  online: "online",
+  offline: "offline",
+  typing: "typing...",
+  messagePlaceholder: "Write a message...",
+  send: "Send",
+  stickers: "Stickers",
+  photo: "Photo",
+  settings: "Settings",
+  language: "Language",
+  myProfile: "My profile",
+  name: "Name",
+  bio: "Bio",
+  bioPlaceholder: "A few words about yourself...",
+  save: "Save",
+  cancel: "Cancel",
+  you: "You",
+  emptyChats: "No chats yet. Find people or start a random chat!",
+  emptyPeople: "Nobody found.",
+  emptyPeopleHint: "Invite a friend to open Randap on another device.",
+  messagesEmpty: "No messages yet. Say hi!",
+  waiting: "Looking for a stranger...",
+  waitingHint: "You will be connected automatically.",
+  connected: "Connected! Say hi",
+  strangerLeft: "Stranger left the chat",
+  next: "Next",
+  back: "Back",
+  leave: "Leave",
+  chatEnded: "Chat ended",
+  viewProfile: "View profile",
+  message: "Message",
+  memberSince: "Joined",
+  imageTooBig: "Image is too large (max 6 MB)",
+  imageOnly: "Please choose an image file",
+  backToList: "Back",
+  loading: "Loading...",
+  unknownUser: "Unknown",
+  nameRequired: "Name must be 2-40 characters",
+  saved: "Saved",
+} as const;
+
+type ChatStrings = typeof en;
+
+const ru: ChatStrings = {
+  chatTitle: "Чат",
+  chatSubtitle: "Общайтесь с людьми",
+  searchPlaceholder: "Поиск людей...",
+  randomChat: "Случайный чат",
+  randomDesc: "Пообщайтесь со случайным человеком",
+  chats: "Чаты",
+  people: "Люди",
+  online: "онлайн",
+  offline: "офлайн",
+  typing: "печатает...",
+  messagePlaceholder: "Напишите сообщение...",
+  send: "Отправить",
+  stickers: "Стикеры",
+  photo: "Фото",
+  settings: "Настройки",
+  language: "Язык",
+  myProfile: "Мой профиль",
+  name: "Имя",
+  bio: "О себе",
+  bioPlaceholder: "Пара слов о себе...",
+  save: "Сохранить",
+  cancel: "Отмена",
+  you: "Вы",
+  emptyChats: "Пока нет чатов. Найдите людей или начните случайный чат!",
+  emptyPeople: "Никого не найдено.",
+  emptyPeopleHint: "Пригласите друга открыть Randap на другом устройстве.",
+  messagesEmpty: "Сообщений пока нет. Напишите привет!",
+  waiting: "Ищем собеседника...",
+  waitingHint: "Соединение произойдёт автоматически.",
+  connected: "Соединено! Скажите привет",
+  strangerLeft: "Собеседник покинул чат",
+  next: "Далее",
+  back: "Назад",
+  leave: "Выйти",
+  chatEnded: "Чат завершён",
+  viewProfile: "Открыть профиль",
+  message: "Написать",
+  memberSince: "С нами с",
+  imageTooBig: "Слишком большое изображение (макс. 6 МБ)",
+  imageOnly: "Выберите файл изображения",
+  backToList: "Назад",
+  loading: "Загрузка...",
+  unknownUser: "Неизвестный",
+  nameRequired: "Имя должно быть 2-40 символов",
+  saved: "Сохранено",
+};
+
+const uz: ChatStrings = {
+  chatTitle: "Chat",
+  chatSubtitle: "Odamlar bilan gaplashing",
+  searchPlaceholder: "Odamlarni qidirish...",
+  randomChat: "Random chat",
+  randomDesc: "Tasodifiy odam bilan yozishing",
+  chats: "Suhbatlar",
+  people: "Odamlar",
+  online: "online",
+  offline: "offline",
+  typing: "yozmoqda...",
+  messagePlaceholder: "Xabar yozing...",
+  send: "Yuborish",
+  stickers: "Stikerlar",
+  photo: "Rasm",
+  settings: "Sozlamalar",
+  language: "Til",
+  myProfile: "Mening profilim",
+  name: "Ism",
+  bio: "Biografiya",
+  bioPlaceholder: "O'zingiz haqingizda qisqacha...",
+  save: "Saqlash",
+  cancel: "Bekor qilish",
+  you: "Siz",
+  emptyChats: "Hozircha suhbat yo'q. Odamlarni toping yoki random chat boshlang!",
+  emptyPeople: "Hech kim topilmadi.",
+  emptyPeopleHint: "Do'stingizni taklif qiling — boshqa qurilmada Randapni ochsin.",
+  messagesEmpty: "Hozircha xabar yo'q. Salom bering!",
+  waiting: "Sherik qidirilmoqda...",
+  waitingHint: "Avtomatik ulanadi.",
+  connected: "Ulandi! Salom bering",
+  strangerLeft: "Sherik chatni tark etdi",
+  next: "Keyingi",
+  back: "Orqaga",
+  leave: "Chiqish",
+  chatEnded: "Chat tugadi",
+  viewProfile: "Profilni ko'rish",
+  message: "Yozish",
+  memberSince: "Qo'shildi",
+  imageTooBig: "Rasm juda katta (maks 6 MB)",
+  imageOnly: "Rasm fayl tanlang",
+  backToList: "Orqaga",
+  loading: "Yuklanmoqda...",
+  unknownUser: "Noma'lum",
+  nameRequired: "Ism 2-40 belgi orasida bo'lishi kerak",
+  saved: "Saqlandi",
+};
+
+export const CHAT_I18N: Record<ChatLang, ChatStrings> = { en, ru, uz };
+
+export function getChatStrings(lang: ChatLang): ChatStrings {
+  return CHAT_I18N[lang] ?? en;
+}
+
+export function isChatLang(value: string | null): value is ChatLang {
+  return value === "en" || value === "ru" || value === "uz";
+}
+
+export function chatLocale(lang: ChatLang): string {
+  if (lang === "ru") return "ru-RU";
+  if (lang === "uz") return "uz-UZ";
+  return "en-US";
+}
+
+export const CHAT_STICKERS = [
+  "😀",
+  "😂",
+  "🥰",
+  "😎",
+  "🤔",
+  "😭",
+  "😍",
+  "🤩",
+  "😅",
+  "🙃",
+  "👍",
+  "👏",
+  "🔥",
+  "❤️",
+  "🎉",
+  "🤝",
+  "🙌",
+  "💯",
+  "🌹",
+  "⭐",
+];
+
+export const CHAT_EMOJIS = [
+  "🙂",
+  "😀",
+  "😎",
+  "🥰",
+  "🤩",
+  "🤔",
+  "😴",
+  "🫡",
+  "🐱",
+  "🦁",
+  "🌍",
+  "⚡",
+];
+
+export const CHAT_COLORS = ["sky", "emerald", "violet", "amber", "rose", "teal"] as const;
+
+export const CHAT_AVATAR_COLORS: Record<string, string> = {
+  sky: "bg-sky-100 text-sky-700",
+  emerald: "bg-emerald-100 text-emerald-700",
+  violet: "bg-violet-100 text-violet-700",
+  amber: "bg-amber-100 text-amber-700",
+  rose: "bg-rose-100 text-rose-700",
+  teal: "bg-teal-100 text-teal-700",
+};
+
+export const CHAT_ONLINE_MS = 30_000;

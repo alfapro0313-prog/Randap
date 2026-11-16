@@ -158,3 +158,49 @@ export type SearchData = {
 };
 
 export const MAX_SHORT_SEC = 80;
+
+/* ---------- Chat ---------- */
+
+export type ChatLang = "en" | "ru" | "uz";
+
+export type ChatProfileItem = {
+  deviceKey: string;
+  name: string;
+  emoji: string;
+  color: string;
+  bio: string;
+  online: boolean;
+  lastSeenAt: string;
+};
+
+export type ChatMessageItem = {
+  id: string;
+  kind: "text" | "sticker" | "image" | "system";
+  content: string;
+  mine: boolean;
+  createdAt: string;
+};
+
+export type ChatConversationItem = {
+  id: string;
+  isRandom: boolean;
+  ended: boolean;
+  partner: ChatProfileItem | null;
+  lastMessage: {
+    kind: ChatMessageItem["kind"];
+    content: string;
+    mine: boolean;
+    createdAt: string;
+  } | null;
+  unreadCount: number;
+  updatedAt: string;
+};
+
+export type ChatNotificationItem = {
+  conversationId: string;
+  senderName: string;
+  senderEmoji: string;
+  senderColor: string;
+  preview: string;
+  createdAt: string;
+};
