@@ -1,0 +1,930 @@
+     1→/**
+     2→ * Randap global i18n — til tanlash HAMMA bo'limlarga tegishli.
+     3→ * Tillar: en (default), ru, uz.
+     4→ * Ushbu fayl faqat UI (interfeys) matnlari uchun. DB va maqola kontenti
+     5→ * alohida fayllarda lokalizatsiya qilinadi (randap-content-i18n, randap-organish).
+     6→ */
+     7→
+     8→export type Lang = "en" | "ru" | "uz";
+     9→
+    10→export const LANG_STORAGE = "randap_lang";
+    11→export const LANG_STORAGE_LEGACY = "randap_chat_lang";
+    12→
+    13→export const LANGS: Array<{ code: Lang; label: string }> = [
+    14→  { code: "en", label: "English" },
+    15→  { code: "ru", label: "Русский" },
+    16→  { code: "uz", label: "O'zbekcha" },
+    17→];
+    18→
+    19→export function isLang(value: string | null | undefined): value is Lang {
+    20→  return value === "en" || value === "ru" || value === "uz";
+    21→}
+    22→
+    23→export function langLocale(lang: Lang): string {
+    24→  if (lang === "ru") return "ru-RU";
+    25→  if (lang === "uz") return "uz-UZ";
+    26→  return "en-US";
+    27→}
+    28→
+    29→const en = {
+    30→  // Umumiy
+    31→  back: "Back",
+    32→  cancel: "Cancel",
+    33→  close: "Close",
+    34→  save: "Save",
+    35→  saving: "Saving...",
+    36→  loading: "Loading...",
+    37→  error: "Error",
+    38→  retry: "Please try again",
+    39→  retryDesc: "Please try again.",
+    40→  you: "YOU",
+    41→  send: "Send",
+    42→  search: "Search",
+    43→  searchButton: "Search",
+    44→  searchPlaceholder: "Search videos and people...",
+    45→  searching: "Searching...",
+    46→  searchAria: "Search",
+    47→  searchTitle: "Search: «{q}»",
+    48→  profiles: "Profiles",
+    49→  videosHeading: "Videos",
+    50→  profileBtn: "Profile",
+    51→  nothingFound: "Nothing found",
+    52→  nothingFoundHint: "Nothing found — try another word.",
+    53→  nothingFoundDesc:
+    54→    "No video or profile found for «{q}». Try another word.",
+    55→  empty: "Empty",
+    56→  minutes: "min",
+    57→  pointUnit: "points",
+    58→  videoUnit: "video",
+    59→  shortsUnit: "shorts",
+    60→  subscriberUnit: "subscribers",
+    61→  viewsUnit: "views",
+    62→  fanUnit: "subjects",
+    63→  testUnit: "tests",
+    64→  orgatuvUnit: "lessons",
+    65→  lessonUnit: "lesson",
+    66→  questionUnit: "questions",
+    67→
+    68→  // Sidebar
+    69→  navPortal: "Main menu",
+    70→  navHome: "Videos",
+    71→  navShorts: "Shorts",
+    72→  navVideos: "Videos",
+    73→  navSections: "Tests",
+    74→  navOrganish: "Learn",
+    75→  navChat: "Chat",
+    76→  navBallar: "Points",
+    77→  navProfile: "Profile",
+    78→  navPortalMobile: "Home",
+    79→  subs: "Subscriptions",
+    80→  subsSectionAria: "Subscriptions section",
+    81→  subsGoAria: "Go to subscriptions",
+    82→  goChannelTitle: "Go to {name} channel",
+    83→  uploadVideo: "Upload video",
+    84→  sidebarTagline: "Videos, Shorts and Tests platform",
+    85→  settings: "Settings",
+    86→  language: "Language",
+    87→  settingsAria: "Settings",
+    88→  languageAppliesAll:
+    89→    "The selected language applies to all sections of Randap.",
+    90→
+    91→  // Header
+    92→  logoAria: "Randap — go to main menu",
+    93→  logoTitle: "Randap — main menu",
+    94→  profileGoAria: "Go to profile",
+    95→
+    96→  // Portal
+    97→  portalWelcome: "Welcome to the Randap platform",
+    98→  portalChoose: "Which section will you start with?",
+    99→  enter: "Enter",
+   100→  enterVideoAria: "Open the Randap Video section",
+   101→  enterTestsAria: "Open the Tests section",
+   102→  enterOrganishAria: "Open the Learn section",
+   103→  enterChatAria: "Open the Chat section",
+   104→  portalVideoSub: "Like YouTube",
+   105→  portalVideoDesc:
+   106→    "Watch videos and Shorts — with likes, comments and subscriptions.",
+   107→  portalTestsSub: "All subjects, a separate section",
+   108→  portalTestsA: "Tests and lessons on all subjects. Points are counted ",
+   109→  portalTestsBold: "separately",
+   110→  portalTestsB: ".",
+   111→  portalOrganishSub: "Long articles section",
+   112→  portalOrganishDesc:
+   113→    "Long articles about English, memory, math and history. Below — duties of religion and life.",
+   114→  fourTopics: "4 topics",
+   115→  dinBadge: "Religion and life duties",
+   116→  portalChatSub: "Like Telegram",
+   117→  portalChatDesc:
+   118→    "Chat with people, send stickers and photos. Random chat is here too.",
+   119→  randomChatBadge: "Random chat",
+   120→  stickersBadge: "Stickers",
+   121→  photoBadge: "Photo",
+   122→  ballarBarTitle: "Points — a separate ranking",
+   123→  ballarBarDesc:
+   124→    "Solve tests to earn points and compete with other people",
+   125→
+   126→  // Home / feed
+   127→  homeNow: "Current videos",
+   128→  all: "All",
+   129→  emptyHome:
+   130→    "No videos yet. Be the first — use the + button in the left menu.",
+   131→  videosAllTitle: "Videos — all videos",
+   132→  emptyVideos:
+   133→    "The Videos section is empty. Upload a video with the + button.",
+   134→  subsFeedTitle: "Videos from channels you subscribed to",
+   135→  emptySubs:
+   136→    "No subscriptions yet. Watch a video and subscribe to a channel — new videos will appear here.",
+   137→
+   138→  // Sections (tests)
+   139→  sectionsTitle: "Tests — all subjects",
+   140→  sectionsSub: "Choose a subject, solve tests and earn points",
+   141→  testsHeading: "Tests",
+   142→  orgatuvsHeading: "Lessons",
+   143→  savolCount: "{n} questions",
+   144→  best: "Best: {a}/{b}",
+   145→  solveAgain: "Solve again",
+   146→  startQuiz: "Start test",
+   147→  testsCountLine: "{q} tests · {l} lessons",
+   148→
+   149→  // Organish
+   150→  organishHeadSub:
+   151→    "Deep knowledge in every topic — learn with long articles",
+   152→  readMin: "{n} min read",
+   153→  readMinShort: "{n} min",
+   154→  articleNotFound: "Article not found.",
+   155→  backToOrganish: "Back to Learn",
+   156→  openArticleAria: "Open the article {title}",
+   157→  dinSectionAria: "Religion and life duties",
+   158→
+   159→  // Quiz
+   160→  quizNotFound: "Test not found",
+   161→  unansweredTitle: "{n} questions were left unanswered",
+   162→  unansweredDesc: "Unanswered questions count as wrong.",
+   163→  submitFailDesc: "The result could not be submitted. Please try again.",
+   164→  resultGreat: "Excellent result! You know this well.",
+   165→  resultGood: "Good! Solve it once more and you will score higher.",
+   166→  resultBad: "Learn the lessons first and try again.",
+   167→  pointsAdded: "+{n} points added",
+   168→  totalParen: "(total: {n} points)",
+   169→  resultReviewAria: "Results review",
+   170→  yourAnswer: "Your answer: ",
+   171→  noAnswer: "— (no answer)",
+   172→  correctAnswer: "Correct answer: ",
+   173→  backToSection: "Back to section",
+   174→  questionN: "Question {a} / {b}",
+   175→  upToPoints: "up to {n} points",
+   176→  answeredCount: "{a} / {b} answered",
+   177→  finish: "Finish",
+   178→  nextQ: "Next",
+   179→  prevQ: "Previous",
+   180→
+   181→  // Lesson
+   182→  lessonNotFound: "Lesson not found",
+   183→  orgatuvBadge: "Lesson",
+   184→  nextLesson: "Next lesson",
+   185→  go: "Go →",
+   186→
+   187→  // Ballar
+   188→  ballarTitle: "Points",
+   189→  ballarSub: "Ranking of the points people earned from tests",
+   190→  ballarHow:
+   191→    "How are points earned? Solve the tests in the sections — every correct answer gives 10 points. Your points in this list update instantly.",
+   192→
+   193→  // Profile
+   194→  profileUpdated: "Profile updated",
+   195→  saveError: "Error while saving",
+   196→  nameLengthDesc: "Name must be 2-40 characters.",
+   197→  chooseImage: "Choose an image",
+   198→  chooseImageDesc: "Upload JPG, PNG or WebP as the profile photo.",
+   199→  imageTooBig: "Image is too large",
+   200→  imageTooBigDesc: "The image must be under 5 MB.",
+   201→  avatarUpdated: "Profile photo updated",
+   202→  avatarFailed: "The photo was not uploaded",
+   203→  changeAvatarAria: "Change profile photo",
+   204→  uploadPhotoTitle: "Upload photo",
+   205→  chooseAvatarAria: "Choose profile photo",
+   206→  myVideosInfo: "{n} uploaded videos · your profile",
+   207→  pointsWithValue: "{n} points",
+   208→  renameLabel: "Change name",
+   209→  myVideos: "My videos",
+   210→  emptyMyVideos:
+   211→    "You have not uploaded videos yet. Press the + button below or in the left menu.",
+   212→  deviceProfile: "Device profile",
+   213→  deviceProfileDesc:
+   214→    "Randap does not require registration: your profile is tied to this browser's device key ({key}). If you press the button below, the profile on this device and the likes/subscriptions made from it will be reset.",
+   215→  resetConfirm: "Yes, reset profile",
+   216→  resetDevice: "Reset device profile",
+   217→
+   218→  // Channel
+   219→  channelStats:
+   220→    "{subs} subscribers · {v} videos · {p} points",
+   221→  subscribed: "Subscribed",
+   222→  subscribe: "Subscribe",
+   223→  emptyChannel: "No videos on this channel yet.",
+   224→
+   225→  // Watch
+   226→  videoNotFound: "Video not found",
+   227→  browserNoVideo: "Your browser does not support the video tag.",
+   228→  commentsOffSuffix: " · Comments are off",
+   229→  subsCount: "{n} subscribers",
+   230→  soon: "Coming soon",
+   231→  commentsHeading: "Comments",
+   232→  commentPlaceholder: "Write a comment...",
+   233→  commentAria: "Write a comment",
+   234→  sendCommentAria: "Send the comment",
+   235→  commentsOffNote:
+   236→    "Comments are off on this video — the author has disabled them.",
+   237→  commentAdded: "Comment added",
+   238→  subToastOk: "You subscribed to the {name} channel",
+   239→  subToastCancel: "Subscription cancelled",
+   240→
+   241→  // Shorts
+   242→  shortsEmpty: "No Shorts yet",
+   243→  shortsEmptyDesc:
+   244→    "Press the «+» button and upload a video up to 1:20 (80 seconds) — it will appear in the Shorts section.",
+   245→  unmute: "Unmute",
+   246→  mute: "Mute",
+   247→  likeAria: "Like",
+   248→  commentsAria: "Comments",
+   249→  writeComment: "Write a comment",
+   250→  yourThoughts: "Your thoughts...",
+   251→  shortsCommentAria: "Shorts comment",
+   252→  sendAria: "Send",
+   253→  seeAllComments: "See all comments in the video",
+   254→  likeFail: "The like was not sent",
+   255→  commentFail: "The comment was not sent",
+   256→
+   257→  // Upload
+   258→  uploadStep1: "1. Video file",
+   259→  pickVideo: "Press to choose a video",
+   260→  pickVideoHint: "MP4, WebM, MOV · max 300 MB",
+   261→  pickVideoAria: "Choose a video file",
+   262→  readingDuration: "reading duration...",
+   263→  removeFileAria: "Remove the file",
+   264→  kindVideoDesc: "Unlimited length",
+   265→  kindShortsDesc: "Max 1:20 (80 seconds)",
+   266→  shortTooLongNote:
+   267→    "This video is {n} seconds — too long for Shorts (max 80 seconds). Upload it as a regular «Video».",
+   268→  uploadStep2: "2. Details",
+   269→  titleLabel: "Video title *",
+   270→  titlePlaceholder: "For example: daily vlog from a Tashkent bazaar",
+   271→  descLabel: "Description",
+   272→  descPlaceholder: "Write briefly about the video...",
+   273→  thumbLabel: "Thumbnail (image)",
+   274→  thumbReplace: "Replace",
+   275→  thumbPick: "Choose image",
+   276→  thumbAuto: "auto",
+   277→  thumbAutoHint: "If no image is chosen, one is taken from the video automatically",
+   278→  allowComments: "Allow comments",
+   279→  allowCommentsDesc:
+   280→    "If checked, people can comment on the video. If unchecked, comments are disabled.",
+   281→  duplicateFound: "Duplicate detected",
+   282→  duplicateToastDesc: "This video is already in the Videos section.",
+   283→  duplicateDefault: "This video has already been uploaded.",
+   284→  seeExisting: "View the existing video",
+   285→  uploadShortsBtn: "Upload Shorts",
+   286→  toastVideoPick: "Choose a video file",
+   287→  toastVideoPickDesc:
+   288→    "MP4, WebM and similar video formats are accepted.",
+   289→  toastFileReadFail: "The file could not be read",
+   290→  toastFileReadFailDesc:
+   291→    "This file did not open as a video. Try another file.",
+   292→  toastThumbPickDesc:
+   293→    "An image file is required for the thumbnail (JPG, PNG, WebP).",
+   294→  toastProfilePreparing: "The profile is being prepared",
+   295→  toastProfilePreparingDesc: "Wait a second and press again.",
+   296→  toastNoFile: "No video file chosen",
+   297→  toastTitleShort: "The title is too short",
+   298→  toastTitleShortDesc: "Enter a video title (at least 2 characters).",
+   299→  toastShortTooLong: "Shorts is too long",
+   300→  toastShortTooLongDesc:
+   301→    "Maximum 1:20 (80 seconds) for Shorts. This video is {n} seconds — upload it as a regular Video.",
+   302→  toastUploaded: "Video uploaded",
+   303→  toastUploadedShorts: "It appeared in the Shorts section.",
+   304→  toastUploadedVideos: "It appeared in the Videos section.",
+   305→  toastUploadFail: "Upload error",
+   306→  toastUploadFailed: "Upload failed",
+   307→  toastUploadFailedDesc: "Check your connection and try again.",
+   308→
+   309→  // Chat-sms (kichkina esemes)
+   310→  newChatAria: "New chat messages",
+   311→
+   312→  // Search view
+   313→  videoCountLine: "{n} videos · {p} points",
+   314→} as const;
+   315→
+   316→export type TKey = keyof typeof en;
+   317→type Dict = Record<TKey, string>;
+   318→
+   319→const ru: Dict = {
+   320→  back: "Назад",
+   321→  cancel: "Отмена",
+   322→  close: "Закрыть",
+   323→  save: "Сохранить",
+   324→  saving: "Сохранение...",
+   325→  loading: "Загрузка...",
+   326→  error: "Ошибка",
+   327→  retry: "Попробуйте ещё раз",
+   328→  retryDesc: "Попробуйте ещё раз.",
+   329→  you: "ВЫ",
+   330→  send: "Отправить",
+   331→  search: "Поиск",
+   332→  searchButton: "Поиск",
+   333→  searchPlaceholder: "Поиск видео и людей...",
+   334→  searching: "Поиск...",
+   335→  searchAria: "Поиск",
+   336→  searchTitle: "Поиск: «{q}»",
+   337→  profiles: "Профили",
+   338→  videosHeading: "Видео",
+   339→  profileBtn: "Профиль",
+   340→  nothingFound: "Ничего не найдено",
+   341→  nothingFoundHint: "Ничего не найдено — попробуйте другое слово.",
+   342→  nothingFoundDesc:
+   343→    "По запросу «{q}» видео или профиль не найдены. Попробуйте другое слово.",
+   344→  empty: "Пусто",
+   345→  minutes: "мин",
+   346→  pointUnit: "баллов",
+   347→  videoUnit: "видео",
+   348→  shortsUnit: "shorts",
+   349→  subscriberUnit: "подписчиков",
+   350→  viewsUnit: "просмотров",
+   351→  fanUnit: "предметов",
+   352→  testUnit: "тестов",
+   353→  orgatuvUnit: "уроков",
+   354→  lessonUnit: "урок",
+   355→  questionUnit: "вопросов",
+   356→
+   357→  navPortal: "Главное меню",
+   358→  navHome: "Видео",
+   359→  navShorts: "Shorts",
+   360→  navVideos: "Видео",
+   361→  navSections: "Тесты",
+   362→  navOrganish: "Обучение",
+   363→  navChat: "Чат",
+   364→  navBallar: "Баллы",
+   365→  navProfile: "Профиль",
+   366→  navPortalMobile: "Главная",
+   367→  subs: "Подписки",
+   368→  subsSectionAria: "Раздел подписок",
+   369→  subsGoAria: "Перейти к подпискам",
+   370→  goChannelTitle: "Перейти на канал {name}",
+   371→  uploadVideo: "Загрузить видео",
+   372→  sidebarTagline: "Платформа видео, Shorts и тестов",
+   373→  settings: "Настройки",
+   374→  language: "Язык",
+   375→  settingsAria: "Настройки",
+   376→  languageAppliesAll:
+   377→    "Выбранный язык применяется ко всем разделам Randap.",
+   378→
+   379→  logoAria: "Randap — на главную",
+   380→  logoTitle: "Randap — главное меню",
+   381→  profileGoAria: "К профилю",
+   382→
+   383→  portalWelcome: "Добро пожаловать на платформу Randap",
+   384→  portalChoose: "С какого раздела начнём?",
+   385→  enter: "Войти",
+   386→  enterVideoAria: "Открыть раздел Randap Video",
+   387→  enterTestsAria: "Открыть раздел Тесты",
+   388→  enterOrganishAria: "Открыть раздел Обучение",
+   389→  enterChatAria: "Открыть раздел Чат",
+   390→  portalVideoSub: "Похоже на YouTube",
+   391→  portalVideoDesc:
+   392→    "Смотрите видео и Shorts — с лайками, комментариями и подписками.",
+   393→  portalTestsSub: "Все предметы, отдельный раздел",
+   394→  portalTestsA: "Тесты и уроки по всем предметам. Баллы считаются ",
+   395→  portalTestsBold: "отдельно",
+   396→  portalTestsB: ".",
+   397→  portalOrganishSub: "Раздел длинных статей",
+   398→  portalOrganishDesc:
+   399→    "Длинные статьи об английском языке, памяти, математике и истории. Ниже — обязанности религии и жизни.",
+   400→  fourTopics: "4 темы",
+   401→  dinBadge: "Обязанности религии и жизни",
+   402→  portalChatSub: "Похоже на Telegram",
+   403→  portalChatDesc:
+   404→    "Общайтесь с людьми, отправляйте стикеры и фото. Есть и случайный чат.",
+   405→  randomChatBadge: "Случайный чат",
+   406→  stickersBadge: "Стикеры",
+   407→  photoBadge: "Фото",
+   408→  ballarBarTitle: "Баллы — отдельный рейтинг",
+   409→  ballarBarDesc:
+   410→    "Решайте тесты, зарабатывайте баллы и соревнуйтесь с другими",
+   411→
+   412→  homeNow: "Текущие видео",
+   413→  all: "Все",
+   414→  emptyHome:
+   415→    "Пока нет видео. Загрузите первое — кнопка «+» в левом меню.",
+   416→  videosAllTitle: "Видео — все видео",
+   417→  emptyVideos:
+   418→    "Раздел «Видео» пока пуст. Загрузите видео кнопкой «+».",
+   419→  subsFeedTitle: "Видео каналов, на которые вы подписаны",
+   420→  emptySubs:
+   421→    "Пока нет подписок. Посмотрите видео и подпишитесь на канал — новые видео появятся здесь.",
+   422→
+   423→  sectionsTitle: "Тесты — все предметы",
+   424→  sectionsSub: "Выберите предмет, решайте тесты и зарабатывайте баллы",
+   425→  testsHeading: "Тесты",
+   426→  orgatuvsHeading: "Уроки",
+   427→  savolCount: "{n} вопросов",
+   428→  best: "Лучший: {a}/{b}",
+   429→  solveAgain: "Решить снова",
+   430→  startQuiz: "Начать тест",
+   431→  testsCountLine: "{q} тестов · {l} уроков",
+   432→
+   433→  organishHeadSub:
+   434→    "Глубокие знания по каждой теме — учитесь с длинными статьями",
+   435→  readMin: "{n} мин чтения",
+   436→  readMinShort: "{n} мин",
+   437→  articleNotFound: "Статья не найдена.",
+   438→  backToOrganish: "Вернуться к обучению",
+   439→  openArticleAria: "Открыть статью {title}",
+   440→  dinSectionAria: "Обязанности религии и жизни",
+   441→
+   442→  quizNotFound: "Тест не найден",
+   443→  unansweredTitle: "{n} вопросов остались без ответа",
+   444→  unansweredDesc: "Вопросы без ответа считаются неправильными.",
+   445→  submitFailDesc:
+   446→    "Не удалось отправить результат. Попробуйте ещё раз.",
+   447→  resultGreat: "Отличный результат! Вы хорошо знаете тему.",
+   448→  resultGood: "Хорошо! Решите ещё раз — и результат будет выше.",
+   449→  resultBad: "Сначала изучите уроки и попробуйте снова.",
+   450→  pointsAdded: "+{n} баллов добавлено",
+   451→  totalParen: "(всего: {n} баллов)",
+   452→  resultReviewAria: "Обзор результатов",
+   453→  yourAnswer: "Ваш ответ: ",
+   454→  noAnswer: "— (нет ответа)",
+   455→  correctAnswer: "Правильный ответ: ",
+   456→  backToSection: "Вернуться к разделу",
+   457→  questionN: "Вопрос {a} / {b}",
+   458→  upToPoints: "до {n} баллов",
+   459→  answeredCount: "{a} / {b} отвечено",
+   460→  finish: "Завершить",
+   461→  nextQ: "Далее",
+   462→  prevQ: "Назад",
+   463→
+   464→  lessonNotFound: "Урок не найден",
+   465→  orgatuvBadge: "Урок",
+   466→  nextLesson: "Следующий урок",
+   467→  go: "Перейти →",
+   468→
+   469→  ballarTitle: "Баллы",
+   470→  ballarSub: "Рейтинг людей по баллам за тесты",
+   471→  ballarHow:
+   472→    "Как начисляются баллы? Решайте тесты в разделах — за каждый правильный ответ даётся 10 баллов. Ваши баллы в этом списке обновляются мгновенно.",
+   473→
+   474→  profileUpdated: "Профиль обновлён",
+   475→  saveError: "Ошибка при сохранении",
+   476→  nameLengthDesc: "Имя должно быть от 2 до 40 символов.",
+   477→  chooseImage: "Выберите изображение",
+   478→  chooseImageDesc: "Для фото профиля загрузите JPG, PNG или WebP.",
+   479→  imageTooBig: "Изображение слишком большое",
+   480→  imageTooBigDesc: "Размер изображения — не больше 5 МБ.",
+   481→  avatarUpdated: "Фото профиля обновлено",
+   482→  avatarFailed: "Фото не загружено",
+   483→  changeAvatarAria: "Изменить фото профиля",
+   484→  uploadPhotoTitle: "Загрузить фото",
+   485→  chooseAvatarAria: "Выбрать фото профиля",
+   486→  myVideosInfo: "{n} загруженных видео · ваш профиль",
+   487→  pointsWithValue: "{n} баллов",
+   488→  renameLabel: "Изменить имя",
+   489→  myVideos: "Мои видео",
+   490→  emptyMyVideos:
+   491→    "Вы ещё не загружали видео. Нажмите кнопку «+» внизу или в левом меню.",
+   492→  deviceProfile: "Профиль устройства",
+   493→  deviceProfileDesc:
+   494→    "Randap не требует регистрации: ваш профиль привязан к ключу устройства этого браузера ({key}). Если нажать кнопку ниже, профиль на этом устройстве и лайки/подписки, сделанные с него, будут сброшены.",
+   495→  resetConfirm: "Да, сбросить профиль",
+   496→  resetDevice: "Сбросить профиль устройства",
+   497→
+   498→  channelStats: "{subs} подписчиков · {v} видео · {p} баллов",
+   499→  subscribed: "Вы подписаны",
+   500→  subscribe: "Подписаться",
+   501→  emptyChannel: "На этом канале пока нет видео.",
+   502→
+   503→  videoNotFound: "Видео не найдено",
+   504→  browserNoVideo: "Ваш браузер не поддерживает тег video.",
+   505→  commentsOffSuffix: " · Комментарии отключены",
+   506→  subsCount: "{n} подписчиков",
+   507→  soon: "Скоро",
+   508→  commentsHeading: "Комментарии",
+   509→  commentPlaceholder: "Напишите комментарий...",
+   510→  commentAria: "Написать комментарий",
+   511→  sendCommentAria: "Отправить комментарий",
+   512→  commentsOffNote:
+   513→    "Комментарии отключены — автор выключил их для этого видео.",
+   514→  commentAdded: "Комментарий добавлен",
+   515→  subToastOk: "Вы подписались на канал {name}",
+   516→  subToastCancel: "Подписка отменена",
+   517→
+   518→  shortsEmpty: "Пока нет Shorts",
+   519→  shortsEmptyDesc:
+   520→    "Нажмите кнопку «+» и загрузите видео до 1:20 (80 секунд) — оно появится в разделе Shorts.",
+   521→  unmute: "Включить звук",
+   522→  mute: "Выключить звук",
+   523→  likeAria: "Поставить лайк",
+   524→  commentsAria: "Комментарии",
+   525→  writeComment: "Написать комментарий",
+   526→  yourThoughts: "Ваше мнение...",
+   527→  shortsCommentAria: "Комментарий к Shorts",
+   528→  sendAria: "Отправить",
+   529→  seeAllComments: "Все комментарии в видео",
+   530→  likeFail: "Лайк не отправился",
+   531→  commentFail: "Комментарий не отправился",
+   532→
+   533→  uploadStep1: "1. Видеофайл",
+   534→  pickVideo: "Нажмите, чтобы выбрать видео",
+   535→  pickVideoHint: "MP4, WebM, MOV · максимум 300 МБ",
+   536→  pickVideoAria: "Выбрать видеофайл",
+   537→  readingDuration: "читается длительность...",
+   538→  removeFileAria: "Удалить файл",
+   539→  kindVideoDesc: "Любая длительность",
+   540→  kindShortsDesc: "Максимум 1:20 (80 секунд)",
+   541→  shortTooLongNote:
+   542→    "Это видео {n} секунд — слишком длинно для Shorts (макс. 80 секунд). Загрузите его как обычное «Видео».",
+   543→  uploadStep2: "2. Информация",
+   544→  titleLabel: "Название видео *",
+   545→  titlePlaceholder: "Например: ежедневный влог с рынка Ташкента",
+   546→  descLabel: "Описание",
+   547→  descPlaceholder: "Коротко опишите видео...",
+   548→  thumbLabel: "Превью (изображение)",
+   549→  thumbReplace: "Заменить",
+   550→  thumbPick: "Выбрать изображение",
+   551→  thumbAuto: "авто",
+   552→  thumbAutoHint:
+   553→    "Если изображение не выбрано, оно берётся из видео автоматически",
+   554→  allowComments: "Разрешить комментарии",
+   555→  allowCommentsDesc:
+   556→    "Если отмечено — люди могут комментировать видео. Если нет — комментарии отключены.",
+   557→  duplicateFound: "Обнаружен дубликат",
+   558→  duplicateToastDesc: "Это видео уже есть в разделе «Видео».",
+   559→  duplicateDefault: "Это видео уже загружено.",
+   560→  seeExisting: "Смотреть существующее видео",
+   561→  uploadShortsBtn: "Загрузить Shorts",
+   562→  toastVideoPick: "Выберите видеофайл",
+   563→  toastVideoPickDesc:
+   564→    "Принимаются форматы MP4, WebM и другие видеоформаты.",
+   565→  toastFileReadFail: "Файл не удалось прочитать",
+   566→  toastFileReadFailDesc:
+   567→    "Этот файл не открылся как видео. Попробуйте другой файл.",
+   568→  toastThumbPickDesc:
+   569→    "Для превью нужно изображение (JPG, PNG, WebP).",
+   570→  toastProfilePreparing: "Профиль готовится",
+   571→  toastProfilePreparingDesc: "Подождите секунду и нажмите снова.",
+   572→  toastNoFile: "Видеофайл не выбран",
+   573→  toastTitleShort: "Слишком короткое название",
+   574→  toastTitleShortDesc:
+   575→    "Введите название видео (минимум 2 символа).",
+   576→  toastShortTooLong: "Shorts слишком длинное",
+   577→  toastShortTooLongDesc:
+   578→    "Максимум 1:20 (80 секунд) для Shorts. Это видео {n} секунд — загрузите его как обычное видео.",
+   579→  toastUploaded: "Видео загружено",
+   580→  toastUploadedShorts: "Появилось в разделе Shorts.",
+   581→  toastUploadedVideos: "Появилось в разделе «Видео».",
+   582→  toastUploadFail: "Ошибка загрузки",
+   583→  toastUploadFailed: "Загрузка не удалась",
+   584→  toastUploadFailedDesc:
+   585→    "Проверьте соединение и попробуйте ещё раз.",
+   586→
+   587→  newChatAria: "Новые сообщения чата",
+   588→
+   589→  videoCountLine: "{n} видео · {p} баллов",
+   590→};
+   591→
+   592→const uz: Dict = {
+   593→  back: "Orqaga",
+   594→  cancel: "Bekor qilish",
+   595→  close: "Yopish",
+   596→  save: "Saqlash",
+   597→  saving: "Saqlanmoqda...",
+   598→  loading: "Yuklanmoqda...",
+   599→  error: "Xatolik",
+   600→  retry: "Qayta urinib ko'ring",
+   601→  retryDesc: "Qayta urinib ko'ring.",
+   602→  you: "SIZ",
+   603→  send: "Yuborish",
+   604→  search: "Qidiruv",
+   605→  searchButton: "Qidirish",
+   606→  searchPlaceholder: "Videolar va odamlarni qidirish...",
+   607→  searching: "Qidirilmoqda...",
+   608→  searchAria: "Qidiruv",
+   609→  searchTitle: "Qidiruv: «{q}»",
+   610→  profiles: "Profillar",
+   611→  videosHeading: "Videolar",
+   612→  profileBtn: "Profili",
+   613→  nothingFound: "Hech narsa topilmadi",
+   614→  nothingFoundHint: "Hech narsa topilmadi — boshqa so'z bilan urinib ko'ring.",
+   615→  nothingFoundDesc:
+   616→    "«{q}» bo'yicha video yoki profil topilmadi. Boshqa so'z bilan urinib ko'ring.",
+   617→  empty: "Bo'sh",
+   618→  minutes: "daqiqa",
+   619→  pointUnit: "ball",
+   620→  videoUnit: "video",
+   621→  shortsUnit: "shorts",
+   622→  subscriberUnit: "obunachi",
+   623→  viewsUnit: "ko'rildi",
+   624→  fanUnit: "fan",
+   625→  testUnit: "test",
+   626→  orgatuvUnit: "o'rgatuv",
+   627→  lessonUnit: "dars",
+   628→  questionUnit: "savol",
+   629→
+   630→  navPortal: "Asosiy menyu",
+   631→  navHome: "Videolar",
+   632→  navShorts: "Shorts",
+   633→  navVideos: "Videos",
+   634→  navSections: "Testlar",
+   635→  navOrganish: "O'rganish",
+   636→  navChat: "Chat",
+   637→  navBallar: "Ballar",
+   638→  navProfile: "Profil",
+   639→  navPortalMobile: "Asosiy",
+   640→  subs: "Obunalar",
+   641→  subsSectionAria: "Obunalar bo'limi",
+   642→  subsGoAria: "Obunalar bo'limiga o'tish",
+   643→  goChannelTitle: "{name} kanaliga o'tish",
+   644→  uploadVideo: "Video yuklash",
+   645→  sidebarTagline: "Videolar, Shorts va Testlar platformasi",
+   646→  settings: "Sozlamalar",
+   647→  language: "Til",
+   648→  settingsAria: "Sozlamalar",
+   649→  languageAppliesAll:
+   650→    "Tanlangan til Randapning barcha bo'limlariga tegishli bo'ladi.",
+   651→
+   652→  logoAria: "Randap — asosiy menyuga o'tish",
+   653→  logoTitle: "Randap — asosiy menyu",
+   654→  profileGoAria: "Profilga o'tish",
+   655→
+   656→  portalWelcome: "Randap platformasiga xush kelibsiz",
+   657→  portalChoose: "Qaysi bo'limdan boshlaysiz?",
+   658→  enter: "Kirish",
+   659→  enterVideoAria: "Randap Video bo'limiga kirish",
+   660→  enterTestsAria: "Testlar bo'limiga kirish",
+   661→  enterOrganishAria: "O'rganish bo'limiga kirish",
+   662→  enterChatAria: "Chat bo'limiga kirish",
+   663→  portalVideoSub: "YouTubega o'xshagan",
+   664→  portalVideoDesc:
+   665→    "Videolar va Shorts ko'rish — layk, komment, obuna bo'lish bilan.",
+   666→  portalTestsSub: "Hamma fandan, alohida bo'lim",
+   667→  portalTestsA: "Barcha fanlardan testlar va o'rgatuvlar. Ballari ",
+   668→  portalTestsBold: "alohida",
+   669→  portalTestsB: " hisoblanadi.",
+   670→  portalOrganishSub: "Uzun maqolalar bo'limi",
+   671→  portalOrganishDesc:
+   672→    "Ingliz tili, xotira, matematika va tarix haqida uzun ma'lumotlar. Pastida din va hayot burchlari yozilgan.",
+   673→  fourTopics: "4 mavzu",
+   674→  dinBadge: "Din va hayot burchlari",
+   675→  portalChatSub: "Telegramga o'xshagan",
+   676→  portalChatDesc:
+   677→    "Odamlar bilan yozishing, stiker va rasm tashishing mumkin. Random chat ham bor.",
+   678→  randomChatBadge: "Random chat",
+   679→  stickersBadge: "Stikerlar",
+   680→  photoBadge: "Rasm",
+   681→  ballarBarTitle: "Ballar — alohida reyting",
+   682→  ballarBarDesc:
+   683→    "Test yechib ball to'plang, boshqalar bilan raqobat qiling",
+   684→
+   685→  homeNow: "Hozirgi videolar",
+   686→  all: "Barchasi",
+   687→  emptyHome:
+   688→    "Hozircha video yo'q. Chap menyudagi + tugmasi bilan birinchisini yuklang.",
+   689→  videosAllTitle: "Videos — barcha videolar",
+   690→  emptyVideos:
+   691→    "Videos bo'limi hozircha bo'sh. + tugmasi bilan video yuklang.",
+   692→  subsFeedTitle: "Obuna bo'lgan kanallar videolari",
+   693→  emptySubs:
+   694→    "Hozircha obuna yo'q. Video ko'rib, kanalga obuna bo'ling — bu yerda yangi videolari chiqadi.",
+   695→
+   696→  sectionsTitle: "Testlar — hamma fanlar",
+   697→  sectionsSub: "Fan tanlang, testlarni yechib ball to'plang",
+   698→  testsHeading: "Testlar",
+   699→  orgatuvsHeading: "O'rgatuvlar (darslar)",
+   700→  savolCount: "{n} savol",
+   701→  best: "Eng yaxshi: {a}/{b}",
+   702→  solveAgain: "Yana yechish",
+   703→  startQuiz: "Testni boshlash",
+   704→  testsCountLine: "{q} test · {l} dars",
+   705→
+   706→  organishHeadSub:
+   707→    "Mavzulalarda bilim boyligi — uzun maqolalar bilan chuqur o'rganing",
+   708→  readMin: "{n} daqiqa o'qish",
+   709→  readMinShort: "{n} daqiqa",
+   710→  articleNotFound: "Maqola topilmadi.",
+   711→  backToOrganish: "O'rganishga qaytish",
+   712→  openArticleAria: "{title} maqolasini ochish",
+   713→  dinSectionAria: "Din va hayot burchlari",
+   714→
+   715→  quizNotFound: "Test topilmadi",
+   716→  unansweredTitle: "{n} ta savol javobsiz qoldi",
+   717→  unansweredDesc: "Javobsiz savollar noto'g'ri hisoblanadi.",
+   718→  submitFailDesc:
+   719→    "Natijani yuborib bo'lmadi. Qayta urinib ko'ring.",
+   720→  resultGreat: "Ajoyib natija! Bilimingiz qattiq ekan.",
+   721→  resultGood: "Yaxshi! Yana bir marta yechsangiz yuqoriga chiqasiz.",
+   722→  resultBad: "Avval darslarni o'rganing va qayta yechib ko'ring.",
+   723→  pointsAdded: "+{n} ball qo'shildi",
+   724→  totalParen: "(jami: {n} ball)",
+   725→  resultReviewAria: "Natijalar ko'rigi",
+   726→  yourAnswer: "Sizning javobingiz: ",
+   727→  noAnswer: "— (javob yo'q)",
+   728→  correctAnswer: "To'g'ri javob: ",
+   729→  backToSection: "Bo'limga qaytish",
+   730→  questionN: "Savol {a} / {b}",
+   731→  upToPoints: "{n} ballgacha",
+   732→  answeredCount: "{a} / {b} javob berildi",
+   733→  finish: "Yakunlash",
+   734→  nextQ: "Keyingi",
+   735→  prevQ: "Oldingi",
+   736→
+   737→  lessonNotFound: "Dars topilmadi",
+   738→  orgatuvBadge: "O'rgatuv",
+   739→  nextLesson: "Keyingi dars",
+   740→  go: "O'tish →",
+   741→
+   742→  ballarTitle: "Ballar",
+   743→  ballarSub: "Odamlarning testlardan olgan ballari reytingi",
+   744→  ballarHow:
+   745→    "Ball qanday to'planadi? Bo'limlardagi testlarni yeching — har bir to'g'ri javob uchun 10 ball beriladi. Ballaringiz shu ro'yxatda darhol yangilanadi.",
+   746→
+   747→  profileUpdated: "Profil yangilandi",
+   748→  saveError: "Saqlashda xatolik",
+   749→  nameLengthDesc: "Ism 2-40 belgi orasida bo'lishi kerak.",
+   750→  chooseImage: "Rasm tanlang",
+   751→  chooseImageDesc: "Profil rasmi sifatida JPG, PNG yoki WebP yuklang.",
+   752→  imageTooBig: "Rasm juda katta",
+   753→  imageTooBigDesc: "Rasm hajmi 5 MB dan oshmasligi kerak.",
+   754→  avatarUpdated: "Profil rasmi yangilandi",
+   755→  avatarFailed: "Rasm yuklanmadi",
+   756→  changeAvatarAria: "Profil rasmini o'zgartirish",
+   757→  uploadPhotoTitle: "Rasm yuklash",
+   758→  chooseAvatarAria: "Profil rasmi tanlash",
+   759→  myVideosInfo: "{n} yuklangan video · sizning profilingiz",
+   760→  pointsWithValue: "{n} ball",
+   761→  renameLabel: "Ismni o'zgartirish",
+   762→  myVideos: "Mening videolarim",
+   763→  emptyMyVideos:
+   764→    "Siz hozircha video yuklamagansiz. Pastdagi yoki chap menyudagi + tugmasini bosing.",
+   765→  deviceProfile: "Qurilma profili",
+   766→  deviceProfileDesc:
+   767→    "Randap ro'yxatdan o'tishni talab qilmaydi: profilingiz shu brauzerdagi qurilma kalitiga bog'langan ({key}). Pastdagi tugmani bossangiz, bu qurilmadagi profil va shu qurilma qo'ygan layklar/obunalar tiklanadi.",
+   768→  resetConfirm: "Ha, profilni tiklash",
+   769→  resetDevice: "Qurilma profilini tiklash",
+   770→
+   771→  channelStats: "{subs} obunachi · {v} video · {p} ball",
+   772→  subscribed: "Obuna bo'lingan",
+   773→  subscribe: "Obuna bo'lish",
+   774→  emptyChannel: "Bu kanalda hozircha video yo'q.",
+   775→
+   776→  videoNotFound: "Video topilmadi",
+   777→  browserNoVideo: "Brauzeringiz video tag'ni qo'llab-quvvatlamaydi.",
+   778→  commentsOffSuffix: " · Chat o'chirilgan",
+   779→  subsCount: "{n} obunachi",
+   780→  soon: "Yaqinda qo'shiladi",
+   781→  commentsHeading: "Izohlar",
+   782→  commentPlaceholder: "Izoh yozing...",
+   783→  commentAria: "Izoh yozish",
+   784→  sendCommentAria: "Izohni yuborish",
+   785→  commentsOffNote:
+   786→    "Bu videoda chat o'chirilgan — muallif izohlarni yoqib qo'ymagan.",
+   787→  commentAdded: "Izohingiz qo'shildi",
+   788→  subToastOk: "{name} kanaliga obuna bo'ldingiz",
+   789→  subToastCancel: "Obuna bekor qilindi",
+   790→
+   791→  shortsEmpty: "Shorts hozircha yo'q",
+   792→  shortsEmptyDesc:
+   793→    "«+» tugmasini bosib, 1:20 (80 soniya) gacha bo'lgan video yuklang — u Shorts bo'limida paydo bo'ladi.",
+   794→  unmute: "Ovozni yoqish",
+   795→  mute: "Ovozni o'chirish",
+   796→  likeAria: "Layk bosish",
+   797→  commentsAria: "Izohlar",
+   798→  writeComment: "Izoh yozish",
+   799→  yourThoughts: "Fikringiz...",
+   800→  shortsCommentAria: "Shorts izohi",
+   801→  sendAria: "Yuborish",
+   802→  seeAllComments: "Barcha izohlarni videoda ko'rish",
+   803→  likeFail: "Layk yuborilmadi",
+   804→  commentFail: "Izoh yuborilmadi",
+   805→
+   806→  uploadStep1: "1. Video fayl",
+   807→  pickVideo: "Video tanlash uchun bosing",
+   808→  pickVideoHint: "MP4, WebM, MOV · maksimal 300 MB",
+   809→  pickVideoAria: "Video fayl tanlash",
+   810→  readingDuration: "davomiylik o'qilmoqda...",
+   811→  removeFileAria: "Faylni olib tashlash",
+   812→  kindVideoDesc: "Davomiyligi cheksiz",
+   813→  kindShortsDesc: "Maksimal 1:20 (80 soniya)",
+   814→  shortTooLongNote:
+   815→    "Bu video {n} soniya — Shorts uchun juda uzun (max 80 soniya). Oddiy «Video» sifatida yuklang.",
+   816→  uploadStep2: "2. Ma'lumotlar",
+   817→  titleLabel: "Video nomi *",
+   818→  titlePlaceholder: "Masalan: Toshkent bozoridan kunlik vlog",
+   819→  descLabel: "Tavsif",
+   820→  descPlaceholder: "Video haqida qisqacha yozing...",
+   821→  thumbLabel: "Thumbnail (rasm)",
+   822→  thumbReplace: "Almashtirish",
+   823→  thumbPick: "Rasm tanlash",
+   824→  thumbAuto: "avtomatik",
+   825→  thumbAutoHint: "Agar rasm tanlanmasa, videodan avtomatik oladi",
+   826→  allowComments: "Chat / izohlarga ruxsat berish",
+   827→  allowCommentsDesc:
+   828→    "Belgilansa odamlar videoga izoh qoldiradi. Belgilanmasa chat o'chiriladi.",
+   829→  duplicateFound: "Dublikat aniqlandi",
+   830→  duplicateToastDesc: "Bu video allaqachon Videos bo'limida bor.",
+   831→  duplicateDefault: "Bu video allaqachon yuklangan.",
+   832→  seeExisting: "Mavjud videoni ko'rish",
+   833→  uploadShortsBtn: "Shorts yuklash",
+   834→  toastVideoPick: "Video fayl tanlang",
+   835→  toastVideoPickDesc:
+   836→    "MP4, WebM va shunga o'xshash video formatlar qabul qilinadi.",
+   837→  toastFileReadFail: "Fayl o'qilmadi",
+   838→  toastFileReadFailDesc:
+   839→    "Bu fayl video sifatida ochilmadi. Boshqa fayl tanlab ko'ring.",
+   840→  toastThumbPickDesc:
+   841→    "Thumbnail sifatida rasm fayli kerak (JPG, PNG, WebP).",
+   842→  toastProfilePreparing: "Profil tayyorlanmoqda",
+   843→  toastProfilePreparingDesc: "Bir soniya kutib qayta bosing.",
+   844→  toastNoFile: "Video fayl tanlanmagan",
+   845→  toastTitleShort: "Nom juda qisqa",
+   846→  toastTitleShortDesc: "Video nomini kiriting (kamida 2 belgi).",
+   847→  toastShortTooLong: "Shorts juda uzun",
+   848→  toastShortTooLongDesc:
+   849→    "Shorts uchun maksimal 1:20 (80 soniya). Bu video {n} soniya — uni oddiy Video sifatida yuklang.",
+   850→  toastUploaded: "Video yuklandi",
+   851→  toastUploadedShorts: "Shorts bo'limida paydo bo'ldi.",
+   852→  toastUploadedVideos: "Videos bo'limida paydo bo'ldi.",
+   853→  toastUploadFail: "Yuklashda xatolik",
+   854→  toastUploadFailed: "Yuklash muvaffaqiyatsiz",
+   855→  toastUploadFailedDesc:
+   856→    "Internet aloqasini tekshirib qayta urinib ko'ring.",
+   857→
+   858→  newChatAria: "Yangi chat xabarlar",
+   859→
+   860→  videoCountLine: "{n} video · {p} ball",
+   861→};
+   862→
+   863→export const I18N: Record<Lang, Dict> = { en, ru, uz };
+   864→
+   865→export type TFunc = (
+   866→  key: TKey,
+   867→  params?: Record<string, string | number>
+   868→) => string;
+   869→
+   870→export function makeT(lang: Lang): TFunc {
+   871→  return (key, params) => {
+   872→    const dict = I18N[lang] ?? I18N.en;
+   873→    let value = dict[key] ?? I18N.en[key] ?? String(key);
+   874→    if (params) {
+   875→      for (const [k, v] of Object.entries(params)) {
+   876→        value = value.split(`{${k}}`).join(String(v));
+   877→      }
+   878→    }
+   879→    return value;
+   880→  };
+   881→}
+   882→
+   883→/** formatCount holatlari: 1 234 → "1.2 K" / "1.2 ming" / "1.2 тыс." */
+   884→export function compactCount(n: number, lang: Lang): string {
+   885→  const kUnit = lang === "ru" ? "тыс." : lang === "uz" ? "ming" : "K";
+   886→  const mUnit = lang === "ru" ? "млн" : lang === "uz" ? "mln" : "M";
+   887→  if (n >= 1_000_000)
+   888→    return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")} ${mUnit}`;
+   889→  if (n >= 1_000)
+   890→    return `${(n / 1_000).toFixed(1).replace(/\.0$/, "")} ${kUnit}`;
+   891→  return String(n);
+   892→}
+   893→
+   894→/** "3 daqiqa oldin" / "3 minutes ago" / "3 мин. назад" */
+   895→export function timeAgo(iso: string, lang: Lang): string {
+   896→  const diff = Date.now() - new Date(iso).getTime();
+   897→  const min = Math.floor(diff / 60_000);
+   898→  if (lang === "en") {
+   899→    if (min < 1) return "just now";
+   900→    if (min < 60) return `${min} min ago`;
+   901→    const h = Math.floor(min / 60);
+   902→    if (h < 24) return `${h} h ago`;
+   903→    const d = Math.floor(h / 24);
+   904→    if (d < 30) return `${d} d ago`;
+   905→    const mo = Math.floor(d / 30);
+   906→    if (mo < 12) return `${mo} mo ago`;
+   907→    return `${Math.floor(mo / 12)} y ago`;
+   908→  }
+   909→  if (lang === "ru") {
+   910→    if (min < 1) return "только что";
+   911→    if (min < 60) return `${min} мин. назад`;
+   912→    const h = Math.floor(min / 60);
+   913→    if (h < 24) return `${h} ч. назад`;
+   914→    const d = Math.floor(h / 24);
+   915→    if (d < 30) return `${d} дн. назад`;
+   916→    const mo = Math.floor(d / 30);
+   917→    if (mo < 12) return `${mo} мес. назад`;
+   918→    return `${Math.floor(mo / 12)} г. назад`;
+   919→  }
+   920→  if (min < 1) return "hozir";
+   921→  if (min < 60) return `${min} daqiqa oldin`;
+   922→  const hours = Math.floor(min / 60);
+   923→  if (hours < 24) return `${hours} soat oldin`;
+   924→  const days = Math.floor(hours / 24);
+   925→  if (days < 30) return `${days} kun oldin`;
+   926→  const months = Math.floor(days / 30);
+   927→  if (months < 12) return `${months} oy oldin`;
+   928→  return `${Math.floor(months / 12)} yil oldin`;
+   929→}
+   930→

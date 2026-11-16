@@ -311,6 +311,34 @@ const en = {
 
   // Search view
   videoCountLine: "{n} videos · {p} points",
+
+  // Login gate (site entry)
+  loginBrandTag: "Videos, Shorts, Tests, Learning and Chat — all in one place",
+  loginWelcome: "Welcome to Randap",
+  loginSub: "To enter the site, write your name and Gmail — both are required.",
+  loginNameLabel: "Name",
+  loginNamePlaceholder: "e.g. Aziz, Dilnoza, Jasur...",
+  loginNameHint: "You can use any name — even one someone else has already used.",
+  loginGmailLabel: "Gmail",
+  loginGmailPlaceholder: "username@gmail.com",
+  loginGmailHint: "Only a Gmail address opens this site.",
+  loginErrNameReq: "Please write your name first.",
+  loginErrNameShort: "The name must be 2–40 characters.",
+  loginErrGmailReq: "Please write your Gmail first.",
+  loginErrGmailFormat: "This is not a Gmail address (example: name@gmail.com).",
+  loginGoogleBtn: "Sign in with Google",
+  loginGoogleTitle: "Sign in with Google",
+  loginGoogleSub: "to continue to Randap",
+  loginGoogleContinue: "Continue",
+  loginGoogleUseOther: "Use another account",
+  loginGoogleChecking: "Checking the account...",
+  loginGoogleErrNotFound:
+    "No Google account found for this Gmail. Entry is not allowed.",
+  loginGoogleDemo: "Demo environment — simulated Google sign-in",
+  loginSuccess: "You have successfully logged in!",
+  loginSuccessSub: "Signed in as {name} ({gmail})",
+  loginEntering: "Opening the site...",
+  logout: "Log out",
 } as const;
 
 export type TKey = keyof typeof en;
@@ -587,6 +615,34 @@ const ru: Dict = {
   newChatAria: "Новые сообщения чата",
 
   videoCountLine: "{n} видео · {p} баллов",
+
+  // Вход на сайт
+  loginBrandTag: "Видео, Shorts, Тесты, Обучение и Чат — всё в одном месте",
+  loginWelcome: "Добро пожаловать в Randap",
+  loginSub: "Чтобы войти на сайт, напишите имя и Gmail — обязательны оба поля.",
+  loginNameLabel: "Имя",
+  loginNamePlaceholder: "например Азиз, Дилноза, Жасур...",
+  loginNameHint: "Можно использовать любое имя — даже то, что уже взял кто-то другой.",
+  loginGmailLabel: "Gmail",
+  loginGmailPlaceholder: "username@gmail.com",
+  loginGmailHint: "Сайт открывается только с Gmail-адресом.",
+  loginErrNameReq: "Сначала напишите имя.",
+  loginErrNameShort: "Имя должно быть от 2 до 40 символов.",
+  loginErrGmailReq: "Сначала напишите Gmail.",
+  loginErrGmailFormat: "Это не Gmail-адрес (пример: name@gmail.com).",
+  loginGoogleBtn: "Войти через Google",
+  loginGoogleTitle: "Вход через Google",
+  loginGoogleSub: "чтобы продолжить в Randap",
+  loginGoogleContinue: "Продолжить",
+  loginGoogleUseOther: "Использовать другой аккаунт",
+  loginGoogleChecking: "Проверяем аккаунт...",
+  loginGoogleErrNotFound:
+    "Аккаунт Google с таким Gmail не найден. Вход запрещён.",
+  loginGoogleDemo: "Демо-режим — имитация входа через Google",
+  loginSuccess: "Вы успешно вошли!",
+  loginSuccessSub: "Вход выполнен как {name} ({gmail})",
+  loginEntering: "Открываем сайт...",
+  logout: "Выйти",
 };
 
 const uz: Dict = {
@@ -858,6 +914,34 @@ const uz: Dict = {
   newChatAria: "Yangi chat xabarlar",
 
   videoCountLine: "{n} video · {p} ball",
+
+  // Login gate (sayt kirishi)
+  loginBrandTag: "Videolar, Shorts, Testlar, O'rganish va Chat — hammasi bir joyda",
+  loginWelcome: "Randap platformasiga xush kelibsiz",
+  loginSub: "Saytga kirish uchun ism va Gmail yozing — ikkalasi ham shart.",
+  loginNameLabel: "Ism",
+  loginNamePlaceholder: "masalan Aziz, Dilnoza, Jasur...",
+  loginNameHint: "Ismga boshqalar qo'ygan ismni ham qo'yish mumkin.",
+  loginGmailLabel: "Gmail",
+  loginGmailPlaceholder: "username@gmail.com",
+  loginGmailHint: "Saytni faqat Gmail manzil bilan kirish mumkin.",
+  loginErrNameReq: "Avval ismni yozing.",
+  loginErrNameShort: "Ism 2-40 belgi orasida bo'lishi kerak.",
+  loginErrGmailReq: "Avval Gmailni yozing.",
+  loginErrGmailFormat: "Bu Gmail manzil emas (namuna: name@gmail.com).",
+  loginGoogleBtn: "Google orqali kirish",
+  loginGoogleTitle: "Google orqali kirish",
+  loginGoogleSub: "Randap'ga davom etish uchun",
+  loginGoogleContinue: "Davom etish",
+  loginGoogleUseOther: "Boshqa hisobdan foydalanish",
+  loginGoogleChecking: "Hisob tekshirilmoqda...",
+  loginGoogleErrNotFound:
+    "Bu Gmail bilan Google hisobi topilmadi. Saytga kirish mumkin emas.",
+  loginGoogleDemo: "Demo muhit — Google bilan kirish imitatsiyasi",
+  loginSuccess: "Muvaffaqiyatli kirdingiz!",
+  loginSuccessSub: "{name} ({gmail}) sifatida kirildi",
+  loginEntering: "Sayt ochilmoqda...",
+  logout: "Chiqish",
 };
 
 export const I18N: Record<Lang, Dict> = { en, ru, uz };

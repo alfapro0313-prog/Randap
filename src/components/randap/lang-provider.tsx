@@ -53,6 +53,11 @@ export function LangProvider({ children }: { children: ReactNode }) {
 
   const t = useMemo(() => makeT(lang), [lang]);
 
+  // <html lang> ni tanlangan til bilan sinxronlash
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+
   const value = useMemo(
     () => ({ lang, setLang, t }),
     [lang, setLang, t]

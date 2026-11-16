@@ -5,6 +5,45 @@ import type { Me } from "./randap-types";
 import { compactCount, timeAgo as timeAgoRelative } from "./randap-i18n";
 
 const DEVICE_KEY_STORAGE = "randap_device_key";
+/** Saytga kirish sessiyasi (login gate) — ism + Gmail */
+export const SESSION_STORAGE = "randap_session";
+
+export type LoginSession = {
+  name: string;
+  gmail: string;
+  viaGoogle: boolean;
+  deviceKey?: string;
+  at?: number;
+};
+
+export function readSession(): LoginSession | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(SESSION_STORAGE);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as LoginSession;
+    if (!parsed || !parsed.name || !parsed.gmail) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+export function writeSession(session: LoginSession) {
+  try {
+    window.localStorage.setItem(SESSION_STORAGE, JSON.stringify(session));
+  } catch {
+    // ignore
+  }
+}
+
+export function clearSession() {
+  try {
+    window.localStorage.removeItem(SESSION_STORAGE);
+  } catch {
+    // ignore
+  }
+}
 
 function randomId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {

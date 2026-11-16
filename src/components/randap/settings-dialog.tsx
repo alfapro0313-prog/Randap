@@ -1,8 +1,9 @@
 "use client";
 
-import { Check, Settings, X } from "lucide-react";
-import { useState } from "react";
+import { Check, LogOut, Settings, X } from "lucide-react";
+import { useCallback, useState } from "react";
 import { LANGS } from "@/lib/randap-i18n";
+import { clearSession, getDeviceKey } from "@/lib/randap-client";
 import { useLang } from "./lang-provider";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +24,21 @@ export function SettingsGear({
   const { t } = useLang();
   const [open, setOpen] = useState(false);
   const { lang, setLang } = useLang();
+
+  const handleLogout = useCallback(() => {
+    try {
+      const deviceKey = getDeviceKey();
+      void fetch("/api/auth", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceKey }),
+      }).catch(() => undefined);
+    } catch {
+      // ignore
+    }
+    clearSession();
+    window.location.reload();
+  }, []);
 
   return (
     <>
@@ -88,6 +104,19 @@ export function SettingsGear({
               </div>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                 {t("languageAppliesAll")}
+              </p>
+            </div>
+
+            <div className="mt-5 border-t border-border pt-4">
+              <button
+                onClick={handleLogout}
+                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 text-sm font-semibold text-red-500 transition-colors hover:bg-red-500/20"
+              >
+                <LogOut className="size-4" aria-hidden="true" />
+                {t("logout")}
+              </button>
+              <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
+                {t("loginGmailHint")}
               </p>
             </div>
           </div>

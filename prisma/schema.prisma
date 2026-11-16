@@ -123,6 +123,18 @@ model QuizAttempt {
   createdAt    DateTime @default(now())
 }
 
+/* ---------- Login gate (saytga kirish: ism + Gmail) ---------- */
+
+model AuthAccount {
+  id        String   @id @default(cuid())
+  deviceKey String  @unique
+  name      String
+  gmail     String
+  viaGoogle Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 /* ---------- Chat (Telegram-ga o'xshagan) ---------- */
 
 model ChatProfile {

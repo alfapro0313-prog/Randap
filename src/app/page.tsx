@@ -1,10 +1,10 @@
 import { LangProvider } from "@/components/randap/lang-provider";
-import { RandapApp } from "@/components/randap/randap-app";
+import { RandapGate } from "@/components/randap/randap-gate";
 
 export default function Home() {
   return (
     <LangProvider>
-      <RandapApp />
+      <RandapGate />
     </LangProvider>
   );
 }
