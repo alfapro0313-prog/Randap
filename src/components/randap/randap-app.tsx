@@ -22,6 +22,7 @@ import { AdminView } from "./admin";
 import { ChatApp } from "./chat/chat-app";
 import { ChatSms } from "./chat-sms";
 import { readSession, useDeviceMe } from "@/lib/randap-client";
+import { AdSlot } from "./ad-slot";
 import { ADMIN_GMAIL } from "@/lib/randap-admin";
 import { useLang } from "./lang-provider";
 import type {
@@ -416,6 +417,7 @@ export function RandapApp() {
                   onOpenChannel={openChannel}
                   emptyText={t("emptyVideos")}
                 />
+                <AdSlot className="mx-auto w-full max-w-sm" />
               </div>
             ) : null}
 

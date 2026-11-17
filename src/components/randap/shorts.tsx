@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Fragment } from "react";
 import {
   ArrowLeft,
   Loader2,
@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { AvatarBubble } from "./avatar";
+import { AdSlot } from "./ad-slot";
 import { useLang } from "./lang-provider";
 import { formatCount } from "@/lib/randap-client";
 import type { VideoItem } from "@/lib/randap-types";
@@ -306,16 +307,20 @@ export function ShortsView({
         className="flex h-[calc(100vh-9rem)] snap-y snap-mandatory flex-col gap-4 overflow-y-auto scrollbar-thin"
         aria-label="Shorts lenta"
       >
-        {shorts.map((short) => (
-          <ShortItem
-            key={short.id}
-            short={short}
-            deviceKey={deviceKey}
-            muted={muted}
-            onToggleMute={() => setMuted((m) => !m)}
-            onOpenChannel={onOpenChannel}
-            onOpenWatch={onOpenWatch}
-          />
+        {shorts.map((short, i) => (
+          <Fragment key={short.id}>
+            <ShortItem
+              short={short}
+              deviceKey={deviceKey}
+              muted={muted}
+              onToggleMute={() => setMuted((m) => !m)}
+              onOpenChannel={onOpenChannel}
+              onOpenWatch={onOpenWatch}
+            />
+            {(i + 1) % 5 === 0 ? (
+              <AdSlot className="mx-auto w-full max-w-sm shrink-0" />
+            ) : null}
+          </Fragment>
         ))}
       </div>
     </div>

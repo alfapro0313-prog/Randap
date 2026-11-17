@@ -129,6 +129,7 @@ const en = {
   emptyHome:
     "No videos yet. Be the first — use the + button in the left menu.",
   videosAllTitle: "Videos — all videos",
+  adLabel: "Ad",
   emptyVideos:
     "The Videos section is empty. Upload a video with the + button.",
   subsFeedTitle: "Videos from channels you subscribed to",
@@ -482,6 +483,7 @@ const ru: Dict = {
   emptyHome:
     "Пока нет видео. Загрузите первое — кнопка «+» в левом меню.",
   videosAllTitle: "Видео — все видео",
+  adLabel: "Реклама",
   emptyVideos:
     "Раздел «Видео» пока пуст. Загрузите видео кнопкой «+».",
   subsFeedTitle: "Видео каналов, на которые вы подписаны",
@@ -823,6 +825,7 @@ const uz: Dict = {
   emptyHome:
     "Hozircha video yo'q. Chap menyudagi + tugmasi bilan birinchisini yuklang.",
   videosAllTitle: "Videos — barcha videolar",
+  adLabel: "Reklama",
   emptyVideos:
     "Videos bo'limi hozircha bo'sh. + tugmasi bilan video yuklang.",
   subsFeedTitle: "Obuna bo'lgan kanallar videolari",

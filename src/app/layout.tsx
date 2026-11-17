@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -47,6 +48,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const adsClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
   return (
     <html lang="uz" suppressHydrationWarning>
       <body
@@ -54,6 +56,14 @@ export default function RootLayout({
       >
         {children}
         <Toaster />
+        {adsClient ? (
+          <Script
+            id="adsense-init"
+            strategy="afterInteractive"
+            crossOrigin="anonymous"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsClient}`}
+          />
+        ) : null}
       </body>
     </html>
   );
