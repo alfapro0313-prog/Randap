@@ -11,7 +11,7 @@ tugmasi bilan tasdiqlanadi. Sayt 3 tilda ishlaydi: **English (standart),
 ## Texnologiyalar
 
 - Next.js 16 (App Router) + TypeScript + Tailwind CSS 4 + shadcn/ui
-- Prisma ORM + SQLite (`db/custom.db` — demo ma'lumotlar bilan birga keldi)
+- Prisma ORM + PostgreSQL (Neon, Vercel'da ishlaydi; lokada `db/custom.db` SQLite arxiv sifatida qoladi)
 - Real-time o'rniga polling (chat: typing, online, o'qilmagan xabarlar)
 
 ## Lokal ishga tushirish
@@ -53,20 +53,14 @@ src/app/api/              — REST API (videos, sections, chat/*, auth, upload..
 src/components/randap/    — butun interfeys (portal, watch, shorts, chat, organish...)
 src/lib/randap-i18n.ts    — 3 tilli lug'at (en/ru/uz)
 public/uploads/           — demo video, shorts va rasmlar
-db/custom.db              — demo ma'lumotlar bilan SQLite baza
+prisma/seed-data.json     — demo ma'lumotlar (Postgresga `prisma/migrate-seed.mjs` bilan yuklanadi)
 ```
 
 ## Deploy (Vercel)
 
-**Muhim:** SQLite va `public/uploads` fayl tizimi Vercelda doimiy saqlanmaydi
-(serverless). To'liq ishlashi uchun:
+Sayt allaqachon Vercelga deploy qilingan: **https://randap.vercel.app**
 
-1. Baza: Prisma provider'ini `sqlite` → `postgresql` (Neon/Supabase) yoki
-   Turso (libSQL) ga o'zgartirib, `DATABASE_URL` ni Vercel env'da berish;
-2. Yuklamalar: video/rasm uchun Vercel Blob / S3 / Cloudinary ulash;
-3. `package.json` dagi `build` skriptini Vercel uchun sodda `next build`
-   qilib ko'rish mumkin.
-
-Yoki demo maqsadlarida: repni Vercelga ulab, `DATABASE_URL` env'ini
-`file:/tmp/custom.db` qilib build qilsa ham bo'ladi (har deployda bazani
-qayta yaratadi).
+- Baza: **Neon Postgres** (Vercel Marketplace orqali ulangan, `POSTGRES_URL_NON_POOLING`
+  env'i Vercel tomonidan avtomatik qo'shiladi);
+- Demi ma'lumotlarni qayta yuklash: `source .env.vercel && node prisma/migrate-seed.mjs`;
+- `public/uploads` dagi fayllar build bilan birga jonlanadi (demo kontenti).
