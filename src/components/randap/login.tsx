@@ -8,6 +8,7 @@ import {
   writeSession,
   type LoginSession,
 } from "@/lib/randap-client";
+import { activeBlockMs, formatLeft, remainingMs } from "@/lib/randap-admin";
 import { useLang } from "./lang-provider";
 import { cn } from "@/lib/utils";
 
@@ -135,6 +136,14 @@ export function LoginView({
         body: JSON.stringify({ deviceKey, name: n, gmail: g, viaGoogle: true }),
       });
       const data = await res.json();
+      if (data?.blocked) {
+        // ADMIN BLOKI — qolgan vaqt bilan xato ko'rsatiladi
+        setChecking(false);
+        const ms = remainingMs(activeBlockMs(data.blockedUntil) ?? 0);
+        const time = formatLeft(ms, t("unitHour"), t("unitMin"));
+        setGoogleErr(t("loginBlocked", { time }));
+        return;
+      }
       if (!data?.ok) {
         setChecking(false);
         setGoogleErr(String(data?.error ?? t("loginGoogleErrNotFound")));

@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { db } from "@/lib/db";
+import { isAdminGmail } from "@/lib/randap-admin";
 
 export const UPLOAD_ROOT = path.join(process.cwd(), "public", "uploads");
 export const VIDEO_DIR = path.join(UPLOAD_ROOT, "videos");
@@ -74,6 +75,17 @@ export async function ensureUser(deviceKey: string) {
   return db.user.create({
     data: { deviceKey, name: `RandapUser ${suffix}`, handle },
   });
+}
+
+/**
+ * Admin tekshiruvi: deviceKey faqat sayt egasining hisobiga tegishlimi?
+ * (AuthAccount.gmail == ADMIN_GMAIL)
+ */
+export async function isAdminDevice(deviceKey: string): Promise<boolean> {
+  const key = (deviceKey ?? "").trim();
+  if (!key) return false;
+  const account = await db.authAccount.findUnique({ where: { deviceKey: key } });
+  return isAdminGmail(account?.gmail);
 }
 
 /** Yangi yuklangan fayl uchun unikal fayl nomi (kengaytmasiz) */

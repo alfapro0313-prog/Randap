@@ -5,6 +5,8 @@ import {
   Camera,
   Loader2,
   LogOut,
+  MessageSquareWarning,
+  Send,
   Trophy,
   UserRoundPen,
 } from "lucide-react";
@@ -44,6 +46,8 @@ export function ProfileView({
   const [saving, setSaving] = useState(false);
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [complaint, setComplaint] = useState("");
+  const [complaintBusy, setComplaintBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   async function saveName(e: React.FormEvent) {
@@ -95,6 +99,37 @@ export function ProfileView({
       });
     }
     e.target.value = "";
+  }
+
+  async function sendComplaint() {
+    const text = complaint.trim();
+    if (complaintBusy || text.length < 3) return;
+    setComplaintBusy(true);
+    try {
+      const res = await fetch("/api/complaints", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceKey, text }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        toast({ title: t("complaintSent") });
+        setComplaint("");
+      } else {
+        toast({
+          title: t("error"),
+          description: data.error,
+          variant: "destructive",
+        });
+      }
+    } catch {
+      toast({
+        title: t("error"),
+        description: t("retry"),
+        variant: "destructive",
+      });
+    }
+    setComplaintBusy(false);
   }
 
   if (!me) {
@@ -200,6 +235,49 @@ export function ProfileView({
           onOpenChannel={onOpenChannel}
           emptyText={t("emptyMyVideos")}
         />
+      </section>
+
+      <section
+        aria-label={t("complaintTitle")}
+        className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5"
+      >
+        <div className="flex items-center gap-2">
+          <MessageSquareWarning
+            className="size-4 text-amber-500"
+            aria-hidden="true"
+          />
+          <h2 className="text-sm font-bold text-foreground">
+            {t("complaintTitle")}
+          </h2>
+        </div>
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          {t("complaintDesc")}
+        </p>
+        <textarea
+          value={complaint}
+          onChange={(e) => setComplaint(e.target.value)}
+          placeholder={t("complaintPlaceholder")}
+          maxLength={1500}
+          rows={4}
+          className="w-full resize-y rounded-xl border border-border bg-background p-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/40"
+        />
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[11px] text-muted-foreground">
+            {complaint.trim().length}/1500
+          </p>
+          <button
+            onClick={() => void sendComplaint()}
+            disabled={complaintBusy || complaint.trim().length < 3}
+            className="flex h-10 items-center gap-2 rounded-full bg-amber-500 px-5 text-sm font-bold text-white transition-colors hover:bg-amber-600 disabled:opacity-50"
+          >
+            {complaintBusy ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Send className="size-4" aria-hidden="true" />
+            )}
+            {complaintBusy ? t("complaintSending") : t("complaintSend")}
+          </button>
+        </div>
       </section>
 
       <section className="rounded-2xl border border-border bg-card p-5">

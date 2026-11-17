@@ -9,11 +9,15 @@ function accountPayload(account: {
   name: string;
   gmail: string;
   viaGoogle: boolean;
+  blockedUntil: Date | null;
 }) {
   return {
     name: account.name,
     gmail: account.gmail,
     viaGoogle: account.viaGoogle,
+    blockedUntil: account.blockedUntil
+      ? new Date(account.blockedUntil).getTime()
+      : null,
   };
 }
 
@@ -29,6 +33,13 @@ export async function GET(req: Request) {
       );
     }
     const account = await db.authAccount.findUnique({ where: { deviceKey } });
+    if (account) {
+      // Har bir kirish — "kimlar kirganini ko'rish" uchun lastSeen yangilanadi
+      await db.authAccount.update({
+        where: { deviceKey },
+        data: { lastSeenAt: new Date() },
+      });
+    }
     return NextResponse.json({
       ok: true,
       account: account ? accountPayload(account) : null,
@@ -94,6 +105,27 @@ export async function POST(req: Request) {
       );
     }
 
+    // ADMIN BLOKI: shu device yoki gmail bloklangan bo'lsa — kirmaydi
+    const now = new Date();
+    const block = await db.authAccount.findFirst({
+      where: {
+        OR: [{ deviceKey }, { gmail }],
+        blockedUntil: { gt: now },
+      },
+      orderBy: { blockedUntil: "desc" },
+    });
+    if (block?.blockedUntil) {
+      return NextResponse.json(
+        {
+          ok: false,
+          blocked: true,
+          blockedUntil: new Date(block.blockedUntil).getTime(),
+          error: "Kirish vaqtincha bloklangan",
+        },
+        { status: 403 }
+      );
+    }
+
     // Profil ismini kirish ismi bilan sinxronlaymiz
     const user = await ensureUser(deviceKey);
     if (user.name !== name) {
@@ -109,7 +141,13 @@ export async function POST(req: Request) {
 
     const account = await db.authAccount.upsert({
       where: { deviceKey },
-      update: { name, gmail, viaGoogle },
+      update: {
+        name,
+        gmail,
+        viaGoogle,
+        lastSeenAt: new Date(),
+        visits: { increment: 1 },
+      },
       create: { deviceKey, name, gmail, viaGoogle },
     });
 

@@ -18,9 +18,11 @@ import { LessonView } from "./lesson";
 import { BallarView } from "./ballar";
 import { SearchView } from "./search";
 import { PortalView } from "./portal";
+import { AdminView } from "./admin";
 import { ChatApp } from "./chat/chat-app";
 import { ChatSms } from "./chat-sms";
-import { useDeviceMe } from "@/lib/randap-client";
+import { readSession, useDeviceMe } from "@/lib/randap-client";
+import { ADMIN_GMAIL } from "@/lib/randap-admin";
 import { useLang } from "./lang-provider";
 import type {
   ChannelInfo,
@@ -41,6 +43,10 @@ export function RandapApp() {
   const { deviceKey, me, setMe } = useDeviceMe();
   const { t, lang } = useLang();
   const [view, setView] = useState<ViewName>("portal");
+  // Admin panel tugmasi — faqat sayt egasining gmail'i bilan kirsangiz ko'rinadi
+  const [isAdmin] = useState(
+    () => readSession()?.gmail?.toLowerCase() === ADMIN_GMAIL
+  );
   const [videoId, setVideoId] = useState("");
   const [channelId, setChannelId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -327,6 +333,7 @@ export function RandapApp() {
           }
           subs={subs}
           onOpenChannel={openChannel}
+          isAdmin={isAdmin}
         />
 
         <div className="flex min-w-0 flex-1 flex-col">
@@ -513,6 +520,8 @@ export function RandapApp() {
             ) : null}
 
             {view === "ballar" ? <BallarView deviceKey={deviceKey} /> : null}
+
+            {view === "admin" ? <AdminView deviceKey={deviceKey} /> : null}
 
             {view === "watch" ? (
               <WatchView

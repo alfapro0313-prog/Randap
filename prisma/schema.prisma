@@ -127,13 +127,28 @@ model QuizAttempt {
 /* ---------- Login gate (saytga kirish: ism + Gmail) ---------- */
 
 model AuthAccount {
-  id        String   @id @default(cuid())
-  deviceKey String  @unique
-  name      String
-  gmail     String
-  viaGoogle Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String    @id @default(cuid())
+  deviceKey    String    @unique
+  name         String
+  gmail        String
+  viaGoogle    Boolean   @default(false)
+  visits       Int       @default(1)
+  lastSeenAt   DateTime  @default(now())
+  blockedUntil DateTime?
+  blockedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+/// Profil ichidan yoziladigan shikoyatlar — admin panelga tushadi
+model Complaint {
+  id         String    @id @default(cuid())
+  deviceKey  String
+  name       String
+  gmail      String
+  text       String
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
 }
 
 /* ---------- Chat (Telegram-ga o'xshagan) ---------- */

@@ -9,6 +9,7 @@ import {
   ListVideo,
   MessageCircle,
   Plus,
+  Shield,
   Trophy,
   User,
   Users,
@@ -39,7 +40,8 @@ export type ViewName =
   | "organishTopic"
   | "ballar"
   | "chat"
-  | "search";
+  | "search"
+  | "admin";
 
 type SidebarProps = {
   view: ViewName;
@@ -48,6 +50,8 @@ type SidebarProps = {
   watchKind?: string;
   subs: SubscribedChannel[];
   onOpenChannel: (id: string) => void;
+  /** Faqat sayt egasi uchun — Admin panel tugmasi ko'rinadi */
+  isAdmin?: boolean;
 };
 
 const NAV_ITEMS: Array<{
@@ -103,19 +107,27 @@ export function Sidebar({
   watchKind,
   subs,
   onOpenChannel,
+  isAdmin = false,
 }: SidebarProps) {
   const { t } = useLang();
   const go = useCallback(
     (key: ViewName) => () => onNavigate(key),
     [onNavigate]
   );
+  // Admin tugmasi — profil ostida, faqat sayt egasiga ko'rinadi
+  const navItems = isAdmin
+    ? [
+        ...NAV_ITEMS,
+        { key: "admin" as ViewName, labelKey: "navAdmin" as TKey, icon: Shield },
+      ]
+    : NAV_ITEMS;
 
   return (
     <>
       {/* Desktop chap menyu — hamma narsa shu yerda */}
       <aside className="hidden md:flex w-56 shrink-0 flex-col gap-1 border-r border-border bg-background px-2 py-4 sticky top-0 h-screen overflow-y-auto scrollbar-thin">
         <nav aria-label={t("navPortal")} className="flex flex-col gap-1">
-          {NAV_ITEMS.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.key, view, watchKind);
             const isProfile = item.key === "profile";

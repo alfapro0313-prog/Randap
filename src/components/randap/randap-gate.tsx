@@ -1,22 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
-import { getDeviceKey, readSession, type LoginSession } from "@/lib/randap-client";
+import { Ban, Loader2 } from "lucide-react";
+import {
+  getDeviceKey,
+  readSession,
+  type LoginSession,
+} from "@/lib/randap-client";
+import { activeBlockMs, formatLeft, remainingMs } from "@/lib/randap-admin";
 import { LoginView } from "./login";
 import { RandapApp } from "./randap-app";
+import { useLang } from "./lang-provider";
 
 /**
  * Kirish darvozasi:
  *  - sessiya yo'q bo'lsa LoginView ko'rinadi (ism + Gmail shart);
  *  - sessiya bo'lsa to'g'ridan-to'g'ri sayt ochiladi;
- *  - sessiya server bilan tekshiriladi (hisob o'chirilgan bo'lsa qayta so'raladi).
+ *  - sessiya server bilan tekshiriladi (hisob o'chirilgan bo'lsa qayta so'raladi);
+ *  - hisob admin tomonidan bloklangan bo'lsa — blok ekrani ko'rinadi.
  */
 export function RandapGate() {
   // undefined = yuklanmoqda, null = login kerak, LoginSession = kirilgan
   const [session, setSession] = useState<LoginSession | null | undefined>(
     undefined
   );
+  const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
 
   useEffect(() => {
     let alive = false;
@@ -33,6 +41,12 @@ export function RandapGate() {
         .then((data) => {
           if (!alive) return;
           if (data?.ok && data.account) {
+            // ADMIN BLOKI — bloklangan bo'lsa sayt ochilmaydi
+            const blockMs = activeBlockMs(data.account.blockedUntil);
+            if (blockMs) {
+              setBlockedUntil(blockMs);
+              return;
+            }
             setSession({
               ...stored,
               name: String(data.account.name ?? stored.name),
@@ -57,6 +71,20 @@ export function RandapGate() {
     };
   }, []);
 
+  // BLOK tekshiruvi yuklanish holatidan OLDIN — aks holda bloklangan
+  // foydalanuvchi abadiy "yuklanmoqda" ekranda qoladi
+  if (blockedUntil) {
+    return (
+      <BlockedScreen
+        until={blockedUntil}
+        onBack={() => {
+          setBlockedUntil(null);
+          setSession(null);
+        }}
+      />
+    );
+  }
+
   if (session === undefined) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-background">
@@ -75,4 +103,57 @@ export function RandapGate() {
   }
 
   return <RandapApp />;
+}
+
+/** Bloklangan hisob uchun ekran — qolgan vaqt taymer bilan ko'rinadi */
+function BlockedScreen({
+  until,
+  onBack,
+}: {
+  until: number;
+  onBack: () => void;
+}) {
+  const { t } = useLang();
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    // Har 30 soniyada qolgan vaqtni yangilab turadi
+    const id = window.setInterval(() => setTick((n) => n + 1), 30000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const left = remainingMs(until);
+  const time = formatLeft(left, t("unitHour"), t("unitMin"));
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-10">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-1/4 h-72 w-72 -translate-x-1/2 rounded-full bg-red-500/10 blur-3xl"
+      />
+      <div className="relative w-full max-w-md rounded-3xl border border-red-500/30 bg-card p-8 text-center shadow-2xl">
+        <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-500/15">
+          <Ban className="size-9 text-red-500" aria-hidden="true" />
+        </div>
+        <h1 className="mt-4 text-xl font-bold text-foreground">
+          {t("blockedTitle")}
+        </h1>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          {t("blockedDesc")}
+        </p>
+        <p
+          role="status"
+          className="mt-5 rounded-xl bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-500"
+        >
+          {t("blockedLeft", { time })}
+        </p>
+        <button
+          onClick={onBack}
+          className="mt-6 flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/60"
+        >
+          {t("blockedBack")}
+        </button>
+      </div>
+    </div>
+  );
 }
