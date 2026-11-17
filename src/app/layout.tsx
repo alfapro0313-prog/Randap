@@ -19,6 +19,9 @@ export const metadata: Metadata = {
     "Randap — videolar va shorts joylash, ko'rish, layk bosish, izoh qoldirish va obuna bo'lish mumkin bo'lgan video platforma.",
   keywords: ["Randap", "video", "shorts", "video platforma", "layk", "obuna"],
   authors: [{ name: "Randap" }],
+  verification: {
+    google: "VXb85HgWsMBp_pNu5PhoVKpZeoqxfkYMhh6_n0GipFw",
+  },
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
