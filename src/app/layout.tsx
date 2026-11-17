@@ -20,7 +20,12 @@ export const metadata: Metadata = {
   keywords: ["Randap", "video", "shorts", "video platforma", "layk", "obuna"],
   authors: [{ name: "Randap" }],
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png" }],
   },
   openGraph: {
     title: "Randap — Video platforma",
