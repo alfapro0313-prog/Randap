@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { CirclePlay, Loader2, Search, UserRound } from "lucide-react";
 import { AvatarBubble } from "./avatar";
 import { SettingsGear } from "./settings-dialog";
+import { NotificationsBell } from "./notifications-bell";
 import { useLang } from "./lang-provider";
 import type { Me, SearchData } from "@/lib/randap-types";
 import type { ViewName } from "./sidebar";
@@ -208,6 +209,9 @@ export function Header({
           </div>
         ) : null}
       </div>
+
+      {/* Bildirishnomalar qo'ng'iroqchasi */}
+      <NotificationsBell onOpenVideo={onOpenVideo} />
 
       {/* Profil yonida gildirak — global sozlamalar (til tanlash) */}
       <SettingsGear />

@@ -251,6 +251,25 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
     void loadConversations();
   }
 
+  /** Chatni tozalash: xabarlar o'chiriladi va darhol yangi sherik qidiriladi */
+  async function clearChat() {
+    if (!deviceKey) return;
+    if (!window.confirm(t.clearConfirm)) return;
+    setActiveConvId(null);
+    try {
+      await fetch("/api/chat/random", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceKey, action: "clear" }),
+      });
+      toast({ title: t.cleared });
+      void loadConversations();
+      void startRandom();
+    } catch {
+      // ignore
+    }
+  }
+
   async function saveSettings() {
     if (!deviceKey) return;
     if (nameDraft.trim().length < 2 || nameDraft.trim().length > 40) {
@@ -564,6 +583,7 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
               onOpenPeer={setPeer}
               onRandomNext={() => void randomNext()}
               onRandomBack={() => void randomBack()}
+              onClear={() => void clearChat()}
             />
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">

@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AvatarBubble } from "./avatar";
 import { useLang } from "./lang-provider";
 import { formatCount, formatDuration, timeAgo } from "@/lib/randap-client";
-import type { VideoDetail } from "@/lib/randap-types";
+import type { CommentItem, VideoDetail } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
 
 type WatchViewProps = {
@@ -43,6 +43,9 @@ export function WatchView({
   const [commentText, setCommentText] = useState("");
   const [postingComment, setPostingComment] = useState(false);
   const [localCommentCount, setLocalCommentCount] = useState<number | null>(null);
+  const [replyTo, setReplyTo] = useState<CommentItem | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [postingReply, setPostingReply] = useState(false);
   const viewedRef = useRef<string | null>(null);
 
   const load = useCallback(async () => {
@@ -161,6 +164,47 @@ export function WatchView({
     }
   }
 
+  async function postReply(e: React.FormEvent) {
+    e.preventDefault();
+    if (!video || !replyTo || !replyText.trim() || postingReply) return;
+    setPostingReply(true);
+    try {
+      const res = await fetch("/api/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          videoId: video.id,
+          deviceId: deviceKey,
+          body: replyText.trim(),
+          parentId: replyTo.id,
+        }),
+      });
+      const data = await res.json();
+      if (data?.ok && data.comment) {
+        setVideo((prev) =>
+          prev
+            ? {
+                ...prev,
+                comments: prev.comments.map((c) =>
+                  c.id === replyTo.id
+                    ? { ...c, replies: [...(c.replies ?? []), data.comment] }
+                    : c
+                ),
+              }
+            : prev
+        );
+        setLocalCommentCount((prev) => (prev ?? 0) + 1);
+        setReplyText("");
+        setReplyTo(null);
+        toast({ title: t("commentAdded") });
+      } else {
+        toast({ title: t("error"), description: data?.error, variant: "destructive" });
+      }
+    } finally {
+      setPostingReply(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col gap-4">
@@ -186,7 +230,10 @@ export function WatchView({
     );
   }
 
-  const commentCount = localCommentCount ?? video.comments.length;
+  const commentCount = localCommentCount ?? video.comments.reduce(
+    (acc, c) => acc + 1 + (c.replies?.length ?? 0),
+    0
+  );
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 pb-6">
@@ -356,21 +403,89 @@ export function WatchView({
 
         <ul className="flex flex-col gap-4">
           {video.comments.map((c) => (
-            <li key={c.id} className="flex gap-3">
-              <AvatarBubble
-                name={c.author.name}
-                avatar={c.author.avatar}
-                className="size-9 text-xs"
-              />
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">
-                  <span className="font-semibold text-foreground">{c.author.name}</span>{" "}
-                  · {timeAgo(c.createdAt)}
-                </p>
-                <p className="mt-1 break-words text-sm leading-relaxed text-foreground/90">
-                  {c.body}
-                </p>
+            <li key={c.id} className="flex flex-col gap-2.5">
+              <div className="flex gap-3">
+                <AvatarBubble
+                  name={c.author.name}
+                  avatar={c.author.avatar}
+                  className="size-9 text-xs"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">{c.author.name}</span>{" "}
+                    · {timeAgo(c.createdAt)}
+                  </p>
+                  <p className="mt-1 break-words text-sm leading-relaxed text-foreground/90">
+                    {c.body}
+                  </p>
+                  {video.allowComments ? (
+                    <button
+                      onClick={() => {
+                        setReplyTo(replyTo?.id === c.id ? null : c);
+                        setReplyText("");
+                      }}
+                      className={cn(
+                        "mt-1 text-xs font-semibold transition-colors hover:text-primary",
+                        replyTo?.id === c.id ? "text-primary" : "text-muted-foreground"
+                      )}
+                    >
+                      {t("reply")}
+                    </button>
+                  ) : null}
+                </div>
               </div>
+
+              {/* Inline javob formasi */}
+              {replyTo?.id === c.id && video.allowComments ? (
+                <form onSubmit={postReply} className="ml-12 flex gap-2">
+                  <input
+                    type="text"
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder={t("replyTo", { n: c.author.name })}
+                    aria-label={t("replyPlaceholder")}
+                    maxLength={1000}
+                    autoFocus
+                    className="h-9 flex-1 rounded-full border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/40"
+                  />
+                  <button
+                    type="submit"
+                    disabled={postingReply || !replyText.trim()}
+                    aria-label={t("replyPlaceholder")}
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    {postingReply ? (
+                      <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                    ) : (
+                      <Send className="size-4" aria-hidden="true" />
+                    )}
+                  </button>
+                </form>
+              ) : null}
+
+              {/* Javoblar */}
+              {(c.replies ?? []).length > 0 ? (
+                <ul className="ml-12 flex flex-col gap-3 border-l-2 border-border/60 pl-3">
+                  {(c.replies ?? []).map((r) => (
+                    <li key={r.id} className="flex gap-2.5">
+                      <AvatarBubble
+                        name={r.author.name}
+                        avatar={r.author.avatar}
+                        className="size-7 text-[10px]"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-xs text-muted-foreground">
+                          <span className="font-semibold text-foreground">{r.author.name}</span>{" "}
+                          · {timeAgo(r.createdAt)}
+                        </p>
+                        <p className="mt-0.5 break-words text-sm leading-relaxed text-foreground/90">
+                          {r.body}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </li>
           ))}
         </ul>

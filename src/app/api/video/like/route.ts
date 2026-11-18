@@ -36,6 +36,31 @@ export async function POST(req: Request) {
       await db.like.delete({ where: { id: existing.id } });
     } else {
       await db.like.create({ data: { videoId, deviceId } });
+
+      /* Video egasiga bildirishnoma (o'zi bosgan bo'lsa yo'q) */
+      try {
+        const actor = await db.user.findUnique({
+          where: { deviceKey: deviceId },
+          select: { name: true },
+        });
+        const uploader = await db.user.findUnique({
+          where: { id: video.uploaderId },
+          select: { deviceKey: true },
+        });
+        if (actor && uploader && uploader.deviceKey !== deviceId) {
+          await db.notification.create({
+            data: {
+              deviceKey: uploader.deviceKey,
+              type: "like",
+              text: video.title.slice(0, 140),
+              actorName: actor.name,
+              videoId,
+            },
+          });
+        }
+      } catch (notifError) {
+        console.error("like notification error:", notifError);
+      }
     }
 
     const count = await db.like.count({ where: { videoId } });

@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { SwRegister } from "@/components/randap/sw-register";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
     "Randap — videolar va shorts joylash, ko'rish, layk bosish, izoh qoldirish va obuna bo'lish mumkin bo'lgan video platforma.",
   keywords: ["Randap", "video", "shorts", "video platforma", "layk", "obuna"],
   authors: [{ name: "Randap" }],
+  manifest: "/manifest.webmanifest",
   verification: {
     google: "VXb85HgWsMBp_pNu5PhoVKpZeoqxfkYMhh6_n0GipFw",
   },
@@ -56,6 +58,7 @@ export default function RootLayout({
       >
         {children}
         <Toaster />
+        <SwRegister />
         {adsClient ? (
           <Script
             id="adsense-init"

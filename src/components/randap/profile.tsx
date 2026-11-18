@@ -1,14 +1,20 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  BarChart3,
   Camera,
+  Eye,
+  Heart,
   Loader2,
   LogOut,
+  MessageSquare,
   MessageSquareWarning,
   Send,
   Trophy,
   UserRoundPen,
+  Users,
+  Video as VideoIcon,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { AvatarBubble } from "./avatar";
@@ -20,6 +26,7 @@ type ProfileViewProps = {
   me: Me | null;
   deviceKey: string;
   videos: VideoItem[];
+  watchLaterVideos: VideoItem[];
   loading: boolean;
   onRename: (name: string) => Promise<boolean>;
   onAvatarUpload: (file: File) => Promise<boolean>;
@@ -33,6 +40,7 @@ export function ProfileView({
   me,
   deviceKey,
   videos,
+  watchLaterVideos,
   loading,
   onRename,
   onAvatarUpload,
@@ -49,6 +57,29 @@ export function ProfileView({
   const [complaint, setComplaint] = useState("");
   const [complaintBusy, setComplaintBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
+
+  /* Profil statistikasi — /api/me/stats */
+  const [stats, setStats] = useState<{
+    videos: number;
+    views: number;
+    likes: number;
+    comments: number;
+    subscribers: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!deviceKey) return;
+    let alive = true;
+    fetch(`/api/me/stats?deviceKey=${encodeURIComponent(deviceKey)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (alive && data?.ok && data.stats) setStats(data.stats);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [deviceKey]);
 
   async function saveName(e: React.FormEvent) {
     e.preventDefault();
@@ -226,6 +257,33 @@ export function ProfileView({
         </button>
       </form>
 
+      <section aria-label={t("statsTitle")} className="flex flex-col gap-3">
+        <h2 className="flex items-center gap-2 text-base font-bold text-foreground">
+          <BarChart3 className="size-4 text-red-500" aria-hidden="true" />
+          {t("statsTitle")}
+        </h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+          {([
+            [VideoIcon, t("statVideos"), stats?.videos ?? 0],
+            [Eye, t("statViews"), stats?.views ?? 0],
+            [Heart, t("statLikes"), stats?.likes ?? 0],
+            [MessageSquare, t("statComments"), stats?.comments ?? 0],
+            [Users, t("statSubscribers"), stats?.subscribers ?? 0],
+          ] as const).map(([Icon, label, value]) => (
+            <div
+              key={label}
+              className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-card p-4 text-center"
+            >
+              <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
+              <span className="text-lg font-extrabold text-foreground">
+                {stats ? value.toLocaleString("en-US") : "..."}
+              </span>
+              <span className="text-[11px] text-muted-foreground">{label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section aria-label={t("myVideos")} className="flex flex-col gap-4">
         <h2 className="text-base font-bold text-foreground">{t("myVideos")}</h2>
         <VideoGrid
@@ -234,6 +292,17 @@ export function ProfileView({
           onOpen={onOpen}
           onOpenChannel={onOpenChannel}
           emptyText={t("emptyMyVideos")}
+        />
+      </section>
+
+      <section aria-label={t("watchLater")} className="flex flex-col gap-4">
+        <h2 className="text-base font-bold text-foreground">{t("watchLater")}</h2>
+        <VideoGrid
+          videos={watchLaterVideos}
+          loading={false}
+          onOpen={onOpen}
+          onOpenChannel={onOpenChannel}
+          emptyText={t("watchLaterEmpty")}
         />
       </section>
 

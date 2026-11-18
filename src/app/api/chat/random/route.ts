@@ -159,6 +159,26 @@ async function endActiveRandom(myKey: string): Promise<void> {
   });
 }
 
+/**
+ * Suhbatni tozalash: barcha xabarlar o'chiriladi va suhbat tugatiladi.
+ * Sherik ham suhbatni bo'sh/tugagan ko'radi — ikki tomon "boshidan" boshlaydi.
+ */
+async function clearActiveRandom(myKey: string): Promise<void> {
+  const active = await db.conversation.findFirst({
+    where: activeRandomWhere(myKey),
+    orderBy: { createdAt: "desc" },
+  });
+  if (!active) return;
+  await db.message.deleteMany({ where: { conversationId: active.id } });
+  await db.conversation.update({
+    where: { id: active.id },
+    data: { endedAt: new Date() },
+  });
+  // Suhbat yopilgach sherik yangi chatga o'tishi uchun sherikning navbatdagi holatini tozalamaymiz —
+  // o'z foydalanuvchimiz navbatdan chiqadi (UI darhol "join" qiladi)
+  await db.randomQueue.deleteMany({ where: { deviceKey: myKey } });
+}
+
 export async function POST(req: Request) {
   try {
     const body = (await req.json().catch(() => null)) as {
@@ -169,7 +189,7 @@ export async function POST(req: Request) {
     const deviceKey = (body?.deviceKey ?? "").trim();
     const action = (body?.action ?? "").trim();
 
-    if (!deviceKey || !["join", "status", "next", "back"].includes(action)) {
+    if (!deviceKey || !["join", "status", "next", "back", "clear"].includes(action)) {
       return NextResponse.json({ ok: false, error: "So'rov noto'g'ri" }, { status: 400 });
     }
 
@@ -200,8 +220,14 @@ export async function POST(req: Request) {
     }
 
     // action === "back" — faol chatni tugatadi va navbatdan chiqadi
-    await endActiveRandom(deviceKey);
-    await db.randomQueue.deleteMany({ where: { deviceKey } });
+    if (action === "back") {
+      await endActiveRandom(deviceKey);
+      await db.randomQueue.deleteMany({ where: { deviceKey } });
+      return NextResponse.json({ ok: true, status: "idle" });
+    }
+
+    // action === "clear" — hamma xabarlar o'chiriladi va suhbat tugaydi (boshidan yozishish)
+    await clearActiveRandom(deviceKey);
     return NextResponse.json({ ok: true, status: "idle" });
   } catch (error) {
     console.error("/api/chat/random POST error:", error);

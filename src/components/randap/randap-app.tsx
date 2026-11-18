@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { ChevronRight, Trophy } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ArrowDownWideNarrow, ChevronRight, Trophy } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Sidebar, type ViewName } from "./sidebar";
 import { Header } from "./header";
@@ -21,7 +21,7 @@ import { PortalView } from "./portal";
 import { AdminView } from "./admin";
 import { ChatApp } from "./chat/chat-app";
 import { ChatSms } from "./chat-sms";
-import { readSession, useDeviceMe } from "@/lib/randap-client";
+import { readSession, useDeviceMe, getWatchLater, WATCH_LATER_EVENT } from "@/lib/randap-client";
 import { AdSlot } from "./ad-slot";
 import { ADMIN_GMAIL } from "@/lib/randap-admin";
 import { useLang } from "./lang-provider";
@@ -52,6 +52,8 @@ export function RandapApp() {
   const [channelId, setChannelId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [feed, setFeed] = useState<Feed>({ videos: [], shorts: [], loading: true });
+  const [savedTick, setSavedTick] = useState(0);
+  const [sort, setSort] = useState<"new" | "popular" | "liked">("new");
   const [channel, setChannel] = useState<ChannelInfo | null>(null);
   const [sections, setSections] = useState<SectionItem[] | null>(null);
   const [subs, setSubs] = useState<SubscribedChannel[]>([]);
@@ -321,6 +323,26 @@ export function RandapApp() {
 
   const myVideos = me ? feed.videos.filter((v) => v.uploader.id === me.id) : [];
 
+  // Keyin ko'rish ro'yxati — localStorage'dagi IDlar bilan feed'dan filtr
+  const watchLaterVideos = useMemo(() => {
+    const ids = getWatchLater();
+    return feed.videos.filter((v) => ids.includes(v.id));
+  }, [feed.videos, savedTick]);
+
+  useEffect(() => {
+    const fn = () => setSavedTick((v) => v + 1);
+    window.addEventListener(WATCH_LATER_EVENT, fn);
+    return () => window.removeEventListener(WATCH_LATER_EVENT, fn);
+  }, []);
+
+  const sortedVideos = useMemo(() => {
+    const list = [...feed.videos];
+    if (sort === "popular") list.sort((a, b) => b.views - a.views);
+    else if (sort === "liked") list.sort((a, b) => b.likeCount - a.likeCount);
+    else list.sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+    return list;
+  }, [feed.videos, sort]);
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <div className="flex flex-1">
@@ -410,8 +432,28 @@ export function RandapApp() {
                 <h1 className="text-lg font-bold text-foreground">
                   {t("videosAllTitle")}
                 </h1>
+                <div className="flex items-center gap-2" role="group">
+                  <ArrowDownWideNarrow
+                    className="size-4 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                  {([
+                    ["new", t("sortNew")],
+                    ["popular", t("sortPopular")],
+                    ["liked", t("sortLiked")],
+                  ] as const).map(([key, label]) => (
+                    <button
+                      key={key}
+                      onClick={() => setSort(key)}
+                      aria-pressed={sort === key}
+                      className={cnSort(sort === key)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
                 <VideoGrid
-                  videos={feed.videos}
+                  videos={sortedVideos}
                   loading={feed.loading}
                   onOpen={openVideo}
                   onOpenChannel={openChannel}
@@ -555,6 +597,7 @@ export function RandapApp() {
                 me={me}
                 deviceKey={deviceKey}
                 videos={myVideos}
+                watchLaterVideos={watchLaterVideos}
                 loading={feed.loading}
                 onRename={renameMe}
                 onAvatarUpload={uploadAvatar}
@@ -639,4 +682,13 @@ function SubsFeed({
       />
     </div>
   );
+}
+
+/** Saralash tugmalarining umumiy stili */
+function cnSort(active: boolean) {
+  return `rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+    active
+      ? "bg-primary text-primary-foreground"
+      : "border border-border bg-secondary/60 text-foreground hover:bg-secondary"
+  }`;
 }

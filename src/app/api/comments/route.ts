@@ -29,10 +29,17 @@ export async function GET(req: Request) {
     }
 
     const comments = await db.comment.findMany({
-      where: { videoId },
+      where: { videoId, parentId: null },
       orderBy: { createdAt: "desc" },
       take: 100,
-      include: { author: { select: { id: true, name: true, handle: true, avatar: true } } },
+      include: {
+        author: { select: { id: true, name: true, handle: true, avatar: true } },
+        replies: {
+          orderBy: { createdAt: "asc" },
+          take: 50,
+          include: { author: { select: { id: true, name: true, handle: true, avatar: true } } },
+        },
+      },
     });
 
     return NextResponse.json({ ok: true, comments });
@@ -51,12 +58,14 @@ export async function POST(req: Request) {
       videoId?: string;
       deviceId?: string;
       body?: string;
+      parentId?: string;
     } | null;
 
     const videoId = (body?.videoId ?? "").trim();
     const deviceId =
       getDeviceKeyFromRequest(req) || (body?.deviceId ?? "").trim();
     const text = (body?.body ?? "").trim();
+    const parentId = (body?.parentId ?? "").trim() || null;
 
     if (!videoId || !deviceId || !text) {
       return NextResponse.json(
@@ -88,10 +97,79 @@ export async function POST(req: Request) {
     }
 
     const author = await upsertUser(deviceId);
+
+    // Javob (reply) uchun ota izoh tekshiruvi
+    let parentComment: {
+      id: string;
+      authorId: string;
+      videoId: string;
+    } | null = null;
+    if (parentId) {
+      parentComment = await db.comment.findUnique({
+        where: { id: parentId },
+        select: { id: true, authorId: true, videoId: true },
+      });
+      if (!parentComment || parentComment.videoId !== videoId) {
+        return NextResponse.json(
+          { ok: false, error: "Javob beriladigan izoh topilmadi" },
+          { status: 404 }
+        );
+      }
+    }
+
     const created = await db.comment.create({
-      data: { videoId, authorId: author.id, body: text },
+      data: {
+        videoId,
+        authorId: author.id,
+        body: text,
+        ...(parentId ? { parentId } : {}),
+      },
       include: { author: { select: { id: true, name: true, handle: true, avatar: true } } },
     });
+
+    /* Bildirishnomalar: video egasiga yoki ota izoh egasiga (o'zi yozgan bo'lsa yo'q) */
+    try {
+      const targets: string[] = [];
+      if (parentComment && parentComment.authorId !== author.id) {
+        const parentAuthor = await db.user.findUnique({
+          where: { id: parentComment.authorId },
+          select: { deviceKey: true, name: true },
+        });
+        if (parentAuthor) targets.push(parentAuthor.deviceKey);
+      }
+      if (video.uploaderId !== author.id) {
+        const uploader = await db.user.findUnique({
+          where: { id: video.uploaderId },
+          select: { deviceKey: true },
+        });
+        if (uploader) {
+          const dup = await db.notification.findFirst({
+            where: {
+              deviceKey: uploader.deviceKey,
+              type: parentComment ? "reply" : "comment",
+              videoId,
+              actorName: author.name,
+              createdAt: { gte: new Date(Date.now() - 60_000) },
+            },
+          });
+          if (!dup) targets.push(uploader.deviceKey);
+        }
+      }
+      const uniqueTargets = [...new Set(targets)];
+      if (uniqueTargets.length > 0) {
+        await db.notification.createMany({
+          data: uniqueTargets.map((key) => ({
+            deviceKey: key,
+            type: parentComment ? "reply" : "comment",
+            text: text.slice(0, 140),
+            actorName: author.name,
+            videoId,
+          })),
+        });
+      }
+    } catch (notifError) {
+      console.error("notification create error:", notifError);
+    }
 
     const count = await db.comment.count({ where: { videoId } });
 

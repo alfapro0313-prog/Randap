@@ -1,9 +1,19 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
+import { Bookmark } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/hooks/use-toast";
 import { AvatarBubble } from "./avatar";
 import { useLang } from "./lang-provider";
-import { formatCount, formatDuration, timeAgo } from "@/lib/randap-client";
+import {
+  formatCount,
+  formatDuration,
+  timeAgo,
+  getWatchLater,
+  toggleWatchLater,
+  subscribeWatchLater,
+} from "@/lib/randap-client";
 import type { VideoItem } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +26,18 @@ type VideoCardProps = {
 
 export function VideoCard({ video, onOpen, onOpenChannel, compact }: VideoCardProps) {
   const { t, lang } = useLang();
+  const saved = useSyncExternalStore(
+    subscribeWatchLater,
+    () => getWatchLater().includes(video.id),
+    () => false
+  );
+
+  function toggleSave(e: React.MouseEvent) {
+    e.stopPropagation();
+    const nowSaved = toggleWatchLater(video.id);
+    toast({ title: t(nowSaved ? "savedAdded" : "savedRemoved") });
+  }
+
   return (
     <article className={cn("group flex flex-col", compact && "gap-2")}>
       <button
@@ -33,6 +55,25 @@ export function VideoCard({ video, onOpen, onOpenChannel, compact }: VideoCardPr
         </div>
         <span className="absolute bottom-2 right-2 rounded-md bg-black/80 px-1.5 py-0.5 text-[11px] font-semibold text-white">
           {formatDuration(video.durationSec)}
+        </span>
+        <span
+          role="button"
+          tabIndex={0}
+          onClick={toggleSave}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") toggleSave(e);
+          }}
+          aria-pressed={saved}
+          aria-label={t("watchLater")}
+          title={t("watchLater")}
+          className={cn(
+            "absolute left-2 top-2 flex size-8 items-center justify-center rounded-full transition-colors",
+            saved
+              ? "bg-primary text-primary-foreground"
+              : "bg-black/70 text-white opacity-0 focus-visible:opacity-100 group-hover:opacity-100"
+          )}
+        >
+          <Bookmark className={cn("size-4", saved && "fill-current")} aria-hidden="true" />
         </span>
         {video.kind === "short" ? (
           <span className="absolute left-2 top-2 rounded-md bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">

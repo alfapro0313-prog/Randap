@@ -36,6 +36,26 @@ export async function POST(req: Request) {
       await db.subscription.delete({ where: { id: existing.id } });
     } else {
       await db.subscription.create({ data: { channelId, deviceId } });
+
+      /* Kanal egasiga bildirishnoma (o'zi bo'lsa yo'q) */
+      try {
+        const actor = await db.user.findUnique({
+          where: { deviceKey: deviceId },
+          select: { name: true },
+        });
+        if (actor && channel.deviceKey !== deviceId) {
+          await db.notification.create({
+            data: {
+              deviceKey: channel.deviceKey,
+              type: "subscribe",
+              text: "",
+              actorName: actor.name,
+            },
+          });
+        }
+      } catch (notifError) {
+        console.error("subscribe notification error:", notifError);
+      }
     }
 
     const count = await db.subscription.count({ where: { channelId } });

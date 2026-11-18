@@ -62,6 +62,47 @@ export function getDeviceKey(): string {
   return key;
 }
 
+/* ---------- Keyin ko'rish ro'yxati (localStorage) ---------- */
+
+export const WATCH_LATER_KEY = "randap_watch_later";
+export const WATCH_LATER_EVENT = "randap-watch-later-changed";
+
+export function getWatchLater(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(WATCH_LATER_KEY);
+    const list = raw ? (JSON.parse(raw) as unknown) : [];
+    return Array.isArray(list) ? list.filter((v): v is string => typeof v === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+/** true qaytarsa — ro'yxatga qo'shildi, false — olib tashlandi */
+export function toggleWatchLater(videoId: string): boolean {
+  const list = getWatchLater();
+  const exists = list.includes(videoId);
+  const next = exists ? list.filter((v) => v !== videoId) : [videoId, ...list].slice(0, 200);
+  try {
+    window.localStorage.setItem(WATCH_LATER_KEY, JSON.stringify(next));
+    window.dispatchEvent(new Event(WATCH_LATER_EVENT));
+  } catch {
+    // ignore
+  }
+  return !exists;
+}
+
+/** useSyncExternalStore uchun subscribe — ro'yxat o'zgarganda xabar beradi */
+export function subscribeWatchLater(onChange: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener(WATCH_LATER_EVENT, onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener(WATCH_LATER_EVENT, onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
 export function ensureMe(): Promise<Me | null> {
   const deviceKey = getDeviceKey();
   if (!deviceKey) return Promise.resolve(null);

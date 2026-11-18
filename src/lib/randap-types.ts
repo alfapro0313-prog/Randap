@@ -28,6 +28,8 @@ export type CommentItem = {
   body: string;
   createdAt: string;
   author: ChannelBrief;
+  parentId?: string | null;
+  replies?: CommentItem[];
 };
 
 export type VideoDetail = VideoItem & {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ImagePlus, Loader2, SendHorizontal, Shuffle, Smile } from "lucide-react";
+import { ArrowLeft, Eraser, ImagePlus, Loader2, SendHorizontal, Shuffle, Smile } from "lucide-react";
 import { ChatAvatar } from "./chat-avatar";
 import { useLang } from "../lang-provider";
 import {
@@ -20,6 +20,7 @@ type ChatWindowProps = {
   onOpenPeer: (peer: ChatProfileItem) => void;
   onRandomNext: () => void;
   onRandomBack: () => void;
+  onClear: () => void;
 };
 
 type Meta = {
@@ -46,6 +47,7 @@ export function ChatWindow({
   onOpenPeer,
   onRandomNext,
   onRandomBack,
+  onClear,
 }: ChatWindowProps) {
   // Til global kontekstdan olinadi
   const { lang } = useLang();
@@ -257,6 +259,15 @@ export function ChatWindow({
               className="flex h-9 items-center gap-1.5 rounded-full border border-border bg-background px-3 text-xs font-bold text-foreground transition-colors hover:bg-secondary"
             >
               {t.back}
+            </button>
+            <button
+              onClick={onClear}
+              title={t.clear}
+              aria-label={t.clear}
+              disabled={ended}
+              className="flex size-9 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-50"
+            >
+              <Eraser className="size-4" aria-hidden="true" />
             </button>
             <button
               onClick={onRandomNext}

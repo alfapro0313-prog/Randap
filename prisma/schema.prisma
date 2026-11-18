@@ -46,6 +46,9 @@ model Comment {
   video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
   authorId  String
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    Comment? @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentThread")
   createdAt DateTime @default(now())
 }
 
@@ -149,6 +152,20 @@ model Complaint {
   text       String
   createdAt  DateTime  @default(now())
   resolvedAt DateTime?
+}
+
+/// Saytdagi bildirishnomalar: layk, komment, javob, obuna, yangi video
+model Notification {
+  id        String    @id @default(cuid())
+  deviceKey String
+  type      String
+  text      String
+  actorName String    @default("")
+  videoId   String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([deviceKey, readAt])
 }
 
 /* ---------- Chat (Telegram-ga o'xshagan) ---------- */
