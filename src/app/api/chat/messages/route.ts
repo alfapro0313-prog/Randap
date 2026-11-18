@@ -125,6 +125,7 @@ export async function POST(req: Request) {
 
     await ensureChatProfile(deviceKey);
 
+    const partnerKey = partnerKeyOf(conv, deviceKey);
     const [message] = await Promise.all([
       db.message.create({
         data: { conversationId: conv.id, senderKey: deviceKey, kind, content },
@@ -132,6 +133,13 @@ export async function POST(req: Request) {
       db.conversation.update({
         where: { id: conv.id },
         data: { lastMessageAt: new Date() },
+      }),
+      // Sherik chatni o'chirib tashlagan bo'lsa — yangi xabar uni qayta ko'rsatadi
+      db.conversation.update({
+        where: { id: conv.id },
+        data: partnerKey === conv.userAKey
+          ? { hiddenForA: false }
+          : { hiddenForB: false },
       }),
       db.typingState.upsert({
         where: { conversationId_userKey: { conversationId: conv.id, userKey: deviceKey } },

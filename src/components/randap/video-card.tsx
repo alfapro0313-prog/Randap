@@ -32,7 +32,7 @@ export function VideoCard({ video, onOpen, onOpenChannel, compact }: VideoCardPr
     () => false
   );
 
-  function toggleSave(e: React.MouseEvent) {
+  function toggleSave(e: React.SyntheticEvent) {
     e.stopPropagation();
     const nowSaved = toggleWatchLater(video.id);
     toast({ title: t(nowSaved ? "savedAdded" : "savedRemoved") });

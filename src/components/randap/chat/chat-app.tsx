@@ -2,13 +2,16 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
+  Check,
   Loader2,
   MessageCircle,
   MessagesSquare,
   Search,
   Settings,
   Shuffle,
+  Trash2,
   UserRound,
+  X,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { ChatAvatar } from "./chat-avatar";
@@ -48,6 +51,8 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
   const [loading, setLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [peer, setPeer] = useState<ChatProfileItem | null>(null);
+  // Qator ichida "o'chirilsinmi?" tasdiqlashi ko'rsatilayotgan suhbat
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   // Sozlamalar formasi
   const [nameDraft, setNameDraft] = useState("");
@@ -270,6 +275,30 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
     }
   }
 
+  /** Chatni o'chirish: faqat o'z ro'yxatdan yo'qoladi (sherikda qoladi) */
+  async function deleteChat(convId: string) {
+    if (!deviceKey) return;
+    setConfirmDeleteId(null);
+    // Darhol ro'yxatdan olib tashlaymiz (optimistik)
+    setConversations((prev) => prev.filter((c) => c.id !== convId));
+    if (activeConvId === convId) setActiveConvId(null);
+    try {
+      const res = await fetch("/api/chat/conversations", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceKey, conversationId: convId }),
+      });
+      const data = await res.json();
+      if (data?.ok) {
+        toast({ title: t.deletedToast });
+      } else {
+        void loadConversations(); // xato bo'lsa ro'yxatni tiklaymiz
+      }
+    } catch {
+      void loadConversations();
+    }
+  }
+
   async function saveSettings() {
     if (!deviceKey) return;
     if (nameDraft.trim().length < 2 || nameDraft.trim().length > 40) {
@@ -489,69 +518,147 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
                     </span>
                   ) : null}
                 </p>
-                {conversations.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => {
-                      setRandomState("idle");
-                      setActiveConvId(c.id);
-                    }}
-                    className={cn(
-                      "flex items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-secondary/60",
-                      c.id === activeConvId && "bg-secondary"
-                    )}
-                  >
-                    {c.partner ? (
-                      <ChatAvatar
-                        emoji={c.partner.emoji}
-                        color={c.partner.color}
-                        name={c.partner.name}
-                        className="size-10"
-                        emojiClassName="text-xl"
-                        online={c.partner.online}
-                      />
-                    ) : (
-                      <span className="size-10 shrink-0 rounded-full bg-secondary" />
-                    )}
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-center justify-between gap-2">
-                        <span className="truncate text-sm font-semibold text-foreground">
-                          {c.partner?.name ?? t.unknownUser}
+                {conversations.map((c) =>
+                  confirmDeleteId === c.id ? (
+                    /* Tasdiqlash — o'sha qatorning o'zida chiqadi */
+                    <div
+                      key={c.id}
+                      className="flex items-center gap-2 rounded-xl border border-rose-300 bg-rose-50 px-3 py-2"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-xs font-bold text-rose-700">
+                          {t.deleteChatAsk}
                         </span>
-                        {c.lastMessage ? (
-                          <span className="shrink-0 text-[10px] text-muted-foreground">
-                            {new Date(c.updatedAt).toLocaleTimeString(chatLocale(lang), {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: false,
-                            })}
-                          </span>
-                        ) : null}
-                      </span>
-                      <span className="flex items-center justify-between gap-2">
-                        <span className="truncate text-xs text-muted-foreground">
-                          {c.isRandom ? `${t.randomChat}: ` : ""}
-                          {c.lastMessage
-                            ? `${c.lastMessage.mine ? `${t.you}: ` : ""}${
-                                c.lastMessage.kind === "image"
-                                  ? "[photo]"
-                                  : c.lastMessage.kind === "sticker"
-                                    ? c.lastMessage.content
-                                    : c.lastMessage.kind === "system"
-                                      ? t.chatEnded
-                                      : c.lastMessage.content
-                              }`
-                            : t.messagesEmpty}
+                        <span className="block truncate text-[10px] text-rose-600/80">
+                          {t.deleteChatHint}
                         </span>
-                        {c.unreadCount > 0 ? (
-                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-sky-600 text-[10px] font-bold text-white">
-                            {c.unreadCount}
-                          </span>
-                        ) : null}
                       </span>
-                    </span>
-                  </button>
-                ))}
+                      <button
+                        onClick={() => void deleteChat(c.id)}
+                        className="flex h-8 shrink-0 items-center gap-1 rounded-lg bg-rose-600 px-3 text-xs font-bold text-white transition-colors hover:bg-rose-700"
+                      >
+                        <Check className="size-3.5" aria-hidden="true" />
+                        {t.deleteYes}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeleteId(null)}
+                        aria-label={t.cancel}
+                        title={t.cancel}
+                        className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary text-foreground transition-colors hover:bg-secondary/80"
+                      >
+                        <X className="size-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      key={c.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => {
+                        // Boshqa qatorda ochiq tasdiqlash bo'lsa — birinchi bosish uni yopadi
+                        if (confirmDeleteId) {
+                          setConfirmDeleteId(null);
+                          return;
+                        }
+                        setRandomState("idle");
+                        setActiveConvId(c.id);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setRandomState("idle");
+                          setActiveConvId(c.id);
+                        }
+                      }}
+                      onContextMenu={(e) => {
+                        // O'ng sichqoncha — shu yerda o'chirish tasdiqlashi chiqadi
+                        e.preventDefault();
+                        setConfirmDeleteId(c.id);
+                      }}
+                      className={cn(
+                        "flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-secondary/60",
+                        c.id === activeConvId && "bg-secondary"
+                      )}
+                    >
+                      {c.partner ? (
+                        <ChatAvatar
+                          emoji={c.partner.emoji}
+                          color={c.partner.color}
+                          name={c.partner.name}
+                          className="size-10"
+                          emojiClassName="text-xl"
+                          online={c.partner.online}
+                        />
+                      ) : (
+                        <span className="size-10 shrink-0 rounded-full bg-secondary" />
+                      )}
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-center justify-between gap-2">
+                          <span className="truncate text-sm font-semibold text-foreground">
+                            {c.partner?.name ?? t.unknownUser}
+                          </span>
+                          {c.lastMessage ? (
+                            <span className="shrink-0 text-[10px] text-muted-foreground">
+                              {new Date(c.updatedAt).toLocaleTimeString(chatLocale(lang), {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              })}
+                            </span>
+                          ) : null}
+                        </span>
+                        <span className="flex items-center justify-between gap-2">
+                          <span className="truncate text-xs text-muted-foreground">
+                            {c.isRandom ? `${t.randomChat}: ` : ""}
+                            {c.lastMessage
+                              ? `${c.lastMessage.mine ? `${t.you}: ` : ""}${
+                                  c.lastMessage.kind === "image"
+                                    ? "[photo]"
+                                    : c.lastMessage.kind === "sticker"
+                                      ? c.lastMessage.content
+                                      : c.lastMessage.kind === "system"
+                                        ? t.chatEnded
+                                        : c.lastMessage.content
+                                }`
+                              : t.messagesEmpty}
+                          </span>
+                          {c.unreadCount > 0 ? (
+                            <span className="flex shrink-0 items-center gap-1.5">
+                              {/* Mobil uchun ham ishlaydigan o'chirish tugmasi */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setConfirmDeleteId(c.id);
+                                }}
+                                aria-label={t.deleteChat}
+                                title={t.deleteChat}
+                                className="flex size-7 items-center justify-center rounded-full text-muted-foreground/50 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                              >
+                                <Trash2 className="size-3.5" aria-hidden="true" />
+                              </button>
+                              <span className="flex size-5 items-center justify-center rounded-full bg-sky-600 text-[10px] font-bold text-white">
+                                {c.unreadCount}
+                              </span>
+                            </span>
+                          ) : (
+                            /* Mobil uchun ham ishlaydigan o'chirish tugmasi */
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setConfirmDeleteId(c.id);
+                              }}
+                              aria-label={t.deleteChat}
+                              title={t.deleteChat}
+                              className="flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground/50 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                            >
+                              <Trash2 className="size-3.5" aria-hidden="true" />
+                            </button>
+                          )}
+                        </span>
+                      </span>
+                    </div>
+                  )
+                )}
               </section>
             )}
           </div>

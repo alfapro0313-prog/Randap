@@ -59,7 +59,12 @@ const en = {
   saved: "Saved",
   emoji: "Emoji",
   color: "Color",
-} as const;
+  deleteChat: "Delete chat",
+  deleteChatAsk: "Delete this chat?",
+  deleteChatHint: "Only disappears for you",
+  deleteYes: "Delete",
+  deletedToast: "Chat deleted",
+};
 
 type ChatStrings = typeof en;
 
@@ -114,6 +119,11 @@ const ru: ChatStrings = {
   saved: "Сохранено",
   emoji: "Эмодзи",
   color: "Цвет",
+  deleteChat: "Удалить чат",
+  deleteChatAsk: "Удалить этот чат?",
+  deleteChatHint: "Исчезнет только у вас",
+  deleteYes: "Удалить",
+  deletedToast: "Чат удалён",
 };
 
 const uz: ChatStrings = {
@@ -167,6 +177,11 @@ const uz: ChatStrings = {
   saved: "Saqlandi",
   emoji: "Emoji",
   color: "Rang",
+  deleteChat: "Chatni o'chirish",
+  deleteChatAsk: "Bu chat o'chirilsinmi?",
+  deleteChatHint: "Faqat sizdan yo'qoladi",
+  deleteYes: "O'chirish",
+  deletedToast: "Chat o'chirildi",
 };
 
 export const CHAT_I18N: Record<ChatLang, ChatStrings> = { en, ru, uz };

@@ -187,6 +187,9 @@ model Conversation {
   userBKey      String
   isRandom      Boolean   @default(false)
   endedAt       DateTime?
+  /// "Chatni o'chirish" — faqat o'z tomondan yashiriladi (sherikda qoladi)
+  hiddenForA    Boolean   @default(false)
+  hiddenForB    Boolean   @default(false)
   lastMessageAt DateTime  @default(now())
   createdAt     DateTime  @default(now())
   messages      Message[]

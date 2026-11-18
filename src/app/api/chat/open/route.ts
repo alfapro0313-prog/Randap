@@ -32,6 +32,19 @@ export async function POST(req: Request) {
     await touchPresence(deviceKey);
 
     const conversationId = await findOrCreateConversation(deviceKey, peerKey);
+
+    // Suhbat o'chirilgan bo'lsa (o'z tomondan yashirilgan) — qayta ochilganda ko'rinadi
+    const conv = await db.conversation.findUnique({ where: { id: conversationId } });
+    if (conv) {
+      const isA = conv.userAKey === deviceKey;
+      if (isA ? conv.hiddenForA : conv.hiddenForB) {
+        await db.conversation.update({
+          where: { id: conversationId },
+          data: isA ? { hiddenForA: false } : { hiddenForB: false },
+        });
+      }
+    }
+
     return NextResponse.json({ ok: true, conversationId });
   } catch (error) {
     console.error("/api/chat/open POST error:", error);
