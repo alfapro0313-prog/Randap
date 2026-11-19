@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Eraser, ImagePlus, Loader2, SendHorizontal, Shuffle, Smile } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import { ChatAvatar } from "./chat-avatar";
 import { useLang } from "../lang-provider";
 import {
@@ -169,12 +170,16 @@ export function ChatWindow({
     }
   }
 
-  async function onPickImage(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    if (!file.type.startsWith("image/")) return;
-    if (file.size > 6 * 1024 * 1024) return;
+  /** Rasm/skrinshotni yuklab, xabar sifatida yuboradi (fayl tanlash yoki Ctrl+V paste) */
+  async function uploadImageFile(file: File): Promise<boolean> {
+    if (!file.type.startsWith("image/")) {
+      toast({ title: t.imageOnly, variant: "destructive" });
+      return false;
+    }
+    if (file.size > 6 * 1024 * 1024) {
+      toast({ title: t.imageTooBig, variant: "destructive" });
+      return false;
+    }
     setUploading(true);
     try {
       const form = new FormData();
@@ -183,12 +188,34 @@ export function ChatWindow({
       const res = await fetch("/api/chat/upload", { method: "POST", body: form });
       const data = await res.json();
       if (data?.ok && typeof data.url === "string") {
+        stickRef.current = true;
         await send("image", data.url);
+        return true;
       }
+      toast({ title: t.imageFailed, variant: "destructive" });
+      return false;
     } catch {
-      // ignore
+      toast({ title: t.imageFailed, variant: "destructive" });
+      return false;
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function onPickImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (file) void uploadImageFile(file);
+  }
+
+  /** Skrinshotni Clipboard'dan (Ctrl+V) ushlaydi */
+  function onPasteImage(e: React.ClipboardEvent<HTMLTextAreaElement>) {
+    const file = Array.from(e.clipboardData?.files ?? []).find((f) =>
+      f.type.startsWith("image/")
+    );
+    if (file) {
+      e.preventDefault();
+      void uploadImageFile(file);
     }
   }
 
@@ -317,15 +344,21 @@ export function ChatWindow({
           }
 
           if (m.kind === "image") {
+            // Bazadagi rasm: /api/chat-images/<id>; eski fayl yo'li: /uploads/chat/...
+            const imageSrc = m.content.startsWith("chat-images/")
+              ? `/api/${m.content}`
+              : `/${m.content.replace(/^\//, "")}`;
             return (
               <div key={m.id} className={cn("flex", m.mine ? "justify-end" : "justify-start")}>
-                <figure className="flex max-w-[230px] flex-col">
-                  <img
-                    src={`/${m.content.replace(/^\//, "")}`}
-                    alt="Chat rasmi"
-                    loading="lazy"
-                    className="max-h-72 rounded-2xl object-cover"
-                  />
+                <figure className="flex max-w-[240px] flex-col">
+                  <a href={imageSrc} target="_blank" rel="noopener noreferrer" title={t.viewFull}>
+                    <img
+                      src={imageSrc}
+                      alt="Chat rasmi"
+                      loading="lazy"
+                      className="max-h-72 w-auto max-w-full rounded-2xl border border-border object-contain"
+                    />
+                  </a>
                   <figcaption
                     className={cn(
                       "mt-0.5 text-[10px] text-muted-foreground",
@@ -450,6 +483,7 @@ export function ChatWindow({
                   }
                 }
               }}
+              onPaste={onPasteImage}
               rows={1}
               maxLength={2000}
               placeholder={t.messagePlaceholder}

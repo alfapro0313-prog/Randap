@@ -116,7 +116,10 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: false, error: "Stiker noto'g'ri" }, { status: 400 });
       }
     } else if (kind === "image") {
-      if (!content.startsWith("uploads/chat/")) {
+      // Yangi format: bazadagi rasm (chat-images/<id>) yoki eski fayl yo'li
+      const valid =
+        content.startsWith("chat-images/") || content.startsWith("uploads/chat/");
+      if (!valid) {
         return NextResponse.json({ ok: false, error: "Rasm manzili noto'g'ri" }, { status: 400 });
       }
     } else {

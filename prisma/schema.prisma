@@ -220,6 +220,16 @@ model TypingState {
   @@unique([conversationId, userKey])
 }
 
+/// Chat rasmlari/skrinshotlari: bazada saqlanadi (Vercel'da fayl tizimi yo'q)
+model ChatImage {
+  id        String   @id @default(cuid())
+  mime      String
+  data      String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 model RandomQueue {
   id        String   @id @default(cuid())
   deviceKey String   @unique

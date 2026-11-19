@@ -744,7 +744,7 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
                             {c.lastMessage
                               ? `${c.lastMessage.mine ? `${t.you}: ` : ""}${
                                   c.lastMessage.kind === "image"
-                                    ? "[photo]"
+                                    ? `[${t.photo}]`
                                     : c.lastMessage.kind === "sticker"
                                       ? c.lastMessage.content
                                       : c.lastMessage.kind === "system"
