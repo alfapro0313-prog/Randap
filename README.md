@@ -42,19 +42,24 @@ so'ngra asosiy menyu (4 bo'lim + Ballar) ochiladi.
 | `dev` | Dev server (port 3000) |
 | `build` + `start` | Production build va ishga tushirish (standalone) |
 | `lint` | ESLint tekshiruvi |
-| `db:push` | Prisma sxemani bazaga qo'llash |
-| `db:generate` | Prisma client yaratish |
+| `db:push` | Lokal SQLite sxemani bazaga qo'llash (`schema.local.prisma`) |
+| `db:generate` | Lokal Prisma client yaratish (`schema.local.prisma`) |
 
 ## Loyiha tuzilishi
 
 ```
-prisma/schema.prisma      — DB sxema (User, Video, Quiz, ChatProfile, AuthAccount...)
+prisma/schema.prisma      — DB sxema: Postgres (Vercel/Neon uchun)
+prisma/schema.local.prisma — xuddi shu sxema, lokal uchun SQLite (DATABASE_URL)
 src/app/api/              — REST API (videos, sections, chat/*, auth, upload...)
 src/components/randap/    — butun interfeys (portal, watch, shorts, chat, organish...)
 src/lib/randap-i18n.ts    — 3 tilli lug'at (en/ru/uz)
 public/uploads/           — demo video, shorts va rasmlar
 prisma/seed-data.json     — demo ma'lumotlar (Postgresga `prisma/migrate-seed.mjs` bilan yuklanadi)
 ```
+
+Lokalda ishlatish: `bun run db:push` (SQLite) va kerak bo'lsa `bun run db:generate`.
+Diqqat: `bun install`dan keyin postinstall Postgres sxemadan client yaratadi —
+lokal devni davom ettirish uchun `bun run db:generate` ni qayta ishga tushiring.
 
 ## Deploy (Vercel)
 
