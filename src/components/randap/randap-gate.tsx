@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { Ban, Loader2 } from "lucide-react";
 import {
+  getBaseDeviceKey,
   getDeviceKey,
   readSession,
+  writeSession,
   type LoginSession,
 } from "@/lib/randap-client";
 import { activeBlockMs, formatLeft, remainingMs } from "@/lib/randap-admin";
@@ -30,13 +32,16 @@ export function RandapGate() {
     let alive = false;
     const id = window.setTimeout(() => {
       alive = true;
+      // Asosiy qurilma kaliti HOZIR saqlanadi — login/logout almashtirishlardan oldin
+      const baseKey = getBaseDeviceKey();
       const stored = readSession();
       if (!stored) {
         setSession(null);
         return;
       }
-      const deviceKey = stored.deviceKey ?? getDeviceKey();
-      fetch(`/api/auth?deviceKey=${encodeURIComponent(deviceKey)}`)
+      // Hisob kaliti bilan tekshirish (yangi sessiyalar), eski sessiya — deviceKey
+      const key = stored.accountKey ?? stored.deviceKey ?? baseKey ?? getDeviceKey();
+      fetch(`/api/auth?deviceKey=${encodeURIComponent(key)}`)
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => {
           if (!alive) return;
@@ -47,12 +52,16 @@ export function RandapGate() {
               setBlockedUntil(blockMs);
               return;
             }
-            setSession({
+            const next: LoginSession = {
               ...stored,
               name: String(data.account.name ?? stored.name),
               gmail: String(data.account.gmail ?? stored.gmail),
               viaGoogle: data.account.viaGoogle !== false,
-            });
+              accountKey: String(data.account.accountKey ?? stored.accountKey ?? ""),
+            };
+            // Hisob kaliti faol identifikator bo'ladi (barcha ma'lumotlar shu kalitda)
+            writeSession(next);
+            setSession(next);
           } else if (data?.ok && !data.account) {
             // hisob serverda yo'q — qayta kirish so'raladi
             setSession(null);

@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 /** PWA manifesti — Randap telefonga ilova sifatida o'rnatiladi */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Randap — Video platforma",
+    name: "Randap Video platforma",
     short_name: "Randap",
     description:
       "Videolar va shorts joylash, ko'rish, layk bosish, izoh qoldirish va obuna bo'lish mumkin bo'lgan video platforma.",

@@ -4,6 +4,7 @@ import { Check, Loader2, LogIn, Mail, Play, User } from "lucide-react";
 import { useState } from "react";
 import { LANGS, type Lang } from "@/lib/randap-i18n";
 import {
+  getBaseDeviceKey,
   getDeviceKey,
   writeSession,
   type LoginSession,
@@ -129,6 +130,7 @@ export function LoginView({
     await new Promise((r) => setTimeout(r, 900));
 
     const deviceKey = getDeviceKey();
+    let accountKey: string | undefined;
     try {
       const res = await fetch("/api/auth", {
         method: "POST",
@@ -149,6 +151,8 @@ export function LoginView({
         setGoogleErr(String(data?.error ?? t("loginGoogleErrNotFound")));
         return;
       }
+      // Hisob kaliti: bitta gmail = bitta hisob (eski ma'lumotlar shu kalitda qaytadi)
+      accountKey = data?.account?.accountKey ?? undefined;
     } catch {
       // server javob bermasa ham demo davom etadi
     }
@@ -157,7 +161,8 @@ export function LoginView({
       name: n,
       gmail: g,
       viaGoogle: true,
-      deviceKey,
+      accountKey,
+      deviceKey: getBaseDeviceKey(),
       at: Date.now(),
     };
     writeSession(session);

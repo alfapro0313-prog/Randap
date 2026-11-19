@@ -11,6 +11,8 @@ export const THUMB_DIR = path.join(UPLOAD_ROOT, "thumbs");
 export const MAX_VIDEO_BYTES = 300 * 1024 * 1024; // 300 MB
 export const MAX_THUMB_BYTES = 5 * 1024 * 1024; // 5 MB
 export const MAX_SHORT_SEC = 80;
+/** Bo'laklab yuklash: har bir bo'lakning xom bayt hajmi (serverless 4.5MB limit) */
+export const UPLOAD_CHUNK_BYTES = 3_000_000;
 
 export function sha256(buffer: Buffer): string {
   return createHash("sha256").update(buffer).digest("hex");
@@ -78,14 +80,17 @@ export async function ensureUser(deviceKey: string) {
 }
 
 /**
- * Admin tekshiruvi: deviceKey faqat sayt egasining hisobiga tegishlimi?
- * (AuthAccount.gmail == ADMIN_GMAIL)
+ * Admin tekshiruvi: kalit sayt egasining hisobiga tegishlimi?
+ * Kalit ikki xil bo'lishi mumkin: eski deviceKey (AuthAccount) yoki
+ * yangi accountKey (Account — gmail asosidagi hisob).
  */
 export async function isAdminDevice(deviceKey: string): Promise<boolean> {
   const key = (deviceKey ?? "").trim();
   if (!key) return false;
   const account = await db.authAccount.findUnique({ where: { deviceKey: key } });
-  return isAdminGmail(account?.gmail);
+  if (isAdminGmail(account?.gmail)) return true;
+  const acct = await db.account.findUnique({ where: { accountKey: key } });
+  return isAdminGmail(acct?.gmail);
 }
 
 /** Yangi yuklangan fayl uchun unikal fayl nomi (kengaytmasiz) */

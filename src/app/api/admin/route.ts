@@ -91,7 +91,11 @@ export async function POST(req: Request) {
         where: { gmail },
         data: { blockedUntil: null, blockedAt: null },
       });
-      return NextResponse.json({ ok: true, action, count: res.count });
+      const res2 = await db.account.updateMany({
+        where: { gmail },
+        data: { blockedUntil: null },
+      });
+      return NextResponse.json({ ok: true, action, count: res.count + res2.count });
     }
 
     const blockedUntil = new Date(Date.now() + BLOCK_HOURS * 60 * 60 * 1000);
@@ -99,7 +103,12 @@ export async function POST(req: Request) {
       where: { gmail },
       data: { blockedUntil, blockedAt: new Date() },
     });
-    if (res.count === 0) {
+    // Gmail asosidagi hisob ham bloklanadi — yangi qurilmadan kirishni ham yopadi
+    const res2 = await db.account.updateMany({
+      where: { gmail },
+      data: { blockedUntil },
+    });
+    if (res.count === 0 && res2.count === 0) {
       return NextResponse.json(
         { ok: false, error: "Bunday hisob topilmadi" },
         { status: 404 }

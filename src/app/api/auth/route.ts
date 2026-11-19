@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { db } from "@/lib/db";
 import { ensureUser } from "@/lib/randap-server";
 
@@ -10,6 +11,7 @@ function accountPayload(account: {
   gmail: string;
   viaGoogle: boolean;
   blockedUntil: Date | null;
+  accountKey: string;
 }) {
   return {
     name: account.name,
@@ -18,32 +20,88 @@ function accountPayload(account: {
     blockedUntil: account.blockedUntil
       ? new Date(account.blockedUntil).getTime()
       : null,
+    accountKey: account.accountKey,
   };
 }
 
-/** Sessiyani tekshirish — bu deviceKey uchun hisob bormi? */
+/**
+ * Gmail bo'yicha hisobni topadi/yaratadi (bitta gmail = bitta accountKey).
+ * Mavjud hisob bo'lmasa: eski AuthAccount qatori (shu gmail bilan biror qurilmada
+ * kirgan bo'lsa) o'sha qurilma kalitini "adopt" qilinadi — eski ma'lumotlar
+ * yo'qolmaydi. Aks holda yangi tasodifiy accountKey yaratiladi.
+ */
+async function upsertAccount(name: string, gmail: string) {
+  const existing = await db.account.findUnique({ where: { gmail } });
+  if (existing) {
+    if (existing.name !== name) {
+      await db.account.update({ where: { id: existing.id }, data: { name } });
+      return { ...existing, name };
+    }
+    return existing;
+  }
+
+  // Migration: eski AuthAccount qatori bor-mi? (deploygacha kirgan hisoblar)
+  const legacy = await db.authAccount.findFirst({
+    where: { gmail },
+    orderBy: { createdAt: "asc" },
+  });
+  const accountKey = legacy?.deviceKey || `acct-${randomUUID()}`;
+  return db.account.create({ data: { gmail, name, accountKey } });
+}
+
+/** Sessiyani tekshirish — accountKey yoki eski deviceKey bo'yicha hisob bormi? */
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const deviceKey = (searchParams.get("deviceKey") ?? "").trim();
-    if (!deviceKey) {
+    const key = (searchParams.get("deviceKey") ?? "").trim();
+    if (!key) {
       return NextResponse.json(
         { ok: false, error: "deviceKey kerak" },
         { status: 400 }
       );
     }
-    const account = await db.authAccount.findUnique({ where: { deviceKey } });
-    if (account) {
-      // Har bir kirish — "kimlar kirganini ko'rish" uchun lastSeen yangilanadi
-      await db.authAccount.update({
-        where: { deviceKey },
-        data: { lastSeenAt: new Date() },
+
+    // 1) Yangi usul: accountKey bo'yicha Account
+    const acct = await db.account.findUnique({ where: { accountKey: key } });
+    if (acct) {
+      await db.account.update({
+        where: { id: acct.id },
+        data: { updatedAt: new Date() },
+      });
+      return NextResponse.json({
+        ok: true,
+        account: accountPayload({
+          name: acct.name,
+          gmail: acct.gmail,
+          viaGoogle: true,
+          blockedUntil: acct.blockedUntil,
+          accountKey: acct.accountKey,
+        }),
       });
     }
-    return NextResponse.json({
-      ok: true,
-      account: account ? accountPayload(account) : null,
-    });
+
+    // 2) Migration: eski deviceKey bo'yicha AuthAccount
+    const authAccount = await db.authAccount.findUnique({ where: { deviceKey: key } });
+    if (authAccount) {
+      // Har bir kirish — "kimlar kirganini ko'rish" uchun lastSeen yangilanadi
+      await db.authAccount.update({
+        where: { deviceKey: key },
+        data: { lastSeenAt: new Date() },
+      });
+      const resolved = await upsertAccount(authAccount.name, authAccount.gmail);
+      return NextResponse.json({
+        ok: true,
+        account: accountPayload({
+          name: resolved.name,
+          gmail: resolved.gmail,
+          viaGoogle: authAccount.viaGoogle,
+          blockedUntil: resolved.blockedUntil ?? authAccount.blockedUntil,
+          accountKey: resolved.accountKey,
+        }),
+      });
+    }
+
+    return NextResponse.json({ ok: true, account: null });
   } catch (error) {
     console.error("/api/auth GET error:", error);
     return NextResponse.json(
@@ -58,6 +116,8 @@ export async function GET(req: Request) {
  *  - ism va Gmail IKKALASI ham to'ldirilishi shart (validatsiya serverda ham);
  *  - ism takroriy bo'lishi mumkin (boshqalar qo'ygan ismni ham qo'yish mumkin);
  *  - Google orqali kirishda gmail @gmail.com bo'lishi shart, aks holda kirmaydi;
+ *  - Bitta gmail = bitta hisob (accountKey): boshqa gmail bilan kirsa eski
+ *    ma'lumotlar ko'rinmaydi, eski gmail bilan qayta kirsa hammasi qaytadi;
  *  - muvaffaqiyatli kirgach User va ChatProfile ismi sinxronlanadi.
  */
 export async function POST(req: Request) {
@@ -105,7 +165,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // ADMIN BLOKI: shu device yoki gmail bloklangan bo'lsa — kirmaydi
+    // ADMIN BLOKI: shu qurilma yoki gmail bloklangan bo'lsa — kirmaydi
     const now = new Date();
     const block = await db.authAccount.findFirst({
       where: {
@@ -125,21 +185,39 @@ export async function POST(req: Request) {
         { status: 403 }
       );
     }
+    const accountBlock = await db.account.findFirst({
+      where: { gmail, blockedUntil: { gt: now } },
+    });
+    if (accountBlock?.blockedUntil) {
+      return NextResponse.json(
+        {
+          ok: false,
+          blocked: true,
+          blockedUntil: new Date(accountBlock.blockedUntil).getTime(),
+          error: "Kirish vaqtincha bloklangan",
+        },
+        { status: 403 }
+      );
+    }
 
-    // Profil ismini kirish ismi bilan sinxronlaymiz
-    const user = await ensureUser(deviceKey);
+    // Bitta gmail = bitta hisob
+    const account = await upsertAccount(name, gmail);
+
+    // Profil ismini kirish ismi bilan sinxronlaymiz (accountKey ostida)
+    const user = await ensureUser(account.accountKey);
     if (user.name !== name) {
       await db.user.update({ where: { id: user.id }, data: { name } });
     }
 
     // Chat profilining ismi ham kirish ismi bilan bir xil bo'lsin
     await db.chatProfile.upsert({
-      where: { deviceKey },
+      where: { deviceKey: account.accountKey },
       update: { name },
-      create: { deviceKey, name },
+      create: { deviceKey: account.accountKey, name },
     });
 
-    const account = await db.authAccount.upsert({
+    // Qurilma sessiyasi (admin panel va statistika uchun saqlanadi)
+    const authAccount = await db.authAccount.upsert({
       where: { deviceKey },
       update: {
         name,
@@ -151,7 +229,16 @@ export async function POST(req: Request) {
       create: { deviceKey, name, gmail, viaGoogle },
     });
 
-    return NextResponse.json({ ok: true, account: accountPayload(account) });
+    return NextResponse.json({
+      ok: true,
+      account: accountPayload({
+        name: authAccount.name,
+        gmail: authAccount.gmail,
+        viaGoogle: authAccount.viaGoogle,
+        blockedUntil: account.blockedUntil,
+        accountKey: account.accountKey,
+      }),
+    });
   } catch (error) {
     console.error("/api/auth POST error:", error);
     return NextResponse.json(
@@ -161,7 +248,11 @@ export async function POST(req: Request) {
   }
 }
 
-/** Chiqish (logout) — sessiya hisobi o'chiriladi */
+/**
+ * Chiqish (logout) — qurilma sessiyasi o'chiriladi.
+ * Gmail→accountKey xaritasi Account jadvalida QOLADI: shu gmail bilan
+ * qayta kirganda eski ma'lumotlar (videolar, chatlar, layklar) qaytadi.
+ */
 export async function DELETE(req: Request) {
   try {
     const body = (await req.json().catch(() => null)) as {

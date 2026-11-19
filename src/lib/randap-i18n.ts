@@ -332,6 +332,7 @@ const en = {
   toastUploadedShorts: "It appeared in the Shorts section.",
   toastUploadedVideos: "It appeared in the Videos section.",
   toastUploadFail: "Upload error",
+  uploadProgress: "Uploading... {percent}%",
   toastUploadFailed: "Upload failed",
   toastUploadFailedDesc: "Check your connection and try again.",
 
@@ -706,6 +707,7 @@ const ru: Dict = {
   toastUploadedShorts: "Появилось в разделе Shorts.",
   toastUploadedVideos: "Появилось в разделе «Видео».",
   toastUploadFail: "Ошибка загрузки",
+  uploadProgress: "Загрузка... {percent}%",
   toastUploadFailed: "Загрузка не удалась",
   toastUploadFailedDesc:
     "Проверьте соединение и попробуйте ещё раз.",
@@ -1074,6 +1076,7 @@ const uz: Dict = {
   toastUploadedShorts: "Shorts bo'limida paydo bo'ldi.",
   toastUploadedVideos: "Videos bo'limida paydo bo'ldi.",
   toastUploadFail: "Yuklashda xatolik",
+  uploadProgress: "Yuklanmoqda... {percent}%",
   toastUploadFailed: "Yuklash muvaffaqiyatsiz",
   toastUploadFailedDesc:
     "Internet aloqasini tekshirib qayta urinib ko'ring.",

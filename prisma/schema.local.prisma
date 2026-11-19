@@ -240,3 +240,42 @@ model RandomQueue {
   deviceKey String   @unique
   joinedAt  DateTime @default(now())
 }
+
+/* ---------- Gmail asosidagi hisoblar (accountKey) ---------- */
+
+/// Bitta gmail = bitta hisob: barcha ma'lumotlar accountKey atrofida saqlanadi.
+/// Shu tufayli boshqa gmail bilan kirsangiz — eski ma'lumotlar ko'rinmaydi,
+/// eski gmail bilan qayta kirganingizda esa hammasi joyida qaytadi.
+model Account {
+  id           String    @id @default(cuid())
+  gmail        String    @unique
+  accountKey   String    @unique
+  name         String
+  blockedUntil DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+/* ---------- Bazadagi yuklamalar (bo'laklab yuklash) ---------- */
+
+/// Video/thumbnail baytlari bazada saqlanadi (Vercel'da fayl tizimi yo'q).
+/// Katta fayllar ~3 MB lik bo'laklarga bo'linib yuklanadi (serverless 4.5MB limit).
+model UploadFile {
+  id        String        @id @default(cuid())
+  mime      String
+  size      Int           @default(0)
+  kind      String        @default("video")
+  createdAt DateTime      @default(now())
+  parts     UploadChunk[]
+}
+
+model UploadChunk {
+  id     String     @id @default(cuid())
+  fileId String
+  file   UploadFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  idx    Int
+  bytes  Int        @default(0)
+  data   String
+
+  @@unique([fileId, idx])
+}

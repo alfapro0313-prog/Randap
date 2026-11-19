@@ -14,20 +14,25 @@ export async function GET(req: Request) {
     await ensureChatProfile(deviceKey);
     await touchPresence(deviceKey);
 
+    // Katta-kichik harf farqsiz qidiruv (SQLite/Postgres mos) — JS da filtrlanadi
     const rows = await db.chatProfile.findMany({
-      where: {
-        deviceKey: { not: deviceKey },
-        name: q ? { contains: q } : undefined,
-      },
+      where: { deviceKey: { not: deviceKey } },
       orderBy: [{ lastSeenAt: "desc" }],
-      take: 40,
+      take: 300,
     });
+    const lower = q.toLowerCase();
+    const filtered = q
+      ? rows.filter((r) => r.name.toLowerCase().includes(lower))
+      : rows;
 
     // Online bo'lganlar tepada turadi
-    const people = rows.map(serializeChatProfile).sort((a, b) => {
-      if (a.online !== b.online) return a.online ? -1 : 1;
-      return b.lastSeenAt.localeCompare(a.lastSeenAt);
-    });
+    const people = filtered
+      .slice(0, 40)
+      .map(serializeChatProfile)
+      .sort((a, b) => {
+        if (a.online !== b.online) return a.online ? -1 : 1;
+        return b.lastSeenAt.localeCompare(a.lastSeenAt);
+      });
 
     return NextResponse.json({ ok: true, people });
   } catch (error) {

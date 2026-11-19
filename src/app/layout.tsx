@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Randap — Video platforma",
+  title: "Randap Video platforma",
   description:
     "Randap — videolar va shorts joylash, ko'rish, layk bosish, izoh qoldirish va obuna bo'lish mumkin bo'lgan video platforma.",
   keywords: ["Randap", "video", "shorts", "video platforma", "layk", "obuna"],
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-icon.png" }],
   },
   openGraph: {
-    title: "Randap — Video platforma",
+    title: "Randap Video platforma",
     description: "Videolar va shorts — hammasi bir joyda.",
     siteName: "Randap",
     type: "website",

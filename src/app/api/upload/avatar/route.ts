@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { ensureUser, saveUpload, uploadBaseName, UPLOAD_ROOT } from "@/lib/randap-server";
-import { mkdir } from "fs/promises";
-import path from "path";
+import { ensureUser } from "@/lib/randap-server";
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024; // 5 MB
 
-/** Profil avatari yuklash */
+/**
+ * Profil avatari yuklash — bazada saqlanadi (Vercel'da fayl tizimi yo'q).
+ * avatar = "api/files/{uploadId}" — /api/files/{id} orqali beriladi.
+ */
 export async function POST(req: Request) {
   try {
     const form = await req.formData();
@@ -32,10 +33,20 @@ export async function POST(req: Request) {
     const user = await ensureUser(deviceKey);
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const dir = path.join(UPLOAD_ROOT, "avatars");
-    await mkdir(dir, { recursive: true });
 
-    const avatarPath = await saveUpload(buffer, dir, uploadBaseName(), file.name, ".jpg");
+    const uploadFile = await db.uploadFile.create({
+      data: { mime: file.type, size: buffer.byteLength, kind: "avatar" },
+    });
+    await db.uploadChunk.create({
+      data: {
+        fileId: uploadFile.id,
+        idx: 0,
+        data: buffer.toString("base64"),
+        bytes: buffer.byteLength,
+      },
+    });
+
+    const avatarPath = `api/files/${uploadFile.id}`;
 
     const updated = await db.user.update({
       where: { id: user.id },

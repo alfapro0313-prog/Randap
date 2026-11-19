@@ -30,10 +30,27 @@ type DuplicateInfo = {
   existingId: string;
 };
 
+/** Bo'laklab yuklash: har bir bo'lakning xom bayt hajmi (serverless 4.5MB limit) */
+const UPLOAD_CHUNK_BYTES = 3_000_000;
+
 function formatBytes(bytes: number): string {
   if (bytes >= 1024 * 1024 * 1024) return `${(bytes / 1024 ** 3).toFixed(1)} GB`;
   if (bytes >= 1024 * 1024) return `${(bytes / 1024 ** 2).toFixed(1)} MB`;
   return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+}
+
+/** Blob/Base64 (FileReader dataURL orqali) — katta fayllar uchun ham xavfsiz */
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const s = String(reader.result ?? "");
+      const comma = s.indexOf(",");
+      resolve(comma >= 0 ? s.slice(comma + 1) : s);
+    };
+    reader.onerror = () => reject(new Error("Faylni o'qib bo'lmadi"));
+    reader.readAsDataURL(blob);
+  });
 }
 
 export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
@@ -48,6 +65,7 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
   const [description, setDescription] = useState("");
   const [allowComments, setAllowComments] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [duplicate, setDuplicate] = useState<DuplicateInfo | null>(null);
   const videoElRef = useRef<HTMLVideoElement | null>(null);
 
@@ -167,36 +185,86 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
     }
 
     setSubmitting(true);
+    setProgress(0);
     setDuplicate(null);
 
     try {
-      const form = new FormData();
-      form.set("deviceKey", deviceKey);
-      form.set("title", title.trim());
-      form.set("description", description.trim());
-      form.set("kind", kind);
-      form.set("allowComments", String(allowComments));
-      form.set("durationSec", String(duration));
-      form.set("file", file);
-      if (thumb) form.set("thumbnail", thumb);
+      // 1) INIT — yuklashni ochish (uploadId + bo'lak hajmi)
+      const initRes = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          deviceKey,
+          title: title.trim(),
+          description: description.trim(),
+          kind,
+          allowComments,
+          durationSec: duration,
+          fileName: file.name,
+          fileSize: file.size,
+          mime: file.type || "video/mp4",
+        }),
+      });
+      const initData = await initRes.json();
+      if (!initData?.ok) {
+        toast({ title: t("toastUploadFail"), description: initData?.error, variant: "destructive" });
+        return;
+      }
+      const uploadId: string = initData.uploadId;
+      const chunkSize: number = Number(initData.chunkSize) || UPLOAD_CHUNK_BYTES;
 
-      // Rasm tanlanmasa — videodan olingan avtomatik rasmni yuboramiz
-      if (!thumb && autoThumbPreview) {
-        try {
-          const blob = await (await fetch(autoThumbPreview)).blob();
-          form.set(
-            "thumbnail",
-            new File([blob], "auto-thumbnail.jpg", { type: "image/jpeg" })
-          );
-        } catch {
-          // bo'lmasa server avtomatik placeholder rasm beradi
+      // 2) BO'LAKLAR — har biri ~3MB, foiz hisoblanib boradi
+      const total = Math.ceil(file.size / chunkSize);
+      for (let i = 0; i < total; i++) {
+        const blob = file.slice(i * chunkSize, Math.min(file.size, (i + 1) * chunkSize));
+        const data = await blobToBase64(blob);
+        const chunkRes = await fetch("/api/upload/chunk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uploadId, index: i, data }),
+        });
+        const chunkData = await chunkRes.json();
+        if (!chunkData?.ok) {
+          toast({
+            title: t("toastUploadFail"),
+            description: chunkData?.error ?? t("toastUploadFailedDesc"),
+            variant: "destructive",
+          });
+          return;
         }
+        const doneBytes = Math.min(file.size, (i + 1) * chunkSize);
+        setProgress(Math.round((doneBytes / file.size) * 100));
       }
 
-      const res = await fetch("/api/upload", { method: "POST", body: form });
-      const data = await res.json();
+      // 3) THUMBNAIL — tanlangan rasm yoki videodan olingan avtomatik rasm
+      let thumbData: string | null = null;
+      if (thumb) {
+        thumbData = await blobToBase64(thumb);
+      } else if (autoThumbPreview) {
+        thumbData = autoThumbPreview.includes(",")
+          ? autoThumbPreview.slice(autoThumbPreview.indexOf(",") + 1)
+          : autoThumbPreview;
+      }
 
-      if (res.ok && data.ok) {
+      // 4) FINISH — hash, dublikat tekshiruvi va Video yozuvi
+      const finRes = await fetch("/api/upload/finish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uploadId,
+          deviceKey,
+          title: title.trim(),
+          description: description.trim(),
+          kind,
+          allowComments,
+          durationSec: duration,
+          thumbData,
+          thumbMime: thumb?.type || "image/jpeg",
+        }),
+      });
+      const finData = await finRes.json();
+
+      if (finData?.ok) {
         toast({
           title: t("toastUploaded"),
           description:
@@ -210,14 +278,14 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
         setAllowComments(true);
         setKind("video");
         setDuration(0);
-        onUploaded(data.video.id);
+        onUploaded(finData.video.id);
         return;
       }
 
-      if (data.duplicate) {
+      if (finData?.duplicate) {
         setDuplicate({
-          message: String(data.error ?? t("duplicateDefault")),
-          existingId: String(data.existingId ?? ""),
+          message: String(finData.error ?? t("duplicateDefault")),
+          existingId: String(finData.existingId ?? ""),
         });
         toast({
           title: t("duplicateFound"),
@@ -227,7 +295,7 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
         return;
       }
 
-      toast({ title: t("toastUploadFail"), description: data.error, variant: "destructive" });
+      toast({ title: t("toastUploadFail"), description: finData?.error, variant: "destructive" });
     } catch {
       toast({
         title: t("toastUploadFailed"),
@@ -236,6 +304,7 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
       });
     } finally {
       setSubmitting(false);
+      setProgress(0);
     }
   }
 
@@ -480,7 +549,7 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
           {submitting ? (
             <>
               <Loader2 className="size-5 animate-spin" aria-hidden="true" />
-              {t("loading")}
+              {t("uploadProgress", { percent: progress })}
             </>
           ) : (
             <>
@@ -489,6 +558,27 @@ export function UploadView({ deviceKey, onBack, onUploaded }: UploadViewProps) {
             </>
           )}
         </Button>
+
+        {/* Yuklanish foizi — progress chizig'i */}
+        {submitting ? (
+          <div
+            className="flex flex-col gap-1.5"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progress}
+          >
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-secondary">
+              <div
+                className="h-full rounded-full bg-primary transition-[width] duration-200 ease-out"
+                style={{ width: `${Math.max(2, progress)}%` }}
+              />
+            </div>
+            <p className="text-center text-xs font-medium text-muted-foreground">
+              {t("uploadProgress", { percent: progress })}
+            </p>
+          </div>
+        ) : null}
       </form>
     </div>
   );
