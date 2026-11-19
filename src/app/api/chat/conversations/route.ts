@@ -51,8 +51,10 @@ export async function GET(req: Request) {
       conversations.map(async (conv) => {
         const partnerKey = partnerKeyOf(conv, deviceKey);
         const partnerRow = partnerMap.get(partnerKey);
+        // O'chirgan tomonda eski tarix ko'rinmaydi (deletedForA/B)
+        const sideFilter = conv.userAKey === deviceKey ? { deletedForA: false } : { deletedForB: false };
         const lastMessage = await db.message.findFirst({
-          where: { conversationId: conv.id, deletedAt: null },
+          where: { conversationId: conv.id, deletedAt: null, ...sideFilter },
           orderBy: { createdAt: "desc" },
         });
         const unreadCount = await db.message.count({
@@ -61,6 +63,7 @@ export async function GET(req: Request) {
             senderKey: { not: deviceKey },
             readAt: null,
             deletedAt: null,
+            ...sideFilter,
           },
         });
 
@@ -113,10 +116,18 @@ export async function DELETE(req: Request) {
     }
 
     const isA = conv.userAKey === deviceKey;
-    await db.conversation.update({
-      where: { id: conversationId },
-      data: isA ? { hiddenForA: true } : { hiddenForB: true },
-    });
+    // WhatsApp uslubi: chat o'chirilganda eski tarix FAQAT o'chirgan tomonda yo'qoladi,
+    // sherikda hamma xabarlar qoladi. Yangi xabarlar yozilsa tabiiy davom etadi.
+    await db.$transaction([
+      db.conversation.update({
+        where: { id: conversationId },
+        data: isA ? { hiddenForA: true } : { hiddenForB: true },
+      }),
+      db.message.updateMany({
+        where: { conversationId },
+        data: isA ? { deletedForA: true } : { deletedForB: true },
+      }),
+    ]);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

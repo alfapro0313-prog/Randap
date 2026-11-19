@@ -23,9 +23,11 @@ export async function GET(req: Request) {
         kind: { not: "system" },
         // O'chirilgan rasm/skrinshotlar ham bildirishnoma bo'lmaydi
         deletedAt: null,
-        conversation: {
-          OR: [{ userAKey: deviceKey }, { userBKey: deviceKey }],
-        },
+        // "Chatni o'chirilgan" eski xabarlar qayta esemes chiqmaydi
+        OR: [
+          { conversation: { userAKey: deviceKey }, deletedForA: false },
+          { conversation: { userBKey: deviceKey }, deletedForB: false },
+        ],
       },
       orderBy: { createdAt: "desc" },
       take: 8,

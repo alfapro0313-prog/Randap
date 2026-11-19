@@ -208,6 +208,9 @@ model Message {
   readAt         DateTime?
   /// Rasm/skrinshot o'chirilgan vaqt — o'chirilgan xabar ikkala tomonda ham ko'rinmaydi
   deletedAt      DateTime?
+  /// "Chatni o'chirish"dan keyin eski tarix faqat o'chirgan tomonda ko'rinmaydi (sherikda qoladi)
+  deletedForA    Boolean      @default(false)
+  deletedForB    Boolean      @default(false)
   createdAt      DateTime     @default(now())
 
   @@index([conversationId, createdAt])

@@ -39,9 +39,11 @@ export async function GET(req: Request) {
     }
 
     const partnerKey = partnerKeyOf(conv, deviceKey);
+    // "Chatni o'chirish"dan keyin eski tarix faqat o'chirgan tomonda ko'rinmaydi
+    const sideFilter = conv.userAKey === deviceKey ? { deletedForA: false } : { deletedForB: false };
     const [messages, partnerRow, typingRow] = await Promise.all([
       db.message.findMany({
-        where: { conversationId: conv.id, deletedAt: null },
+        where: { conversationId: conv.id, deletedAt: null, ...sideFilter },
         orderBy: { createdAt: "asc" },
         take: 300,
       }),
@@ -52,8 +54,14 @@ export async function GET(req: Request) {
     ]);
 
     // Men ochiq ko'rayotganim uchun yangi xabarlarni o'qilgan deb belgilaymiz
+    // (o'zim o'chirib tashlagan eski xabarlar ham o'qilgan hisoblanadi — boshqa ko'rinmaydi)
     await db.message.updateMany({
-      where: { conversationId: conv.id, senderKey: { not: deviceKey }, readAt: null },
+      where: {
+        conversationId: conv.id,
+        senderKey: { not: deviceKey },
+        readAt: null,
+        ...(conv.userAKey === deviceKey ? { deletedForA: false } : { deletedForB: false }),
+      },
       data: { readAt: new Date() },
     });
     await touchPresence(deviceKey);
