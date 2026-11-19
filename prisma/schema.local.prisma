@@ -1,0 +1,227 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String        @id @default(cuid())
+  deviceKey String        @unique
+  name      String
+  handle    String        @unique
+  avatar    String?
+  points    Int           @default(0)
+  createdAt DateTime      @default(now())
+  videos    Video[]
+  comments  Comment[]
+  subs      Subscription[] @relation("SubscribedChannels")
+}
+
+model Video {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  thumbPath     String
+  videoPath     String
+  hash          String    @unique
+  kind          String    @default("video")
+  durationSec   Int       @default(0)
+  allowComments Boolean   @default(true)
+  views         Int       @default(0)
+  uploaderId    String
+  uploader      User      @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  comments      Comment[]
+  likes         Like[]
+  createdAt     DateTime  @default(now())
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  body      String
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    Comment? @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentThread")
+  createdAt DateTime @default(now())
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  deviceId  String
+  createdAt DateTime @default(now())
+
+  @@unique([videoId, deviceId])
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  channelId String
+  channel   User     @relation("SubscribedChannels", fields: [channelId], references: [id], onDelete: Cascade)
+  deviceId  String
+  createdAt DateTime @default(now())
+
+  @@unique([channelId, deviceId])
+}
+
+model Subject {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  description String
+  icon        String        @default("book")
+  color       String        @default("emerald")
+  order       Int           @default(0)
+  lessons     Lesson[]
+  quizzes     Quiz[]
+}
+
+model Lesson {
+  id          String  @id @default(cuid())
+  subjectId   String
+  subject     Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  title       String
+  summary     String
+  content     String
+  durationMin Int     @default(5)
+  order       Int     @default(0)
+}
+
+model Quiz {
+  id          String        @id @default(cuid())
+  subjectId   String
+  subject     Subject       @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  order       Int           @default(0)
+  questions   Question[]
+  attempts    QuizAttempt[]
+}
+
+model Question {
+  id           String  @id @default(cuid())
+  quizId       String
+  quiz         Quiz    @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  text         String
+  options      String
+  correctIndex Int
+  order        Int     @default(0)
+}
+
+model QuizAttempt {
+  id           String   @id @default(cuid())
+  quizId       String
+  quiz         Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  deviceId     String
+  score        Int
+  total        Int
+  pointsEarned Int      @default(0)
+  createdAt    DateTime @default(now())
+}
+
+/* ---------- Login gate (saytga kirish: ism + Gmail) ---------- */
+
+model AuthAccount {
+  id           String    @id @default(cuid())
+  deviceKey    String    @unique
+  name         String
+  gmail        String
+  viaGoogle    Boolean   @default(false)
+  visits       Int       @default(1)
+  lastSeenAt   DateTime  @default(now())
+  blockedUntil DateTime?
+  blockedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+/// Profil ichidan yoziladigan shikoyatlar — admin panelga tushadi
+model Complaint {
+  id         String    @id @default(cuid())
+  deviceKey  String
+  name       String
+  gmail      String
+  text       String
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+}
+
+/// Saytdagi bildirishnomalar: layk, komment, javob, obuna, yangi video
+model Notification {
+  id        String    @id @default(cuid())
+  deviceKey String
+  type      String
+  text      String
+  actorName String    @default("")
+  videoId   String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([deviceKey, readAt])
+}
+
+/* ---------- Chat (Telegram-ga o'xshagan) ---------- */
+
+model ChatProfile {
+  id         String   @id @default(cuid())
+  deviceKey  String   @unique
+  name       String
+  emoji      String   @default("🙂")
+  color      String   @default("sky")
+  bio        String   @default("")
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+}
+
+model Conversation {
+  id            String    @id @default(cuid())
+  userAKey      String
+  userBKey      String
+  isRandom      Boolean   @default(false)
+  endedAt       DateTime?
+  /// "Chatni o'chirish" — faqat o'z tomondan yashiriladi (sherikda qoladi)
+  hiddenForA    Boolean   @default(false)
+  hiddenForB    Boolean   @default(false)
+  lastMessageAt DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  messages      Message[]
+
+  @@index([userAKey])
+  @@index([userBKey])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderKey      String
+  kind           String       @default("text")
+  content        String
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+}
+
+model TypingState {
+  id             String   @id @default(cuid())
+  conversationId String
+  userKey        String
+  updatedAt      DateTime @default(now())
+
+  @@unique([conversationId, userKey])
+}
+
+model RandomQueue {
+  id        String   @id @default(cuid())
+  deviceKey String   @unique
+  joinedAt  DateTime @default(now())
+}

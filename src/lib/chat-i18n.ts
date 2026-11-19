@@ -64,6 +64,9 @@ const en = {
   deleteChatHint: "Only disappears for you",
   deleteYes: "Delete",
   deletedToast: "Chat deleted",
+  selectMode: "Select to delete",
+  selectedLabel: "selected",
+  deletedMany: "{n} chats deleted",
 };
 
 type ChatStrings = typeof en;
@@ -124,6 +127,9 @@ const ru: ChatStrings = {
   deleteChatHint: "Исчезнет только у вас",
   deleteYes: "Удалить",
   deletedToast: "Чат удалён",
+  selectMode: "Выбрать для удаления",
+  selectedLabel: "выбрано",
+  deletedMany: "Удалено чатов: {n}",
 };
 
 const uz: ChatStrings = {
@@ -182,6 +188,9 @@ const uz: ChatStrings = {
   deleteChatHint: "Faqat sizdan yo'qoladi",
   deleteYes: "O'chirish",
   deletedToast: "Chat o'chirildi",
+  selectMode: "Tanlab o'chirish",
+  selectedLabel: "tanlandi",
+  deletedMany: "{n} ta chat o'chirildi",
 };
 
 export const CHAT_I18N: Record<ChatLang, ChatStrings> = { en, ru, uz };

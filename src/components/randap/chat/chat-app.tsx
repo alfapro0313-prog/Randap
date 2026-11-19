@@ -53,6 +53,9 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
   const [peer, setPeer] = useState<ChatProfileItem | null>(null);
   // Qator ichida "o'chirilsinmi?" tasdiqlashi ko'rsatilayotgan suhbat
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  // Tanlab o'chirish rejimi: qidiruv yonidagi axlat qutisiga bosilganda
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Sozlamalar formasi
   const [nameDraft, setNameDraft] = useState("");
@@ -114,6 +117,9 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
   // SMS xabaridan kelgan suhbatni ochish
   useEffect(() => {
     if (focusConversationId) {
+      // Tanlash rejimi bo'lsa — uni yopamiz
+      setSelectionMode(false);
+      setSelectedIds(new Set());
       setActiveConvId(focusConversationId);
       setRandomState("idle");
     }
@@ -275,6 +281,62 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
     }
   }
 
+  /** Tanlash rejimini yoqish/o'chirish — qidiruv yonidagi axlat qutisi */
+  function toggleSelectionMode() {
+    setConfirmDeleteId(null);
+    setSearchQ("");
+    if (selectionMode) setSelectedIds(new Set());
+    setSelectionMode((v) => !v);
+  }
+
+  function exitSelectionMode() {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  }
+
+  /** Tanlash rejimida qator bosilganda — belgilash/bekor qilish */
+  function toggleSelected(convId: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(convId)) next.delete(convId);
+      else next.add(convId);
+      return next;
+    });
+  }
+
+  /** Tanlangan chatlarni bir yo'la o'chirish */
+  async function deleteSelected() {
+    if (!deviceKey || selectedIds.size === 0) return;
+    const ids = Array.from(selectedIds);
+    exitSelectionMode();
+    // Darhol ro'yxatdan olib tashlaymiz (optimistik)
+    setConversations((prev) => prev.filter((c) => !ids.includes(c.id)));
+    if (activeConvId && ids.includes(activeConvId)) setActiveConvId(null);
+    try {
+      const results = await Promise.all(
+        ids.map(async (id) => {
+          try {
+            const res = await fetch("/api/chat/conversations", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ deviceKey, conversationId: id }),
+            });
+            const data = await res.json().catch(() => null);
+            return Boolean(data?.ok);
+          } catch {
+            return false;
+          }
+        })
+      );
+      if (results.some((r) => !r)) void loadConversations(); // xato bo'lsa tiklaymiz
+      toast({
+        title: ids.length === 1 ? t.deletedToast : t.deletedMany.replace("{n}", String(ids.length)),
+      });
+    } catch {
+      void loadConversations();
+    }
+  }
+
   /** Chatni o'chirish: faqat o'z ro'yxatdan yo'qoladi (sherikda qoladi) */
   async function deleteChat(convId: string) {
     if (!deviceKey) return;
@@ -417,38 +479,77 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
             )}
           </div>
 
-          {/* Qidiruv */}
-          <div className="px-3 pt-3">
-            <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3">
+          {/* Qidiruv + axlat qutisi (tanlab o'chirish) */}
+          <div className="flex items-center gap-2 px-3 pt-3">
+            <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-background px-3">
               <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
               <input
                 value={searchQ}
                 onChange={(e) => setSearchQ(e.target.value)}
-                placeholder={t.searchPlaceholder}
+                disabled={selectionMode}
+                placeholder={selectionMode ? t.selectMode : t.searchPlaceholder}
                 aria-label={t.searchPlaceholder}
-                className="h-10 w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+                className="h-10 w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed"
               />
             </div>
+            <button
+              onClick={toggleSelectionMode}
+              aria-label={t.selectMode}
+              title={t.selectMode}
+              aria-pressed={selectionMode}
+              className={cn(
+                "flex size-10 shrink-0 items-center justify-center rounded-xl border transition-colors",
+                selectionMode
+                  ? "border-rose-500 bg-rose-600 text-white"
+                  : "border-border bg-background text-muted-foreground hover:bg-rose-50 hover:text-rose-600"
+              )}
+            >
+              <Trash2 className="size-4" aria-hidden="true" />
+            </button>
           </div>
 
-          {/* Random chat tugmasi */}
+          {/* Random chat tugmasi / tanlash rejimi paneli */}
           <div className="px-3 pt-3">
-            <button
-              onClick={() => void startRandom()}
-              disabled={randomState === "waiting"}
-              className="flex w-full items-center gap-3 rounded-xl bg-sky-600 px-4 py-2.5 text-left text-white transition-colors hover:bg-sky-700 disabled:opacity-60"
-            >
-              <Shuffle className="size-5 shrink-0" aria-hidden="true" />
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold">{t.randomChat}</span>
-                <span className="block text-xs text-sky-100">{t.randomDesc}</span>
-              </span>
-            </button>
+            {selectionMode ? (
+              <div className="flex items-center gap-2 rounded-xl border border-rose-300 bg-rose-50 px-3 py-2">
+                <span className="min-w-0 flex-1 truncate text-xs font-bold text-rose-700">
+                  {selectedIds.size} {t.selectedLabel}
+                </span>
+                <button
+                  onClick={exitSelectionMode}
+                  aria-label={t.cancel}
+                  title={t.cancel}
+                  className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-secondary text-foreground transition-colors hover:bg-secondary/80"
+                >
+                  <X className="size-4" aria-hidden="true" />
+                </button>
+                <button
+                  onClick={() => void deleteSelected()}
+                  disabled={selectedIds.size === 0}
+                  className="flex h-8 shrink-0 items-center gap-1 rounded-lg bg-rose-600 px-3 text-xs font-bold text-white transition-colors hover:bg-rose-700 disabled:opacity-50"
+                >
+                  <Check className="size-3.5" aria-hidden="true" />
+                  {t.deleteYes}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => void startRandom()}
+                disabled={randomState === "waiting"}
+                className="flex w-full items-center gap-3 rounded-xl bg-sky-600 px-4 py-2.5 text-left text-white transition-colors hover:bg-sky-700 disabled:opacity-60"
+              >
+                <Shuffle className="size-5 shrink-0" aria-hidden="true" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-bold">{t.randomChat}</span>
+                  <span className="block text-xs text-sky-100">{t.randomDesc}</span>
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Ro'yxat */}
           <div className="mt-3 min-h-0 flex-1 overflow-y-auto px-3 pb-3 scrollbar-thin">
-            {searchMode ? (
+            {!selectionMode && searchMode ? (
               <section aria-label={t.people} className="flex flex-col gap-1">
                 <p className="px-1 pb-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
                   {t.people}
@@ -555,6 +656,11 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
                       role="button"
                       tabIndex={0}
                       onClick={() => {
+                        // Tanlash rejimi — bosilganda belgilanadi
+                        if (selectionMode) {
+                          toggleSelected(c.id);
+                          return;
+                        }
                         // Boshqa qatorda ochiq tasdiqlash bo'lsa — birinchi bosish uni yopadi
                         if (confirmDeleteId) {
                           setConfirmDeleteId(null);
@@ -566,20 +672,45 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
+                          if (selectionMode) {
+                            toggleSelected(c.id);
+                            return;
+                          }
                           setRandomState("idle");
                           setActiveConvId(c.id);
                         }
                       }}
                       onContextMenu={(e) => {
-                        // O'ng sichqoncha — shu yerda o'chirish tasdiqlashi chiqadi
+                        // Tanlash rejimida o'ng bosish ham belgilaydi
                         e.preventDefault();
+                        if (selectionMode) {
+                          toggleSelected(c.id);
+                          return;
+                        }
+                        // O'ng sichqoncha — shu yerda o'chirish tasdiqlashi chiqadi
                         setConfirmDeleteId(c.id);
                       }}
                       className={cn(
                         "flex cursor-pointer items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-secondary/60",
-                        c.id === activeConvId && "bg-secondary"
+                        c.id === activeConvId && !selectionMode && "bg-secondary",
+                        selectionMode && selectedIds.has(c.id) && "bg-sky-500/10 ring-1 ring-sky-500/60"
                       )}
                     >
+                      {/* Tanlash rejimida belgilash doirasi */}
+                      {selectionMode ? (
+                        <span
+                          className={cn(
+                            "flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                            selectedIds.has(c.id)
+                              ? "border-sky-600 bg-sky-600 text-white"
+                              : "border-muted-foreground/40"
+                          )}
+                        >
+                          {selectedIds.has(c.id) ? (
+                            <Check className="size-3" aria-hidden="true" />
+                          ) : null}
+                        </span>
+                      ) : null}
                       {c.partner ? (
                         <ChatAvatar
                           emoji={c.partner.emoji}
@@ -622,7 +753,7 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
                                 }`
                               : t.messagesEmpty}
                           </span>
-                          {c.unreadCount > 0 ? (
+                          {!selectionMode && c.unreadCount > 0 ? (
                             <span className="flex shrink-0 items-center gap-1.5">
                               {/* Mobil uchun ham ishlaydigan o'chirish tugmasi */}
                               <button
@@ -640,7 +771,7 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
                                 {c.unreadCount}
                               </span>
                             </span>
-                          ) : (
+                          ) : !selectionMode ? (
                             /* Mobil uchun ham ishlaydigan o'chirish tugmasi */
                             <button
                               onClick={(e) => {
@@ -653,7 +784,7 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
                             >
                               <Trash2 className="size-3.5" aria-hidden="true" />
                             </button>
-                          )}
+                          ) : null}
                         </span>
                       </span>
                     </div>
