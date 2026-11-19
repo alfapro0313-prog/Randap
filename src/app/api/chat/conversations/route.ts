@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { unlink } from "node:fs/promises";
+import path from "node:path";
 import { db } from "@/lib/db";
 import {
   ensureChatProfile,
@@ -87,8 +89,9 @@ export async function GET(req: Request) {
 }
 
 /**
- * Chatni o'chirish — faqat o'z tomondan yashiriladi (sherikda suhbat qoladi).
- * Aytish joiz: sherik yangi xabar yozsa, suhbat qaytadan ro'yxatda ko'rinadi.
+ * Chatni o'chirish — ikkala tomonda ham yo'qoladi:
+ * xabarlar, rasmlar/skrinshotlar (baytlari bilan) o'chiriladi, suhbat ikkala ro'yxatdan yashiriladi.
+ * Keyin qayta ochilsa — toza, bo'sh chat boshlanadi.
  */
 export async function DELETE(req: Request) {
   try {
@@ -115,19 +118,41 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ ok: false, error: "Ruxsat yo'q" }, { status: 403 });
     }
 
-    const isA = conv.userAKey === deviceKey;
-    // WhatsApp uslubi: chat o'chirilganda eski tarix FAQAT o'chirgan tomonda yo'qoladi,
-    // sherikda hamma xabarlar qoladi. Yangi xabarlar yozilsa tabiiy davom etadi.
+    // Ikkala tomon uchun ham o'chiriladi: xabarlar va rasmlar bazadan butunlay o'chadi
+    const msgs = await db.message.findMany({
+      where: { conversationId },
+      select: { content: true },
+    });
+    const dbImageIds = msgs
+      .filter((m) => m.content.startsWith("chat-images/"))
+      .map((m) => m.content.slice("chat-images/".length));
+    const filePaths = msgs
+      .filter((m) => m.content.startsWith("uploads/chat/"))
+      .map((m) => m.content);
+
     await db.$transaction([
+      // Ikkala ro'yxatdan yashiriladi
       db.conversation.update({
         where: { id: conversationId },
-        data: isA ? { hiddenForA: true } : { hiddenForB: true },
+        data: { hiddenForA: true, hiddenForB: true },
       }),
-      db.message.updateMany({
-        where: { conversationId },
-        data: isA ? { deletedForA: true } : { deletedForB: true },
-      }),
+      // Xabarlar butunlay o'chadi — sherikning ochiq oynasi ham bo'shashadi
+      db.message.deleteMany({ where: { conversationId } }),
+      db.typingState.deleteMany({ where: { conversationId } }),
+      // Rasm baytlari ham bo'shashadi
+      ...(dbImageIds.length
+        ? [db.chatImage.deleteMany({ where: { id: { in: dbImageIds } } })]
+        : []),
     ]);
+
+    // Eski fayl yo'li rasmlari (uploads/chat/...) — fayllarni ham o'chiramiz (xatosiga chidab)
+    for (const p of filePaths) {
+      try {
+        await unlink(path.join(process.cwd(), "public", p));
+      } catch {
+        // fayl yo'q — muhim emas
+      }
+    }
 
     return NextResponse.json({ ok: true });
   } catch (error) {
