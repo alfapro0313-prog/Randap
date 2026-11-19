@@ -21,6 +21,8 @@ export async function GET(req: Request) {
         senderKey: { not: deviceKey },
         // Tizim xabarlari (__connected__/__left__) "esemes" bo'lmaydi
         kind: { not: "system" },
+        // O'chirilgan rasm/skrinshotlar ham bildirishnoma bo'lmaydi
+        deletedAt: null,
         conversation: {
           OR: [{ userAKey: deviceKey }, { userBKey: deviceKey }],
         },

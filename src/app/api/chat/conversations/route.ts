@@ -52,7 +52,7 @@ export async function GET(req: Request) {
         const partnerKey = partnerKeyOf(conv, deviceKey);
         const partnerRow = partnerMap.get(partnerKey);
         const lastMessage = await db.message.findFirst({
-          where: { conversationId: conv.id },
+          where: { conversationId: conv.id, deletedAt: null },
           orderBy: { createdAt: "desc" },
         });
         const unreadCount = await db.message.count({
@@ -60,6 +60,7 @@ export async function GET(req: Request) {
             conversationId: conv.id,
             senderKey: { not: deviceKey },
             readAt: null,
+            deletedAt: null,
           },
         });
 

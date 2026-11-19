@@ -69,6 +69,10 @@ const en = {
   selectMode: "Select to delete",
   selectedLabel: "selected",
   deletedMany: "{n} chats deleted",
+  deleteImage: "Delete photo",
+  deleteImageAsk: "Delete this screenshot?",
+  deleteImageHint: "Disappears for both of you",
+  deletedImageToast: "Screenshot deleted",
 };
 
 type ChatStrings = typeof en;
@@ -134,6 +138,10 @@ const ru: ChatStrings = {
   selectMode: "Выбрать для удаления",
   selectedLabel: "выбрано",
   deletedMany: "Удалено чатов: {n}",
+  deleteImage: "Удалить фото",
+  deleteImageAsk: "Удалить этот скриншот?",
+  deleteImageHint: "Исчезнет у вас обоих",
+  deletedImageToast: "Скриншот удалён",
 };
 
 const uz: ChatStrings = {
@@ -197,6 +205,10 @@ const uz: ChatStrings = {
   selectMode: "Tanlab o'chirish",
   selectedLabel: "tanlandi",
   deletedMany: "{n} ta chat o'chirildi",
+  deleteImage: "Rasmni o'chirish",
+  deleteImageAsk: "Bu skrinshot o'chirilsinmi?",
+  deleteImageHint: "Ikkala tomonda ham yo'qoladi",
+  deletedImageToast: "Skrinshot o'chirildi",
 };
 
 export const CHAT_I18N: Record<ChatLang, ChatStrings> = { en, ru, uz };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Eraser, ImagePlus, Loader2, SendHorizontal, Shuffle, Smile } from "lucide-react";
+import { ArrowLeft, Check, Eraser, ImagePlus, Loader2, SendHorizontal, Shuffle, Smile, Trash2, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { ChatAvatar } from "./chat-avatar";
 import { useLang } from "../lang-provider";
@@ -59,6 +59,8 @@ export function ChatWindow({
   const [sending, setSending] = useState(false);
   const [showStickers, setShowStickers] = useState(false);
   const [uploading, setUploading] = useState(false);
+  // "Rasm o'chirilsinmi?" tasdiqlashi ko'rsatilayotgan xabar
+  const [confirmDeleteMsgId, setConfirmDeleteMsgId] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const stickRef = useRef(true);
@@ -219,6 +221,28 @@ export function ChatWindow({
     }
   }
 
+  /** Rasm/skrinshot xabarini o'chirish — ikkala tomonda ham yo'qoladi */
+  async function deleteImageMessage(messageId: string) {
+    setConfirmDeleteMsgId(null);
+    // Darhol ekrandan olib tashlaymiz (optimistik)
+    setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    try {
+      const res = await fetch("/api/chat/messages", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceKey, conversationId, messageId }),
+      });
+      const data = await res.json();
+      if (data?.ok) {
+        toast({ title: t.deletedImageToast });
+      } else {
+        await refresh(); // xato bo'lsa ro'yxatni tiklaymiz
+      }
+    } catch {
+      await refresh();
+    }
+  }
+
   const ended = meta?.ended ?? false;
   const isRandom = meta?.isRandom ?? initialIsRandom;
   const statusText = ended
@@ -348,6 +372,34 @@ export function ChatWindow({
             const imageSrc = m.content.startsWith("chat-images/")
               ? `/api/${m.content}`
               : `/${m.content.replace(/^\//, "")}`;
+            if (confirmDeleteMsgId === m.id) {
+              // Tasdiqlash — rasm o'rnida qizil panel chiqadi
+              return (
+                <div key={m.id} className={cn("flex", m.mine ? "justify-end" : "justify-start")}>
+                  <div className="flex w-60 flex-col gap-1 rounded-2xl border border-rose-300 bg-rose-50 px-3 py-2.5">
+                    <span className="block text-xs font-bold text-rose-700">{t.deleteImageAsk}</span>
+                    <span className="block text-[10px] text-rose-600/80">{t.deleteImageHint}</span>
+                    <span className="mt-1 flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => setConfirmDeleteMsgId(null)}
+                        aria-label={t.cancel}
+                        title={t.cancel}
+                        className="flex size-8 items-center justify-center rounded-lg bg-secondary text-foreground transition-colors hover:bg-secondary/80"
+                      >
+                        <X className="size-4" aria-hidden="true" />
+                      </button>
+                      <button
+                        onClick={() => void deleteImageMessage(m.id)}
+                        className="flex h-8 items-center gap-1 rounded-lg bg-rose-600 px-3 text-xs font-bold text-white transition-colors hover:bg-rose-700"
+                      >
+                        <Check className="size-3.5" aria-hidden="true" />
+                        {t.deleteYes}
+                      </button>
+                    </span>
+                  </div>
+                </div>
+              );
+            }
             return (
               <div key={m.id} className={cn("flex", m.mine ? "justify-end" : "justify-start")}>
                 <figure className="flex max-w-[240px] flex-col">
@@ -361,11 +413,20 @@ export function ChatWindow({
                   </a>
                   <figcaption
                     className={cn(
-                      "mt-0.5 text-[10px] text-muted-foreground",
-                      m.mine ? "text-right" : "text-left"
+                      "mt-0.5 flex items-center gap-1 text-[10px] text-muted-foreground",
+                      m.mine ? "flex-row-reverse" : "flex-row"
                     )}
                   >
-                    {formatTime(m.createdAt, lang)}
+                    <span>{formatTime(m.createdAt, lang)}</span>
+                    {/* Skrinshotni o'chirish — yuborgan ham, olgan ham o'chira oladi */}
+                    <button
+                      onClick={() => setConfirmDeleteMsgId(m.id)}
+                      aria-label={t.deleteImage}
+                      title={t.deleteImage}
+                      className="flex size-6 items-center justify-center rounded-full text-muted-foreground/50 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                    >
+                      <Trash2 className="size-3.5" aria-hidden="true" />
+                    </button>
                   </figcaption>
                 </figure>
               </div>

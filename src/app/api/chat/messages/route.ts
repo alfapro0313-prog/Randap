@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { unlink } from "node:fs/promises";
+import path from "node:path";
 import {
   ensureChatProfile,
   partnerKeyOf,
@@ -39,7 +41,7 @@ export async function GET(req: Request) {
     const partnerKey = partnerKeyOf(conv, deviceKey);
     const [messages, partnerRow, typingRow] = await Promise.all([
       db.message.findMany({
-        where: { conversationId: conv.id },
+        where: { conversationId: conv.id, deletedAt: null },
         orderBy: { createdAt: "asc" },
         take: 300,
       }),
@@ -158,6 +160,78 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("/api/chat/messages POST error:", error);
+    return NextResponse.json({ ok: false, error: "Serverda xatolik" }, { status: 500 });
+  }
+}
+
+/**
+ * Rasm/skrinshot xabarini o'chirish — ikkala tomonda ham yo'qoladi.
+ * Rasm bazadagi ChatImage jadvalidan ham o'chiriladi (baytlar bo'shashadi).
+ */
+export async function DELETE(req: Request) {
+  try {
+    const body = (await req.json().catch(() => null)) as {
+      deviceKey?: string;
+      conversationId?: string;
+      messageId?: string;
+    } | null;
+
+    const deviceKey = (body?.deviceKey ?? "").trim();
+    const conversationId = (body?.conversationId ?? "").trim();
+    const messageId = (body?.messageId ?? "").trim();
+
+    if (!deviceKey || !conversationId || !messageId) {
+      return NextResponse.json(
+        { ok: false, error: "deviceKey, conversationId va messageId kerak" },
+        { status: 400 }
+      );
+    }
+
+    const conv = await loadConversation(conversationId, deviceKey);
+    if (!conv) {
+      return NextResponse.json({ ok: false, error: "Suhbat topilmadi" }, { status: 404 });
+    }
+
+    const message = await db.message.findUnique({ where: { id: messageId } });
+    if (!message || message.conversationId !== conv.id) {
+      return NextResponse.json({ ok: false, error: "Xabar topilmadi" }, { status: 404 });
+    }
+    if (message.kind !== "image") {
+      return NextResponse.json(
+        { ok: false, error: "Faqat rasm/skrinshot o'chiriladi" },
+        { status: 400 }
+      );
+    }
+    if (message.deletedAt) {
+      return NextResponse.json({ ok: true }); // allaqachon o'chirilgan
+    }
+
+    // Xabarni ikkala tomon uchun yashiramiz va rasm baytini bazadan o'chiramiz
+    await db.$transaction(async (tx) => {
+      await tx.message.update({
+        where: { id: message.id },
+        data: { deletedAt: new Date() },
+      });
+      // Yangi format: bazadagi rasm (chat-images/<id>) — jadvaldan o'chirish
+      if (message.content.startsWith("chat-images/")) {
+        const imageId = message.content.slice("chat-images/".length);
+        await tx.chatImage.deleteMany({ where: { id: imageId } });
+      }
+    });
+
+    // Eski fayl yo'li (uploads/chat/...) bo'lsa — faylni ham o'chirib tashlaymiz (xatosiga chidab)
+    if (message.content.startsWith("uploads/chat/")) {
+      try {
+        const filePath = path.join(process.cwd(), "public", message.content);
+        await unlink(filePath);
+      } catch {
+        // fayl yo'q yoki yozish mumkin emas — muhim emas, xabar baribir yashirildi
+      }
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("/api/chat/messages DELETE error:", error);
     return NextResponse.json({ ok: false, error: "Serverda xatolik" }, { status: 500 });
   }
 }
