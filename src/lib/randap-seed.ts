@@ -1,11 +1,19 @@
 /**
  * Randap test kontenti — avtomatik seed (idempotent).
  * Fanlar: O'zbekiston tarixi (7-11 sinf), Jahon tarixi (7-11 sinf),
- * Ingliz tili (CEFR + IELTS + Listening).
- * Barcha IDlar barqaror (fixed) — createMany skipDuplicates bilan bir necha marta
+ * Ingliz tili (CEFR + IELTS + Listening), Matematika, Fizika, Kimyo,
+ * Geografiya, Ona tili, Adabiyot (har biri oson/o'rtacha/qiyin).
+ * Mavjud testlarga qo'shimcha savollar: randap-seed-more.ts (EXTRA_QUESTIONS).
+ * Har kirganda har bir testdan TASODIFIY 10 savol tanlanadi (/api/quiz).
+ * Barcha IDlar barqaror (fixed) — createMany/upsert bilan bir necha marta
  * ishga tushsa ham ikki nusxa hosil bo'lmaydi (Vercel serverless uchun xavfsiz).
  */
 import { db } from "@/lib/db";
+import {
+  NEW_SUBJECTS,
+  EXTRA_QUESTIONS,
+  type SubjectDef2,
+} from "./randap-seed-more";
 
 const DIF = { easy: "easy", middle: "middle", hard: "hard" } as const;
 type Dif = keyof typeof DIF;
@@ -840,8 +848,15 @@ const INGLIZ: SubjectDef = {
 
 /* ================= SEED (idempotent) ================= */
 
-const CONTENT: SubjectDef[] = [UZ_TARIXI, JAHON_TARIXI, INGLIZ];
-const MARKER_QUIZ_ID = "quiz_uz_7_easy";
+const CONTENT: SubjectDef[] = [
+  UZ_TARIXI,
+  JAHON_TARIXI,
+  INGLIZ,
+  ...NEW_SUBJECTS,
+];
+
+/** Yangi kontent ham seed qilinishi uchun marker yangi testga ko'chirildi */
+const MARKER_QUIZ_ID = "quiz_adab_hard";
 
 let running: Promise<void> | null = null;
 
@@ -857,6 +872,14 @@ export async function ensureContentSeeded(): Promise<void> {
       if (marker) return;
 
       for (const s of CONTENT) {
+        // Qo'shimcha savollarni mavjud testlarga qo'shib chiqamiz
+        const sWithExtras: SubjectDef2 = {
+          ...s,
+          quizzes: s.quizzes.map((q) => ({
+            ...q,
+            questions: [...q.questions, ...(EXTRA_QUESTIONS[q.id] ?? [])],
+          })),
+        };
         await db.subject.upsert({
           where: { slug: s.slug },
           update: { name: s.name, description: s.description, icon: s.icon, color: s.color, order: s.order },
@@ -873,14 +896,14 @@ export async function ensureContentSeeded(): Promise<void> {
         if (!subject) continue;
 
         // Darslar — mavjudlarini o'tkazib yuboramiz (SQLite skipDuplicates qo'llab-quvvatlamaydi)
-        if (s.lessons.length) {
-          const lessonIds = s.lessons.map((l) => l.id);
+        if (sWithExtras.lessons.length) {
+          const lessonIds = sWithExtras.lessons.map((l) => l.id);
           const existingLessons = await db.lesson.findMany({
             where: { id: { in: lessonIds } },
             select: { id: true },
           });
           const existingLessonSet = new Set(existingLessons.map((l) => l.id));
-          const newLessons = s.lessons
+          const newLessons = sWithExtras.lessons
             .map((l, li) => ({
               id: l.id,
               subjectId: subject.id,
@@ -896,7 +919,7 @@ export async function ensureContentSeeded(): Promise<void> {
           }
         }
 
-        for (const [qi, q] of s.quizzes.entries()) {
+        for (const [qi, q] of sWithExtras.quizzes.entries()) {
           await db.quiz.upsert({
             where: { id: q.id },
             update: {
@@ -942,7 +965,7 @@ export async function ensureContentSeeded(): Promise<void> {
           }
         }
       }
-      console.log("[seed] test kontenti tayyor: uz-tarixi, jahon-tarixi, ingliz (CEFR/IELTS/Listening)");
+      console.log("[seed] kontent tayyor: tarix (uz/jahon 7-11), ingliz (CEFR/IELTS/Listening), matematika, fizika, kimyo, geografiya, ona tili, adabiyot");
     } catch (e) {
       console.error("[seed] xatolik:", e);
     } finally {

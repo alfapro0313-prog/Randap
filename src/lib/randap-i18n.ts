@@ -54,7 +54,7 @@ const en = {
     "No video or profile found for «{q}». Try another word.",
   empty: "Empty",
   minutes: "min",
-  pointUnit: "points",
+  pointUnit: "DZF",
   videoUnit: "video",
   shortsUnit: "shorts",
   subscriberUnit: "subscribers",
@@ -119,9 +119,9 @@ const en = {
   randomChatBadge: "Random chat",
   stickersBadge: "Stickers",
   photoBadge: "Photo",
-  ballarBarTitle: "Points — a separate ranking",
+  ballarBarTitle: "Dapzif — the money rating",
   ballarBarDesc:
-    "Solve tests to earn points and compete with other people",
+    "Tap to see who has the most DZF (dapzif) money — solve tests to earn more",
 
   // Home / feed
   homeNow: "Current videos",
@@ -202,6 +202,7 @@ const en = {
   backToSection: "Back to section",
   questionN: "Question {a} / {b}",
   upToPoints: "up to {n} points",
+  randomQuizHint: "Random {pool} questions — you get different questions every time!",
   answeredCount: "{a} / {b} answered",
   finish: "Finish",
   nextQ: "Next",
@@ -213,11 +214,11 @@ const en = {
   nextLesson: "Next lesson",
   go: "Go →",
 
-  // Ballar
-  ballarTitle: "Points",
-  ballarSub: "Ranking of the points people earned from tests",
+  // Dapzif (reyting)
+  ballarTitle: "Dapzif",
+  ballarSub: "Who has the most money? Ranking by DZF (dapzif)",
   ballarHow:
-    "How are points earned? Solve the tests in the sections — every correct answer gives 10 points. Your points in this list update instantly.",
+    "How is DZF earned? Solve the tests in the sections — every correct answer gives 0.2 DZF (dapzif). The list shows who currently has the most money. It updates instantly.",
 
   // Profile
   profileUpdated: "Profile updated",
@@ -377,6 +378,10 @@ const en = {
   shopCatSpecial: "Special",
   shopCatFaces: "Faces",
   shopCatHands: "Hands and symbols",
+  shopCatHearts: "Hearts",
+  shopCatAnimals: "Animals",
+  shopCatFood: "Food",
+  shopCatSymbols: "Signs and things",
   shopAvatarCard: "Photo for chat avatar",
   shopAvatarDesc: "Put your own photo on the chat avatar (in chat settings).",
   shopStickerSoldOut: "Already yours",
@@ -478,7 +483,7 @@ const ru: Dict = {
     "По запросу «{q}» видео или профиль не найдены. Попробуйте другое слово.",
   empty: "Пусто",
   minutes: "мин",
-  pointUnit: "баллов",
+  pointUnit: "DZF",
   videoUnit: "видео",
   shortsUnit: "shorts",
   subscriberUnit: "подписчиков",
@@ -496,7 +501,7 @@ const ru: Dict = {
   navSections: "Тесты",
   navOrganish: "Обучение",
   navChat: "Чат",
-  navBallar: "Баллы",
+  navBallar: "Дапзиф",
   navProfile: "Профиль",
   navPortalMobile: "Главная",
   subs: "Подписки",
@@ -540,9 +545,9 @@ const ru: Dict = {
   randomChatBadge: "Случайный чат",
   stickersBadge: "Стикеры",
   photoBadge: "Фото",
-  ballarBarTitle: "Баллы — отдельный рейтинг",
+  ballarBarTitle: "Дапзиф — рейтинг по деньгам",
   ballarBarDesc:
-    "Решайте тесты, зарабатывайте баллы и соревнуйтесь с другими",
+    "Нажмите, чтобы увидеть, у кого больше всего DZF (дапзиф) — решайте тесты и зарабатывайте",
 
   homeNow: "Текущие видео",
   all: "Все",
@@ -620,6 +625,7 @@ const ru: Dict = {
   backToSection: "Вернуться к разделу",
   questionN: "Вопрос {a} / {b}",
   upToPoints: "до {n} баллов",
+  randomQuizHint: "Случайные {pool} вопросов — каждый раз вопросы разные!",
   answeredCount: "{a} / {b} отвечено",
   finish: "Завершить",
   nextQ: "Далее",
@@ -630,10 +636,10 @@ const ru: Dict = {
   nextLesson: "Следующий урок",
   go: "Перейти →",
 
-  ballarTitle: "Баллы",
-  ballarSub: "Рейтинг людей по баллам за тесты",
+  ballarTitle: "Дапзиф",
+  ballarSub: "У кого больше всего денег? Рейтинг по DZF (дапзиф)",
   ballarHow:
-    "Как начисляются баллы? Решайте тесты в разделах — за каждый правильный ответ даётся 10 баллов. Ваши баллы в этом списке обновляются мгновенно.",
+    "Как зарабатывается DZF? Решайте тесты в разделах — за каждый правильный ответ даётся 0.2 DZF (дапзиф). В списке видно, у кого сейчас больше всего денег. Обновляется мгновенно.",
 
   profileUpdated: "Профиль обновлён",
   saveError: "Ошибка при сохранении",
@@ -788,6 +794,10 @@ const ru: Dict = {
   shopCatSpecial: "Особые",
   shopCatFaces: "Лица",
   shopCatHands: "Руки и символы",
+  shopCatHearts: "Сердечки",
+  shopCatAnimals: "Животные",
+  shopCatFood: "Еда",
+  shopCatSymbols: "Знаки и вещи",
   shopAvatarCard: "Фото для аватара чата",
   shopAvatarDesc: "Поставьте своё фото на аватар чата (в настройках чата).",
   shopStickerSoldOut: "Уже ваше",
@@ -886,7 +896,7 @@ const uz: Dict = {
     "«{q}» bo'yicha video yoki profil topilmadi. Boshqa so'z bilan urinib ko'ring.",
   empty: "Bo'sh",
   minutes: "daqiqa",
-  pointUnit: "ball",
+  pointUnit: "DZF",
   videoUnit: "video",
   shortsUnit: "shorts",
   subscriberUnit: "obunachi",
@@ -904,7 +914,7 @@ const uz: Dict = {
   navSections: "Testlar",
   navOrganish: "O'rganish",
   navChat: "Chat",
-  navBallar: "Ballar",
+  navBallar: "Dapzif",
   navProfile: "Profil",
   navPortalMobile: "Asosiy",
   subs: "Obunalar",
@@ -948,9 +958,9 @@ const uz: Dict = {
   randomChatBadge: "Random chat",
   stickersBadge: "Stikerlar",
   photoBadge: "Rasm",
-  ballarBarTitle: "Ballar — alohida reyting",
+  ballarBarTitle: "Dapzif — pul reytingi",
   ballarBarDesc:
-    "Test yechib ball to'plang, boshqalar bilan raqobat qiling",
+    "Bossangiz — kimda eng ko'p pul (DZF) bor shuni ko'rasiz. Test yechib dapzif to'plang",
 
   homeNow: "Hozirgi videolar",
   all: "Barchasi",
@@ -1028,6 +1038,7 @@ const uz: Dict = {
   backToSection: "Bo'limga qaytish",
   questionN: "Savol {a} / {b}",
   upToPoints: "{n} ballgacha",
+  randomQuizHint: "{pool} savol aralashtirilgan — har kirishda boshqacha savollar tushadi!",
   answeredCount: "{a} / {b} javob berildi",
   finish: "Yakunlash",
   nextQ: "Keyingi",
@@ -1038,10 +1049,10 @@ const uz: Dict = {
   nextLesson: "Keyingi dars",
   go: "O'tish →",
 
-  ballarTitle: "Ballar",
-  ballarSub: "Odamlarning testlardan olgan ballari reytingi",
+  ballarTitle: "Dapzif",
+  ballarSub: "Kimning puli ko'p? Dapzif (DZF) bo'yicha umumiy reyting",
   ballarHow:
-    "Ball qanday to'planadi? Bo'limlardagi testlarni yeching — har bir to'g'ri javob uchun 10 ball beriladi. Ballaringiz shu ro'yxatda darhol yangilanadi.",
+    "DZF qanday to'planadi? Bo'limlardagi testlarni yeching — har bir to'g'ri javob uchun 0,2 DZF (dapzif) beriladi. Bu reytingda hozirda puli eng ko'p odamlar yuqorida turadi. Ro'yxat darhol yangilanadi.",
 
   profileUpdated: "Profil yangilandi",
   saveError: "Saqlashda xatolik",
@@ -1194,6 +1205,10 @@ const uz: Dict = {
   shopCatSpecial: "Maxsus",
   shopCatFaces: "Yuzlar",
   shopCatHands: "Qo'llar va belgilar",
+  shopCatHearts: "Yuraklar",
+  shopCatAnimals: "Hayvonlar",
+  shopCatFood: "Ovqatlar",
+  shopCatSymbols: "Belgilar va narsalar",
   shopAvatarCard: "Chat avatariga rasm",
   shopAvatarDesc: "Chat avatariga o'z rasmingizni qo'yasiz (chat sozlamalarida).",
   shopStickerSoldOut: "Allaqachon sizniki",

@@ -80,7 +80,7 @@ export function BallarView({ deviceKey }: { deviceKey: string }) {
           </div>
           <div className="shrink-0 text-right">
             <p className="text-xl font-extrabold text-primary">
-              {formatCount(me.points, lang)}
+              {formatCount(me.dzf, lang)}
             </p>
             <p className="text-[11px] text-muted-foreground">{t("pointUnit")}</p>
           </div>
@@ -129,7 +129,7 @@ export function BallarView({ deviceKey }: { deviceKey: string }) {
             </div>
             <span className="shrink-0 text-right">
               <span className="block text-base font-extrabold text-foreground">
-                {formatCount(l.points, lang)}
+                {formatCount(l.dzf, lang)}
               </span>
               <span className="block text-[11px] text-muted-foreground">{t("pointUnit")}</span>
             </span>

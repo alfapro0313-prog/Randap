@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ArrowLeft,
   CheckCircle2,
+  Dice5,
   Headphones,
   ListChecks,
   Loader2,
@@ -129,6 +130,7 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
           deviceKey,
           quizId: quiz.id,
           answers: answers.map((a) => a ?? -1),
+          questionIds: quiz.questions.map((q) => q.id),
         }),
       });
       const data = await res.json();
@@ -326,6 +328,12 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
             aria-valuemax={100}
           />
         </div>
+        {quiz.poolSize && quiz.poolSize > quiz.total ? (
+          <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <Dice5 className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
+            {t("randomQuizHint", { pool: quiz.poolSize })}
+          </p>
+        ) : null}
       </div>
 
       {/* Savol */}

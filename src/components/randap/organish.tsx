@@ -2,11 +2,14 @@
 
 import {
   ArrowLeft,
+  Atom,
   BookOpen,
   Brain,
   Calculator,
   ChevronRight,
   Clock,
+  FlaskConical,
+  Globe2,
   Landmark,
   Languages,
   ScrollText,
@@ -25,6 +28,10 @@ const ICONS: Record<string, typeof BookOpen> = {
   brain: Brain,
   calculator: Calculator,
   landmark: Landmark,
+  atom: Atom,
+  flask: FlaskConical,
+  globe: Globe2,
+  book: BookOpen,
 };
 
 const TILE_CLASSES: Record<string, string> = {
@@ -32,6 +39,8 @@ const TILE_CLASSES: Record<string, string> = {
   violet: "bg-violet-100 text-violet-700",
   amber: "bg-amber-100 text-amber-700",
   emerald: "bg-emerald-100 text-emerald-700",
+  sky: "bg-sky-100 text-sky-700",
+  cyan: "bg-cyan-100 text-cyan-700",
 };
 
 function TopicTile({ topic, className }: { topic: OrganishTopic; className?: string }) {

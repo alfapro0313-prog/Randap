@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { ensureUser } from "@/lib/randap-server";
+import { dzfFromCents } from "@/lib/shop-catalog";
 
 /**
  * GET /api/leaderboard?deviceKey=
- * "Ballar" sahifasi: barcha foydalanuvchilar olgan ballari reytingi.
+ * "Dapzif" sahifasi: kimning DZF (dapzif) puli eng ko'p — umumiy reyting.
  */
 export async function GET(req: Request) {
   try {
@@ -18,7 +19,7 @@ export async function GET(req: Request) {
     }
 
     const users = await db.user.findMany({
-      orderBy: [{ points: "desc" }, { createdAt: "asc" }],
+      orderBy: [{ dzfCents: "desc" }, { points: "desc" }, { createdAt: "asc" }],
       take: 50,
       select: {
         id: true,
@@ -26,6 +27,7 @@ export async function GET(req: Request) {
         handle: true,
         avatar: true,
         points: true,
+        dzfCents: true,
         _count: { select: { videos: true } },
       },
     });
@@ -36,6 +38,7 @@ export async function GET(req: Request) {
       handle: u.handle,
       avatar: u.avatar,
       points: u.points,
+      dzf: dzfFromCents(u.dzfCents),
       videoCount: u._count.videos,
       isMe: u.id === meId,
     }));

@@ -19,7 +19,7 @@ import {
 import type { ShopData } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
 
-type ShopCategory = "special" | "faces" | "hands";
+type ShopCategory = "special" | "faces" | "hands" | "hearts" | "animals" | "food" | "symbols";
 
 export function ShopView({
   deviceKey,
@@ -87,6 +87,10 @@ export function ShopView({
     ["special", t("shopCatSpecial")],
     ["faces", t("shopCatFaces")],
     ["hands", t("shopCatHands")],
+    ["hearts", t("shopCatHearts")],
+    ["animals", t("shopCatAnimals")],
+    ["food", t("shopCatFood")],
+    ["symbols", t("shopCatSymbols")],
   ];
 
   const ownedSet = new Set(data?.ownedIds ?? []);

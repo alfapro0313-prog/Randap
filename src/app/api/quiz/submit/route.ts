@@ -9,8 +9,11 @@ const DZF_CENTS_PER_CORRECT = 20; // 0.2 DZF = 20 sent
 
 /**
  * POST /api/quiz/submit
- * { deviceKey, quizId, answers: number[] }
- * Baholash serverda bajariladi, ball foydalanuvchiga qo'shiladi.
+ * { deviceKey, quizId, answers: number[], questionIds?: string[] }
+ * Savollar har kirganda tasodifiy tanlanadi — shuning uchun client o'zi
+ * olgan savollarning idlarini ham yuboradi; faqat shu savollar bo'yicha
+ * baholanadi. questionIds berilmasa — barcha savollar tartibi bilan.
+ * Baholash serverda bajariladi, ball va DZF foydalanuvchiga qo'shiladi.
  */
 export async function POST(req: Request) {
   try {
@@ -18,11 +21,13 @@ export async function POST(req: Request) {
       deviceKey?: string;
       quizId?: string;
       answers?: number[];
+      questionIds?: string[];
     } | null;
 
     const deviceKey = (body?.deviceKey ?? "").trim();
     const quizId = (body?.quizId ?? "").trim();
     const answers = Array.isArray(body?.answers) ? body!.answers : [];
+    const questionIds = Array.isArray(body?.questionIds) ? body!.questionIds : [];
 
     if (!deviceKey || !quizId) {
       return NextResponse.json(
@@ -43,15 +48,25 @@ export async function POST(req: Request) {
       );
     }
 
+    // Baholanadigan savollar: client tanlagan idlar bo'yicha (tartibi ham shunday)
+    let graded = quiz.questions;
+    if (questionIds.length > 0) {
+      const byId = new Map(quiz.questions.map((q) => [q.id, q]));
+      const picked = questionIds
+        .map((id) => byId.get(id))
+        .filter((q): q is (typeof quiz.questions)[number] => Boolean(q));
+      if (picked.length > 0) graded = picked;
+    }
+
     // Baholash
     const correctIndexes: number[] = [];
     let score = 0;
-    quiz.questions.forEach((q, i) => {
+    graded.forEach((q, i) => {
       correctIndexes.push(q.correctIndex);
       if (answers[i] === q.correctIndex) score++;
     });
 
-    const total = quiz.questions.length;
+    const total = graded.length;
     const pointsEarned = score * POINTS_PER_CORRECT;
     const dzfEarnedCents = score * DZF_CENTS_PER_CORRECT;
 

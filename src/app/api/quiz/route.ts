@@ -4,10 +4,24 @@ import { localizeQuestion, localizeQuiz, localizeSubject } from "@/lib/randap-co
 
 /**
  * GET /api/quiz?id=&lang=
- * Testni to'liq savollari bilan qaytaradi (to'g'ri javoblar yashirin —
- * baholash faqat serverda /api/quiz/submit orqali bajariladi).
+ * Test savollari TASODIFIY tanlab qaytariladi (har kirganda har xil savol):
+ * savollar bazasidan ko'pi bilan 10 ta aralashtirib tanlanadi.
+ * To'g'ri javoblar yashirin — baholash faqat serverda /api/quiz/submit orqali
+ * bajariladi (client tanlangan savollarning idlarini qaytaradi).
  * lang=en|ru berilsa — savollar tarjima qilib qaytariladi.
  */
+
+/** Bir yo'lda ko'rsatiladigan savollar soni */
+const SHOW_QUESTIONS = 10;
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -52,6 +66,10 @@ export async function GET(req: Request) {
       lang
     );
 
+    // Tasodifiy tanlash: har kirganda har xil savollar tushadi
+    const allQuestions = shuffle(quiz.questions);
+    const picked = allQuestions.slice(0, Math.min(SHOW_QUESTIONS, allQuestions.length));
+
     return NextResponse.json({
       ok: true,
       quiz: {
@@ -59,9 +77,10 @@ export async function GET(req: Request) {
         title: quizTr.title,
         description: quizTr.description,
         subject: { ...quiz.subject, name: subjectTr.name },
-        total: quiz.questions.length,
+        total: picked.length,
+        poolSize: quiz.questions.length,
         kind: quiz.kind,
-        questions: quiz.questions.map((q) => {
+        questions: picked.map((q) => {
           const qtr = localizeQuestion(
             quiz.subject.slug,
             quiz.order,

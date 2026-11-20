@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import {
   ArrowLeft,
+  Atom,
   BookOpen,
   Calculator,
   ChevronRight,
@@ -27,6 +28,7 @@ const ICONS: Record<string, typeof BookOpen> = {
   book: BookOpen,
   flask: FlaskConical,
   globe: Globe2,
+  atom: Atom,
 };
 
 const TILE_CLASSES: Record<string, string> = {
@@ -35,6 +37,7 @@ const TILE_CLASSES: Record<string, string> = {
   rose: "bg-rose-100 text-rose-700",
   sky: "bg-sky-100 text-sky-700",
   violet: "bg-violet-100 text-violet-700",
+  cyan: "bg-cyan-100 text-cyan-700",
 };
 
 const DIFF_BADGE: Record<QuizDifficulty, string> = {

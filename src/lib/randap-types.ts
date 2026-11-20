@@ -118,7 +118,10 @@ export type QuizData = {
     icon: string;
     color: string;
   };
+  /** Bu safar ko'rsatiladigan savollar soni (tasodifiy tanlangan) */
   total: number;
+  /** Bazadagi jami savollar soni (katta bazadan tanlanadi) */
+  poolSize?: number;
   kind: "quiz" | "listening";
   questions: QuizQuestion[];
 };
@@ -140,6 +143,8 @@ export type LeaderEntry = {
   handle: string;
   avatar: string | null;
   points: number;
+  /** DZF (dapzif) balansi — pul */
+  dzf: number;
   videoCount: number;
   isMe: boolean;
 };
@@ -150,6 +155,7 @@ export type LeaderMe = {
   handle: string;
   avatar: string | null;
   points: number;
+  dzf: number;
   videoCount: number;
   isMe: boolean;
   rank: number;

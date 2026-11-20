@@ -14,8 +14,16 @@ export type OrganishTopic = {
   title: string;
   subtitle: string;
   readMin: number;
-  icon: "languages" | "brain" | "calculator" | "landmark";
-  color: "rose" | "violet" | "amber" | "emerald";
+  icon:
+    | "languages"
+    | "brain"
+    | "calculator"
+    | "landmark"
+    | "atom"
+    | "flask"
+    | "globe"
+    | "book";
+  color: "rose" | "violet" | "amber" | "emerald" | "sky" | "cyan";
   intro: string;
   sections: OrganishSection[];
 };
@@ -449,12 +457,214 @@ export const ORGANISH_TOPICS: OrganishTopic[] = [
       },
     ],
   },
+  /* ---- Yangi fan maqolalari (o'zbekcha; en/ru sarlavhalari quyida tarjima qilingan) ---- */
+  {
+    id: "matematika",
+    title: "Matematika",
+    subtitle: "Foizlar, tenglamalar va geometriya — qadam-baqadam o'rganish rejimi",
+    readMin: 6,
+    icon: "calculator",
+    color: "sky",
+    intro:
+      "Matematika — mashq talab qiladigan fan: musiqachi kabi, u ham har kuni mashq qilsa yo'naladi. Bu maqolada qo'rquvni yengish, asosiy mavzularni poydevoridan o'zlashtirish va testlarda tez va aniq javob berish yo'llari keltirilgan.",
+    sections: [
+      {
+        heading: "Poydevorni mustahkamlash",
+        bullets: [
+          { lead: "Jadvalni avtomatlashtirish", text: "ko'paytirish jadvalini 1-daqiqada aytib beradigan darajaga yetkazing — hamma katta mavzular shunga tayanadi." },
+          { lead: "Har kuni 10 misol", text: "ko'p miqdor emas, doimiylik muhim. 10 misol kuniga — oyda 300 misol, bu yirik yutuq." },
+          { lead: "Xatoni tahlil qilish", text: "har xato belgilangan misolni alohida daftarga yozing va bir haftadan keyin yana yechib ko'ring." },
+        ],
+      },
+      {
+        heading: "Asosiy mavzular tartibi",
+        bullets: [
+          { lead: "1. Arifmetika va foizlar", text: "10%, 25%, 50% tez hisoblash usullarini o'rganing — ular testlarda eng ko'p uchraydi." },
+          { lead: "2. Tenglamalar", text: "3 qadam: ixchamlash → ko'chirish → bo'lish. Har yechimni tekshirib boring." },
+          { lead: "3. Geometriya", text: "Pifagor teoremasi, yuza va perimetr formulalarini kartochkaga yozib yodlang." },
+        ],
+      },
+      {
+        heading: "Test strategiyasi",
+        bullets: [
+          { lead: "Osondan boshlash", text: "avval aniq biladigan savollaringizni yechib oling, keyin murakkablariga qayting." },
+          { lead: "Test bilan tekshirish", text: "Randapning Matematika testlarini oson → o'rtacha → qiyin tartibida yeching va DZF to'plang." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "fizika",
+    title: "Fizika",
+    subtitle: "Nyuton qonunlari, elektr zanjirlari va formulalarni tushunish kaliti",
+    readMin: 6,
+    icon: "atom",
+    color: "violet",
+    intro:
+      "Fizika — atrofdagi dunyoning 'ishlash qoidalari': nima uchun raketa uchadi, nima uchun choynak qaynaydi. Formulalarni yodlash emas, ular orqasidagi mantiqni tushunish asosiy kalitdir.",
+    sections: [
+      {
+        heading: "Formulani tushunish usuli",
+        bullets: [
+          { lead: "Har belgini nomlang", text: "F = m·a formulada F — kuch (nyuton), m — massa (kg), a — tezlanish (m/s²). Belgini bilsangiz, formula o'z-o'zidan esda qoladi." },
+          { lead: "Birliklarni tekshirish", text: "javobning birliklari to'g'ri chiqmasa — formulada xatolik bor. Bu tezkor nazorat usuli." },
+          { lead: "Hayotiy misol toping", text: "har qonun uchun o'z hayotingizdan misol toping: avtobus birdan harakatlanganda orqaga siljish — inersiya." },
+        ],
+      },
+      {
+        heading: "Mavzular tartibi",
+        bullets: [
+          { lead: "1. Mexanika", text: "tezlik, yo'l, vaqt; Nyutonning 3 qonuni — hammasining asosi." },
+          { lead: "2. Issiqlik va modda", text: "harorat, issiqlik o'tkazuvchanlik, modda holatlari." },
+          { lead: "3. Elektr", text: "Om qonuni I = U/R, ketma-ket va paralel ulash — uy tarmog'i qanday ishlaydi." },
+        ],
+      },
+      {
+        heading: "Mashq rejimi",
+        bullets: [
+          { lead: "Rasm chizish", text: "masala yechishdan oldin holatni chizma bilan tasvirlang — yarim yechim shu bo'ladi." },
+          { lead: "Test bilan tekshirish", text: "Randapning Fizika testlarini darajalar bo'yicha yeching — har to'g'ri javob 0,2 DZF." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "kimyo",
+    title: "Kimyo",
+    subtitle: "Davriy jadval, reaksiyalar va formulalar bilan do'st bolish",
+    readMin: 6,
+    icon: "flask",
+    color: "emerald",
+    intro:
+      "Kimyo — moddalarning 'pishirish kitobi': nima bilan nima qo'shilsa nima hosil bo'ladi. Davriy jadvalni tushunish — kimyoning birinchi kalitidir.",
+    sections: [
+      {
+        heading: "Davriy jadvalni o'zlashtirish",
+        bullets: [
+          { lead: "20 ta asosiy element", text: "H, O, C, N, Na, K, Ca, Fe, Cu, Zn, Al, S, Cl va boshqalarning belgisini va eng oddiy xossasini yodlang." },
+          { lead: "Guruhlar mantiqi", text: "bir guruhdagi elementlar o'xshash xossali — shuning uchun jadval 'davriy' deb ataladi." },
+          { lead: "Valentlik o'yini", text: "har kuni 5 ta birikma formulasini yozing: H₂O, CO₂, NaCl... 2 haftada qo'lga kiradi." },
+        ],
+      },
+      {
+        heading: "Reaksiyalarni tushunish",
+        bullets: [
+          { lead: "Tenglamani balanslash", text: "chap va o'ng tomonda har bir atomdan bir xil son bo'lishi shart — bu buxgalteriya kabi aniq ish." },
+          { lead: "Fizik yoki kimyoviy?", text: "yangi modda hosil bo'lsa — kimyoviy (kuyish); bo'lmasa — fizik (erish)." },
+        ],
+      },
+      {
+        heading: "Mashq rejimi",
+        bullets: [
+          { lead: "Test bilan tekshirish", text: "Randapning Kimyo testlari — oson darajadan boshlab, har to'g'ri javob 0,2 DZF beradi." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "geografiya",
+    title: "Geografiya",
+    subtitle: "Xarita, O'zbekiston va dunyo — 'eng-englar' bilan yodlash san'ati",
+    readMin: 5,
+    icon: "globe",
+    color: "rose",
+    intro:
+      "Geografiya — sayohat qilib bo'lmaydigan joylarni ko'z oldiga keltirish fani. Xarita bilan do'st bo'lsangiz, fan o'z-o'zidan qiziqarli bo'lib qoladi.",
+    sections: [
+      {
+        heading: "Xarita bilan ishlash",
+        bullets: [
+          { lead: "Masshtabni tushunish", text: "1:100 000 — xaritadagi 1 sm real 1 km. Masshtabni bilsangiz, xarita 'o'lchov asbobi'ga aylanadi." },
+          { lead: "Bo'sh xarita mashqi", text: "konturli xaritaga viloyatlar, daryolar va tog'larni xotiradan chizing — eng kuchli yodlash usuli." },
+        ],
+      },
+      {
+        heading: "'Eng-englar' kartochkalari",
+        bullets: [
+          { lead: "Dunyo rekordlari", text: "Everest 8848 m, Baykal 1642 m, Tinch okeani eng katta... har kuni 3 ta kartochka ko'rib chiqing." },
+          { lead: "O'zbekiston raqamlari", text: "maydon ~449 ming km², 12 viloyat, Amudaryo va Sirdaryo, Hazrat Sulton 4643 m." },
+        ],
+      },
+      {
+        heading: "Mashq rejimi",
+        bullets: [
+          { lead: "Test bilan tekshirish", text: "Randapning Geografiya testlari bilan bilimingizni sinang va DZF to'plang." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "ona-tili",
+    title: "Ona tili",
+    subtitle: "Qoidalar, imlo va gap tuzish — aniq va chiroyli yozish yo'llari",
+    readMin: 5,
+    icon: "languages",
+    color: "amber",
+    intro:
+      "Ona tili — barcha fanlar kaliti: matnni to'g'ri tushunmasangiz, boshqa fanga ham chiroyli javob yozolmaysiz. Yaxshi yangilik: til qoidalar bilan o'rganadi va qoidalar mantiqli.",
+    sections: [
+      {
+        heading: "Imlo poydevori",
+        bullets: [
+          { lead: "Juft undoshlar", text: "q—g', b—p, d—t... qo'qir va qo'rsiq tovushlarni ajratish — imlo xatolarining yarmi shu yerda hal bo'ladi." },
+          { lead: "5 so'z qoidasi", text: "har kuni eng ko'p adashtiriladigan 5 ta so'zni to'g'ri yozib boring: qi…, g'…, x…" },
+        ],
+      },
+      {
+        heading: "Gap tuzish",
+        bullets: [
+          { lead: "Ega va kesim", text: "har gapda kim? (ega) va nima qildi? (kesim) savollariga javob toping — gap tuzilishi shu yerda ko'rinadi." },
+          { lead: "O'qish rejimi", text: "kuniga 10 daqiqa o'zbekcha yaxshi matn o'qing — imlo va uslub ko'zga ko'rinadigan darajada yaxshilanadi." },
+        ],
+      },
+      {
+        heading: "Mashq rejimi",
+        bullets: [
+          { lead: "Test bilan tekshirish", text: "Randapning Ona tili testlari — alifbodan sintaksisgacha, darajalar bo'yicha." },
+        ],
+      },
+    ],
+  },
+  {
+    id: "adabiyot",
+    title: "Adabiyot",
+    subtitle: "Navoiydan Qodiriygacha — asarlar va mualliflarni esda saqlash tizimi",
+    readMin: 5,
+    icon: "book",
+    color: "cyan",
+    intro:
+      "Adabiyot — odamlar va asarlar haqidagi fan: yaxshi tizim bilan yodlangan bo'lsa, imtihonda eng oson fanlardan biriga aylanadi.",
+    sections: [
+      {
+        heading: "Muallif–asar kartochkalari",
+        bullets: [
+          { lead: "Bir muallif — bir kartochka", text: "kartochkada: ism, davri, 3 ta mashhur asari, bittasi haqida 1 gap. Haftada 5 muallif." },
+          { lead: "Xamsa tartibi", text: "Navoiyning 5 dostoni tartib bilan: Hayrat ul-abror → Farhod va Shirin → Layli va Majnun → Sab'ai sayyor → Saddi Iskandariy." },
+        ],
+      },
+      {
+        heading: "Janrlarni ajratish",
+        bullets: [
+          { lead: "She'riy yoki nasriy?", text: "g'azal, ruboiy, doston — she'riy; roman, qissa, hikoya — nasriy. Har yangi janrni 1 misol bilan bog'lang." },
+        ],
+      },
+      {
+        heading: "Mashq rejimi",
+        bullets: [
+          { lead: "Test bilan tekshirish", text: "Randapning Adabiyot testlari bilan har hafta o'z-o'zingizni tekshirib boring." },
+        ],
+      },
+    ],
+  },
 ];
 
-export type OrganishTopicContent = Omit<
-  OrganishTopic,
-  "icon" | "color" | "readMin"
->;
+/**
+ * Tarjima elementlari — qisman bo'lishi mumkin: faqat sarlavha/subtitle berilsa,
+ * qolgan maydonlar o'zbekcha asl matndan qoladi (index bo'yicha moslash).
+ */
+export type OrganishTopicContent = Partial<
+  Omit<OrganishTopic, "icon" | "color" | "readMin">
+> & { id: string };
 
 /* ---------------- EN translations ---------------- */
 
@@ -877,6 +1087,13 @@ const TOPICS_EN: OrganishTopicContent[] = [
       },
     ],
   },
+  /* Short titles for the new subject articles (body stays in Uzbek) */
+  { id: "matematika", title: "Mathematics", subtitle: "Percentages, equations and geometry — a step-by-step study plan" },
+  { id: "fizika", title: "Physics", subtitle: "Newton's laws, electric circuits and the key to understanding formulas" },
+  { id: "kimyo", title: "Chemistry", subtitle: "The periodic table, reactions and making friends with formulas" },
+  { id: "geografiya", title: "Geography", subtitle: "Maps, Uzbekistan and the world — the art of memorising records" },
+  { id: "ona-tili", title: "Native language", subtitle: "Spelling rules and sentence building — write accurately and beautifully" },
+  { id: "adabiyot", title: "Literature", subtitle: "From Navoiy to Qodiriy — a system for remembering authors and works" },
 ];
 
 /* ---------------- RU translations ---------------- */
@@ -1300,6 +1517,13 @@ const TOPICS_RU: OrganishTopicContent[] = [
       },
     ],
   },
+  /* Короткие заголовки для новых предметных статей (текст остаётся на узбекском) */
+  { id: "matematika", title: "Математика", subtitle: "Проценты, уравнения и геометрия — пошаговый план изучения" },
+  { id: "fizika", title: "Физика", subtitle: "Законы Ньютона, электрические цепи и ключ к пониманию формул" },
+  { id: "kimyo", title: "Химия", subtitle: "Периодическая таблица, реакции и дружба с формулами" },
+  { id: "geografiya", title: "География", subtitle: "Карты, Узбекистан и мир — искусство запоминать рекорды" },
+  { id: "ona-tili", title: "Родной язык", subtitle: "Правила орфографии и построение предложений — писать точно и красиво" },
+  { id: "adabiyot", title: "Литература", subtitle: "От Навои до Кадыри — система запоминания авторов и произведений" },
 ];
 
 const TOPICS_BY_LANG: Record<"en" | "ru", OrganishTopicContent[] | null> = {

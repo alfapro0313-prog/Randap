@@ -37,6 +37,31 @@ const EN: ContentPack = {
       name: "History",
       description: "Interesting tests from world and Uzbekistan history.",
     },
+    fizika: {
+      name: "Physics",
+      description:
+        "Mechanics, heat, electricity and optics — tests at three difficulty levels.",
+    },
+    kimyo: {
+      name: "Chemistry",
+      description:
+        "Matter, atoms, the periodic table and reactions — three difficulty levels.",
+    },
+    geografiya: {
+      name: "Geography",
+      description:
+        "Continents, oceans, Uzbekistan and the world — three difficulty levels.",
+    },
+    "ona-tili": {
+      name: "Native language",
+      description:
+        "Alphabet, parts of speech, rules and syntax — three difficulty levels.",
+    },
+    adabiyot: {
+      name: "Literature",
+      description:
+        "Classical and modern Uzbek literature — three difficulty levels.",
+    },
   },
   quizzes: {
     "matematika:0": {
@@ -383,6 +408,31 @@ const RU: ContentPack = {
       name: "История",
       description:
         "Интересные тесты по истории мира и Узбекистана.",
+    },
+    fizika: {
+      name: "Физика",
+      description:
+        "Механика, тепло, электричество и оптика — тесты трёх уровней сложности.",
+    },
+    kimyo: {
+      name: "Химия",
+      description:
+        "Вещества, атомы, периодическая таблица и реакции — три уровня сложности.",
+    },
+    geografiya: {
+      name: "География",
+      description:
+        "Континенты, океаны, Узбекистан и мир — три уровня сложности.",
+    },
+    "ona-tili": {
+      name: "Родной язык",
+      description:
+        "Алфавит, части речи, правила и синтаксис — три уровня сложности.",
+    },
+    adabiyot: {
+      name: "Литература",
+      description:
+        "Классическая и современная узбекская литература — три уровня сложности.",
     },
   },
   quizzes: {
