@@ -83,6 +83,9 @@ export function BallarView({ deviceKey }: { deviceKey: string }) {
               {formatCount(me.dzf, lang)}
             </p>
             <p className="text-[11px] text-muted-foreground">{t("pointUnit")}</p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
+              {t("pointsWithValue", { n: formatCount(me.points, lang) })}
+            </p>
           </div>
         </div>
       ) : null}
@@ -124,7 +127,8 @@ export function BallarView({ deviceKey }: { deviceKey: string }) {
                 ) : null}
               </p>
               <p className="truncate text-xs text-muted-foreground">
-                {l.handle} · {l.videoCount} {t("videoUnit")}
+                {l.handle} · {t("pointsWithValue", { n: formatCount(l.points, lang) })} · {l.videoCount}{" "}
+                {t("videoUnit")}
               </p>
             </div>
             <span className="shrink-0 text-right">

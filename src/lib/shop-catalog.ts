@@ -175,7 +175,7 @@ const HANDS: Array<[string, string]> = [
   ["obj-camera", "📷"],
 ];
 
-/** Yuraklar va mehr — har biri 20 DZF */
+/** Yuraklar va mehr — har biri 5 DZF */
 const HEARTS: Array<[string, string]> = [
   ["heart-orange", "🧡"],
   ["heart-yellow", "💛"],
@@ -197,7 +197,7 @@ const HEARTS: Array<[string, string]> = [
   ["heart-decoration", "💟"],
 ];
 
-/** Hayvonlar — har biri 20 DZF */
+/** Hayvonlar — har biri 5 DZF */
 const ANIMALS: Array<[string, string]> = [
   ["an-dog", "🐶"],
   ["an-cat", "🐱"],
@@ -241,7 +241,7 @@ const ANIMALS: Array<[string, string]> = [
   ["an-hedgehog", "🦔"],
 ];
 
-/** Ovqat va ichimliklar — har biri 20 DZF */
+/** Ovqat va ichimliklar — har biri 5 DZF */
 const FOOD: Array<[string, string]> = [
   ["fd-green-apple", "🍏"],
   ["fd-red-apple", "🍎"],
@@ -308,7 +308,7 @@ const FOOD: Array<[string, string]> = [
   ["fd-soda", "🥤"],
 ];
 
-/** Belgilar va narsalar — har biri 20 DZF */
+/** Belgilar va narsalar — har biri 5 DZF */
 const SYMBOLS: Array<[string, string]> = [
   ["sy-zap", "⚡"],
   ["sy-sun", "☀️"],
@@ -371,7 +371,7 @@ function buildNew(list: Array<[string, string]>, category: ShopItem["category"])
   return list.map(([id, emoji]) => ({
     id,
     content: emoji,
-    price: 20,
+    price: 5,
     category,
     kind: "sticker",
   }));

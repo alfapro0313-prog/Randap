@@ -218,7 +218,7 @@ const en = {
   ballarTitle: "Dapzif",
   ballarSub: "Who has the most money? Ranking by DZF (dapzif)",
   ballarHow:
-    "How is DZF earned? Solve the tests in the sections — every correct answer gives 0.2 DZF (dapzif). The list shows who currently has the most money. It updates instantly.",
+    "How is DZF earned? Solve the tests in the sections — every correct answer gives 0.2 DZF (dapzif) and 10 points. The list ranks by money (DZF); the points earned in tests are shown next to each name. It updates instantly.",
 
   // Profile
   profileUpdated: "Profile updated",
@@ -639,7 +639,7 @@ const ru: Dict = {
   ballarTitle: "Дапзиф",
   ballarSub: "У кого больше всего денег? Рейтинг по DZF (дапзиф)",
   ballarHow:
-    "Как зарабатывается DZF? Решайте тесты в разделах — за каждый правильный ответ даётся 0.2 DZF (дапзиф). В списке видно, у кого сейчас больше всего денег. Обновляется мгновенно.",
+    "Как зарабатывается DZF? Решайте тесты в разделах — за каждый правильный ответ даётся 0.2 DZF (дапзиф) и 10 баллов. Рейтинг строится по деньгам (DZF), а баллы, заработанные в тестах, показаны рядом с каждым именем. Обновляется мгновенно.",
 
   profileUpdated: "Профиль обновлён",
   saveError: "Ошибка при сохранении",
@@ -1052,7 +1052,7 @@ const uz: Dict = {
   ballarTitle: "Dapzif",
   ballarSub: "Kimning puli ko'p? Dapzif (DZF) bo'yicha umumiy reyting",
   ballarHow:
-    "DZF qanday to'planadi? Bo'limlardagi testlarni yeching — har bir to'g'ri javob uchun 0,2 DZF (dapzif) beriladi. Bu reytingda hozirda puli eng ko'p odamlar yuqorida turadi. Ro'yxat darhol yangilanadi.",
+    "DZF qanday to'planadi? Bo'limlardagi testlarni yeching — har bir to'g'ri javob uchun 0,2 DZF (dapzif) va 10 ball beriladi. Reyting pul (DZF) bo'yicha quriladi, testlarda yig'ilgan balllar esa har bir ism yonida ko'rinadi. Ro'yxat darhol yangilanadi.",
 
   profileUpdated: "Profil yangilandi",
   saveError: "Saqlashda xatolik",
