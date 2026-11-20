@@ -24,21 +24,22 @@ model User {
 }
 
 model Video {
-  id            String    @id @default(cuid())
+  id            String      @id @default(cuid())
   title         String
   description   String?
   thumbPath     String
   videoPath     String
-  hash          String    @unique
-  kind          String    @default("video")
-  durationSec   Int       @default(0)
-  allowComments Boolean   @default(true)
-  views         Int       @default(0)
+  hash          String      @unique
+  kind          String      @default("video")
+  durationSec   Int         @default(0)
+  allowComments Boolean     @default(true)
+  views         Int         @default(0)
   uploaderId    String
-  uploader      User      @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  uploader      User        @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
   comments      Comment[]
   likes         Like[]
-  createdAt     DateTime  @default(now())
+  viewRecords   VideoView[]
+  createdAt     DateTime    @default(now())
 }
 
 model Comment {
@@ -62,6 +63,19 @@ model Like {
   createdAt DateTime @default(now())
 
   @@unique([videoId, deviceId])
+}
+
+/// Ko'rishlar: har bir akkaunt (viewerKey = accountKey) videoni FAQAT BIR MAROTA
+/// sanaydi — chiqib qayta kirsa ham ko'rish ortmaydi.
+model VideoView {
+  id        String   @id @default(cuid())
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  viewerKey String
+  createdAt DateTime @default(now())
+
+  @@unique([videoId, viewerKey])
+  @@index([viewerKey])
 }
 
 model Subscription {
@@ -154,6 +168,8 @@ model AuthAccount {
   lastSeenAt   DateTime  @default(now())
   blockedUntil DateTime?
   blockedAt    DateTime?
+  /// Admin yozgan sabab — bloklangan foydalanuvchi kirishda shuni ko'radi
+  blockReason  String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
@@ -284,6 +300,8 @@ model Account {
   /// Parol (scrypt hash, "salt:hash" formatida) — boshqalar hisobni ola olmasligi uchun
   passwordHash String?
   blockedUntil DateTime?
+  /// Admin yozgan sabab — bloklangan foydalanuvchi kirishda shuni ko'radi
+  blockReason  String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }

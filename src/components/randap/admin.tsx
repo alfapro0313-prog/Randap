@@ -28,6 +28,7 @@ type AdminAccount = {
   lastSeenAt: number;
   createdAt: number;
   blockedUntil: number | null;
+  blockReason: string | null;
 };
 
 type AdminComplaint = {
@@ -50,6 +51,12 @@ export function AdminView({ deviceKey }: { deviceKey: string }) {
   const [accounts, setAccounts] = useState<AdminAccount[] | null>(null);
   const [complaints, setComplaints] = useState<AdminComplaint[] | null>(null);
   const [busy, setBusy] = useState("");
+  // Ochilgan blok formasi: qaysi gmail + tanlangan muddat + sabab
+  const [blockForm, setBlockForm] = useState<{
+    gmail: string;
+    hours: number;
+    reason: string;
+  } | null>(null);
 
   const loadUsers = useCallback(async () => {
     try {
@@ -85,19 +92,51 @@ export function AdminView({ deviceKey }: { deviceKey: string }) {
     return () => window.clearTimeout(id);
   }, [loadUsers, loadComplaints]);
 
-  async function setBlock(gmail: string, action: "block" | "unblock") {
+  async function setBlock(
+    gmail: string,
+    action: "block" | "unblock",
+    hours = 3,
+    reason = ""
+  ) {
     setBusy(`${gmail}:${action}`);
     try {
       const res = await fetch("/api/admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deviceKey, gmail, action }),
+        body: JSON.stringify({ deviceKey, gmail, action, hours, reason }),
       });
       const data = await res.json();
       if (data.ok) {
         toast({
           title: action === "block" ? t("adminBlockedDone") : t("adminUnblocked"),
         });
+        setBlockForm(null);
+        void loadUsers();
+      } else {
+        toast({
+          title: t("error"),
+          description: data.error,
+          variant: "destructive",
+        });
+      }
+    } catch {
+      toast({ title: t("error"), description: t("retry"), variant: "destructive" });
+    }
+    setBusy("");
+  }
+
+  async function deleteAccount(gmail: string) {
+    if (!window.confirm(t("adminDeleteConfirm"))) return;
+    setBusy(`${gmail}:delete`);
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceKey, gmail, action: "delete" }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        toast({ title: t("adminAccDeletedDone") });
         void loadUsers();
       } else {
         toast({
@@ -216,82 +255,196 @@ export function AdminView({ deviceKey }: { deviceKey: string }) {
           <div className="flex flex-col gap-3">
             {accounts.map((a) => {
               const blockMs = activeBlockMs(a.blockedUntil);
+              const isPerm = !!blockMs && (a.blockedUntil ?? 0) >= 253402000000000;
               const isMe = a.gmail.toLowerCase() === ADMIN_GMAIL;
               const letter = (a.name.trim()[0] ?? "R").toUpperCase();
+              const formOpen = blockForm?.gmail === a.gmail;
               return (
                 <div
                   key={a.id}
-                  className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 sm:flex-row sm:items-center"
+                  className={cn(
+                    "flex flex-col gap-3 rounded-2xl border bg-card p-4",
+                    blockMs ? "border-red-500/40" : "border-border"
+                  )}
                 >
-                  <div className="flex min-w-0 flex-1 items-center gap-3">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
-                      {letter}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="flex items-center gap-2 truncate text-sm font-semibold text-foreground">
-                        {a.name}
-                        {isMe ? (
-                          <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">
-                            {t("adminYou")}
-                          </span>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div className="flex min-w-0 flex-1 items-center gap-3">
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
+                        {letter}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="flex items-center gap-2 truncate text-sm font-semibold text-foreground">
+                          {a.name}
+                          {isMe ? (
+                            <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">
+                              {t("adminYou")}
+                            </span>
+                          ) : null}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground" dir="ltr">
+                          {a.gmail}
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-muted-foreground">
+                          {t("adminVisits")}: {a.visits} · {t("adminLastSeen")}:{" "}
+                          {timeAgo(new Date(a.lastSeenAt).toISOString(), lang)}
+                        </p>
+                        {blockMs && a.blockReason ? (
+                          <p
+                            className="mt-1 text-[11px] font-semibold text-red-500/90"
+                            dir="auto"
+                          >
+                            {t("blockedReason", { reason: a.blockReason })}
+                          </p>
                         ) : null}
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground" dir="ltr">
-                        {a.gmail}
-                      </p>
-                      <p className="mt-0.5 text-[11px] text-muted-foreground">
-                        {t("adminVisits")}: {a.visits} · {t("adminLastSeen")}:{" "}
-                        {timeAgo(new Date(a.lastSeenAt).toISOString(), lang)}
-                      </p>
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 flex-wrap items-center gap-2">
+                      {blockMs ? (
+                        <span className="rounded-full bg-red-500/15 px-3 py-1 text-xs font-bold text-red-500">
+                          {isPerm
+                            ? `${t("adminStatusBlocked")} · ${t("adminPermanentChip")}`
+                            : t("adminBlockedLeft", {
+                                time: formatLeft(
+                                  remainingMs(blockMs),
+                                  t("unitHour"),
+                                  t("unitMin")
+                                ),
+                              })}
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-bold text-emerald-600">
+                          {t("adminStatusActive")}
+                        </span>
+                      )}
+                      {!isMe ? (
+                        <>
+                          {blockMs ? (
+                            <button
+                              onClick={() => void setBlock(a.gmail, "unblock")}
+                              disabled={busy === `${a.gmail}:unblock`}
+                              className="flex min-h-[36px] items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+                            >
+                              {busy === `${a.gmail}:unblock` ? (
+                                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                              ) : (
+                                <ShieldCheck className="size-3.5" aria-hidden="true" />
+                              )}
+                              {t("adminUnblock")}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() =>
+                                setBlockForm({ gmail: a.gmail, hours: 3, reason: "" })
+                              }
+                              disabled={busy === `${a.gmail}:block`}
+                              className="flex min-h-[36px] items-center gap-1.5 rounded-full bg-red-600 px-3.5 text-xs font-bold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                            >
+                              {busy === `${a.gmail}:block` ? (
+                                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                              ) : (
+                                <Ban className="size-3.5" aria-hidden="true" />
+                              )}
+                              {t("adminBlockBtn")}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => void deleteAccount(a.gmail)}
+                            disabled={busy === `${a.gmail}:delete`}
+                            className="flex min-h-[36px] items-center gap-1.5 rounded-full border border-destructive/50 px-3.5 text-xs font-bold text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
+                          >
+                            {busy === `${a.gmail}:delete` ? (
+                              <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                            ) : (
+                              <Trash2 className="size-3.5" aria-hidden="true" />
+                            )}
+                            {t("adminDeleteBtn")}
+                          </button>
+                        </>
+                      ) : null}
                     </div>
                   </div>
 
-                  <div className="flex shrink-0 flex-wrap items-center gap-2">
-                    {blockMs ? (
-                      <span className="rounded-full bg-red-500/15 px-3 py-1 text-xs font-bold text-red-500">
-                        {t("adminBlockedLeft", {
-                          time: formatLeft(
-                            remainingMs(blockMs),
-                            t("unitHour"),
-                            t("unitMin")
-                          ),
-                        })}
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-bold text-emerald-600">
-                        {t("adminStatusActive")}
-                      </span>
-                    )}
-                    {!isMe ? (
-                      blockMs ? (
+                  {/* Blok formasi: muddat + sabab */}
+                  {blockForm && formOpen ? (
+                    <div className="flex flex-col gap-2.5 rounded-xl border border-red-500/30 bg-red-500/5 p-3">
+                      <p className="text-xs font-semibold text-foreground">
+                        {t("adminReasonLabel")}
+                      </p>
+                      <input
+                        value={blockForm.reason}
+                        onChange={(e) =>
+                          setBlockForm({
+                            gmail: a.gmail,
+                            hours: blockForm.hours,
+                            reason: e.target.value,
+                          })
+                        }
+                        placeholder={t("adminReasonPh")}
+                        maxLength={300}
+                        dir="auto"
+                        className="min-h-[38px] w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/40"
+                      />
+                      <div className="flex flex-wrap gap-1.5">
+                        {(
+                          [
+                            [1, "adminD1"],
+                            [3, "adminD3"],
+                            [12, "adminD12"],
+                            [24, "adminDDay"],
+                            [168, "adminD7"],
+                            [0, "adminDPerm"],
+                          ] as const
+                        ).map(([h, key]) => (
+                          <button
+                            key={key}
+                            onClick={() =>
+                              setBlockForm({
+                                gmail: a.gmail,
+                                hours: h,
+                                reason: blockForm.reason,
+                              })
+                            }
+                            className={cn(
+                              "min-h-[32px] rounded-full px-3 text-xs font-bold transition-colors",
+                              blockForm.hours === h
+                                ? "bg-red-600 text-white"
+                                : "border border-border text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            {t(key)}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
                         <button
-                          onClick={() => void setBlock(a.gmail, "unblock")}
-                          disabled={busy === `${a.gmail}:unblock`}
-                          className="flex min-h-[36px] items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
-                        >
-                          {busy === `${a.gmail}:unblock` ? (
-                            <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-                          ) : (
-                            <ShieldCheck className="size-3.5" aria-hidden="true" />
-                          )}
-                          {t("adminUnblock")}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => void setBlock(a.gmail, "block")}
+                          onClick={() =>
+                            void setBlock(
+                              a.gmail,
+                              "block",
+                              blockForm.hours,
+                              blockForm.reason
+                            )
+                          }
                           disabled={busy === `${a.gmail}:block`}
-                          className="flex min-h-[36px] items-center gap-1.5 rounded-full bg-red-600 px-3.5 text-xs font-bold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
+                          className="flex min-h-[36px] items-center gap-1.5 rounded-full bg-red-600 px-4 text-xs font-bold text-white transition-colors hover:bg-red-700 disabled:opacity-50"
                         >
                           {busy === `${a.gmail}:block` ? (
                             <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
                           ) : (
                             <Ban className="size-3.5" aria-hidden="true" />
                           )}
-                          {t("adminBlock3h")}
+                          {t("adminBlockBtn")}
                         </button>
-                      )
-                    ) : null}
-                  </div>
+                        <button
+                          onClick={() => setBlockForm(null)}
+                          className="flex min-h-[36px] items-center rounded-full border border-border bg-secondary px-4 text-xs font-semibold text-foreground transition-colors hover:bg-secondary/80"
+                        >
+                          {t("adminBlockCancel")}
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               );
             })}

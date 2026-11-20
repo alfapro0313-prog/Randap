@@ -27,6 +27,7 @@ export function RandapGate() {
     undefined
   );
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
+  const [blockedReason, setBlockedReason] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = false;
@@ -50,6 +51,7 @@ export function RandapGate() {
             const blockMs = activeBlockMs(data.account.blockedUntil);
             if (blockMs) {
               setBlockedUntil(blockMs);
+              setBlockedReason(data.account.blockReason ?? null);
               return;
             }
             const next: LoginSession = {
@@ -86,8 +88,10 @@ export function RandapGate() {
     return (
       <BlockedScreen
         until={blockedUntil}
+        reason={blockedReason}
         onBack={() => {
           setBlockedUntil(null);
+          setBlockedReason(null);
           setSession(null);
         }}
       />
@@ -114,12 +118,14 @@ export function RandapGate() {
   return <RandapApp />;
 }
 
-/** Bloklangan hisob uchun ekran — qolgan vaqt taymer bilan ko'rinadi */
+/** Bloklangan hisob uchun ekran — sabab va qolgan vaqt ko'rinadi */
 function BlockedScreen({
   until,
+  reason,
   onBack,
 }: {
   until: number;
+  reason: string | null;
   onBack: () => void;
 }) {
   const { t } = useLang();
@@ -133,6 +139,8 @@ function BlockedScreen({
 
   const left = remainingMs(until);
   const time = formatLeft(left, t("unitHour"), t("unitMin"));
+  // Doimiy blok — 9999-yilga qadar
+  const isPerm = until >= 253402000000000;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-10">
@@ -150,11 +158,19 @@ function BlockedScreen({
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
           {t("blockedDesc")}
         </p>
+        {reason ? (
+          <p
+            className="mt-4 rounded-xl bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-500"
+            dir="auto"
+          >
+            {t("blockedReason", { reason })}
+          </p>
+        ) : null}
         <p
           role="status"
-          className="mt-5 rounded-xl bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-500"
+          className="mt-4 rounded-xl bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-500"
         >
-          {t("blockedLeft", { time })}
+          {isPerm ? t("blockedPermanent") : t("blockedLeft", { time })}
         </p>
         <button
           onClick={onBack}

@@ -68,16 +68,16 @@ export function WatchView({
     load();
   }, [load]);
 
-  // Ko'rishlar hisoblagichi — har bir video uchun bir marta
+  // Ko'rishlar hisoblagichi — har bir akkaunt video uchun FAQAT bir marta
   useEffect(() => {
     if (!videoId || viewedRef.current === videoId) return;
     viewedRef.current = videoId;
     fetch("/api/video/view", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: videoId }),
+      body: JSON.stringify({ id: videoId, deviceKey }),
     }).catch(() => undefined);
-  }, [videoId]);
+  }, [videoId, deviceKey]);
 
   async function toggleLike() {
     if (!video || liking) return;

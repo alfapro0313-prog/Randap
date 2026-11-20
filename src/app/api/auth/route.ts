@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { randomBytes, randomUUID, scryptSync, timingSafeEqual } from "crypto";
 import { db } from "@/lib/db";
 import { ensureUser } from "@/lib/randap-server";
+import {
+  validateGmailFormat,
+  verifyGmailReal,
+  allowNewAccount,
+} from "@/lib/gmail-verify";
 
 /** Faqat Gmail manzillar qabul qilinadi */
 const GMAIL_RE = /^[a-z0-9](?:[a-z0-9._%+-]{0,62})?@(?:gmail|googlemail)\.com$/i;
@@ -32,6 +37,7 @@ export function accountPayload(account: {
   viaGoogle: boolean;
   blockedUntil: Date | null;
   accountKey: string;
+  blockReason?: string | null;
 }) {
   return {
     name: account.name,
@@ -40,6 +46,7 @@ export function accountPayload(account: {
     blockedUntil: account.blockedUntil
       ? new Date(account.blockedUntil).getTime()
       : null,
+    blockReason: account.blockReason ?? null,
     accountKey: account.accountKey,
   };
 }
@@ -95,6 +102,7 @@ export async function GET(req: Request) {
           gmail: acct.gmail,
           viaGoogle: true,
           blockedUntil: acct.blockedUntil,
+          blockReason: acct.blockReason,
           accountKey: acct.accountKey,
         }),
       });
@@ -116,6 +124,7 @@ export async function GET(req: Request) {
           gmail: resolved.gmail,
           viaGoogle: authAccount.viaGoogle,
           blockedUntil: resolved.blockedUntil ?? authAccount.blockedUntil,
+          blockReason: resolved.blockReason ?? authAccount.blockReason,
           accountKey: resolved.accountKey,
         }),
       });
@@ -187,6 +196,14 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    // HAQIQIY GMAIL — 1-qatlam: qatiy Gmail format qoidalari
+    const format = validateGmailFormat(gmail);
+    if (!format.ok) {
+      return NextResponse.json(
+        { ok: false, error: format.error ?? "Gmail noto'g'ri" },
+        { status: 400 }
+      );
+    }
     if (!password) {
       return NextResponse.json(
         { ok: false, passwordRequired: true, error: "Parol yozilishi shart" },
@@ -219,7 +236,8 @@ export async function POST(req: Request) {
           ok: false,
           blocked: true,
           blockedUntil: new Date(block.blockedUntil).getTime(),
-          error: "Kirish vaqtincha bloklangan",
+          blockReason: block.blockReason ?? null,
+          error: "Kirish admin tomonidan bloklangan",
         },
         { status: 403 }
       );
@@ -233,7 +251,8 @@ export async function POST(req: Request) {
           ok: false,
           blocked: true,
           blockedUntil: new Date(accountBlock.blockedUntil).getTime(),
-          error: "Kirish vaqtincha bloklangan",
+          blockReason: accountBlock.blockReason ?? null,
+          error: "Kirish admin tomonidan bloklangan",
         },
         { status: 403 }
       );
@@ -241,6 +260,38 @@ export async function POST(req: Request) {
 
     // Bitta gmail = bitta hisob + parol himoyasi
     const existing = await db.account.findUnique({ where: { gmail } });
+
+    // YANGI HISOB: haqiqiy Gmail tekshiruvi + yaratish limiti
+    if (!existing) {
+      const legacy = await db.authAccount.findFirst({ where: { gmail } });
+      if (!legacy) {
+        // Yangi akkaunt: bir qurilmadan kuniga 3 tadan ko'p yo'q
+        if (!allowNewAccount(deviceKey)) {
+          return NextResponse.json(
+            {
+              ok: false,
+              error:
+                "Bugun bu qurilmadan ko'p akkaunt yaratildi. Iltimos, keyinroq urinib ko'ring",
+            },
+            { status: 429 }
+          );
+        }
+        // 2-qatlam: gmail Gmail serverida mavjudligini tekshirish
+        const verdict = await verifyGmailReal(gmail);
+        if (verdict === "fake") {
+          return NextResponse.json(
+            {
+              ok: false,
+              gmailNotReal: true,
+              error:
+                "Bu Gmail manzil mavjud emas. Faqat haqiqiy Gmail akkauntingiz bilan kiring",
+            },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     let account;
     if (existing) {
       if (existing.passwordHash) {

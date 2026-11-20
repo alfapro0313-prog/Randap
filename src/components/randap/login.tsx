@@ -163,11 +163,25 @@ export function LoginView({
       });
       const data = await res.json();
       if (data?.blocked) {
-        // ADMIN BLOKI — qolgan vaqt bilan xato ko'rsatiladi
+        // ADMIN BLOKI — sabab + qolgan vaqt (yoki doimiy) ko'rsatiladi
         setChecking(false);
-        const ms = remainingMs(activeBlockMs(data.blockedUntil) ?? 0);
-        const time = formatLeft(ms, t("unitHour"), t("unitMin"));
-        setGoogleErr(t("loginBlocked", { time }));
+        setGoogleOpen(false);
+        const isPerm =
+          typeof data.blockedUntil === "number" &&
+          data.blockedUntil >= 253402000000000;
+        const base = isPerm
+          ? t("blockedPermanent")
+          : (() => {
+              const ms = remainingMs(activeBlockMs(data.blockedUntil) ?? 0);
+              return t("loginBlocked", {
+                time: formatLeft(ms, t("unitHour"), t("unitMin")),
+              });
+            })();
+        setGoogleErr(
+          data.blockReason
+            ? `${base} ${t("blockedReason", { reason: data.blockReason })}`
+            : base
+        );
         return;
       }
       if (data?.passwordWrong) {
