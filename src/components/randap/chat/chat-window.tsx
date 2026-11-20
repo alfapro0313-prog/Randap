@@ -64,6 +64,11 @@ export function ChatWindow({
   const [ownedStickers, setOwnedStickers] = useState<string[]>([]);
   // "Rasm o'chirilsinmi?" tasdiqlashi ko'rsatilayotgan xabar
   const [confirmDeleteMsgId, setConfirmDeleteMsgId] = useState<string | null>(null);
+  // "O'tkaz" — DZF pul o'tkazish (do'kondan tovar olingan bo'lishi kerak)
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [transferAmount, setTransferAmount] = useState("");
+  const [transferBusy, setTransferBusy] = useState(false);
+  const [myDzf, setMyDzf] = useState<number | null>(null);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const stickRef = useRef(true);
@@ -271,6 +276,61 @@ export function ChatWindow({
     }
   }
 
+  async function onTransferClick() {
+    try {
+      const res = await fetch(`/api/shop?deviceKey=${encodeURIComponent(deviceKey)}`);
+      const data = (await res.json()) as ShopData & { ok?: boolean };
+      if (data?.ok) {
+        setMyDzf(data.dzf);
+        if (data.ownedIds?.includes("otkaz")) {
+          setTransferAmount("");
+          setShowTransfer(true);
+        } else {
+          toast({ title: t.transferNeedBuy, variant: "destructive" });
+        }
+      }
+    } catch {
+      toast({ title: t.transferFail, variant: "destructive" });
+    }
+  }
+
+  async function doTransfer() {
+    const amount = Number(transferAmount.replace(",", "."));
+    if (!Number.isFinite(amount) || amount <= 0 || transferBusy) {
+      toast({ title: t.transferBadAmount, variant: "destructive" });
+      return;
+    }
+    setTransferBusy(true);
+    try {
+      const res = await fetch("/api/dzf/transfer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceKey, conversationId, amount }),
+      });
+      const data = await res.json();
+      if (data?.ok) {
+        setMyDzf(data.dzf);
+        setShowTransfer(false);
+        setTransferAmount("");
+        toast({ title: t.transferSent });
+        stickRef.current = true;
+        await refresh();
+      } else if (data?.notEnough) {
+        toast({ title: t.transferNotEnough, variant: "destructive" });
+      } else if (data?.otkazNotOwned) {
+        toast({ title: t.transferNeedBuy, variant: "destructive" });
+      } else if (data?.badAmount) {
+        toast({ title: t.transferBadAmount, variant: "destructive" });
+      } else {
+        toast({ title: t.transferFail, variant: "destructive" });
+      }
+    } catch {
+      toast({ title: t.transferFail, variant: "destructive" });
+    } finally {
+      setTransferBusy(false);
+    }
+  }
+
   const ended = meta?.ended ?? false;
   const isRandom = meta?.isRandom ?? initialIsRandom;
   const statusText = ended
@@ -383,6 +443,25 @@ export function ChatWindow({
               >
                 {text}
               </p>
+            );
+          }
+
+          if (m.kind === "dzf") {
+            const dzfVal = String(Number(m.content) / 100);
+            return (
+              <div key={m.id} className="flex justify-center">
+                <div className="flex flex-col items-center gap-0.5 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-2 text-center shadow-sm">
+                  <span className="text-base font-extrabold text-amber-700">
+                    💸 {dzfVal} DZF
+                  </span>
+                  <span className="text-[11px] font-semibold text-amber-600">
+                    {m.mine ? t.transferMine : t.transferGot}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {formatTime(m.createdAt, lang)}
+                  </span>
+                </div>
+              </div>
             );
           }
 
@@ -556,6 +635,17 @@ export function ChatWindow({
           ) : null}
 
           <div className="flex items-end gap-1.5">
+            {!isRandom ? (
+              <button
+                onClick={() => void onTransferClick()}
+                disabled={uploading}
+                aria-label={t.transferTitle}
+                title={t.transferTitle}
+                className="flex size-10 shrink-0 items-center justify-center rounded-full text-xl text-muted-foreground transition-colors hover:bg-secondary"
+              >
+                💸
+              </button>
+            ) : null}
             <button
               onClick={() => setShowStickers((prev) => !prev)}
               aria-label={t.stickers}
@@ -625,6 +715,73 @@ export function ChatWindow({
           </div>
         </div>
       )}
+
+      {/* O'tkaz — DZF pul o'tkazish dialogi */}
+      {showTransfer ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={() => setShowTransfer(false)}
+          role="presentation"
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl border border-border bg-card p-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-label={t.transferTitle}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-sm font-bold text-foreground">
+                💸 {t.transferTitle}
+              </h3>
+              <button
+                onClick={() => setShowTransfer(false)}
+                aria-label={t.cancel}
+                className="flex size-8 items-center justify-center rounded-full bg-secondary text-foreground transition-colors hover:bg-secondary/80"
+              >
+                <X className="size-4" aria-hidden="true" />
+              </button>
+            </div>
+            <p className="mt-2 truncate text-xs text-muted-foreground">
+              {meta?.partner?.name ?? ""}
+            </p>
+            <div className="mt-3 flex items-center justify-between rounded-xl bg-secondary/60 px-3 py-2">
+              <span className="text-xs text-muted-foreground">{t.transferBalance}</span>
+              <span className="text-sm font-extrabold text-amber-600">
+                {myDzf ?? 0} DZF
+              </span>
+            </div>
+            <input
+              type="number"
+              inputMode="decimal"
+              min="0.1"
+              step="0.1"
+              value={transferAmount}
+              onChange={(e) => setTransferAmount(e.target.value)}
+              placeholder={t.transferAmount}
+              aria-label={t.transferAmount}
+              className="mt-3 w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            />
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button
+                onClick={() => setShowTransfer(false)}
+                className="flex h-9 items-center rounded-full bg-secondary px-4 text-xs font-bold text-foreground transition-colors hover:bg-secondary/80"
+              >
+                {t.cancel}
+              </button>
+              <button
+                onClick={() => void doTransfer()}
+                disabled={transferBusy || !transferAmount}
+                className="flex h-9 items-center gap-1.5 rounded-full bg-sky-600 px-4 text-xs font-bold text-white transition-colors hover:bg-sky-700 disabled:opacity-50"
+              >
+                {transferBusy ? (
+                  <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                ) : null}
+                {t.transferTitle}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

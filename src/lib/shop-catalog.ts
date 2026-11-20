@@ -13,10 +13,12 @@ export type ShopItem = {
   category: "special" | "faces" | "hands" | "hearts" | "animals" | "food" | "symbols";
   /** Qisqa nomi (maxsus tovarlar uchun) */
   name?: string;
-  kind: "sticker" | "avatar";
+  kind: "sticker" | "avatar" | "tool";
 };
 
 export const AVATAR_ITEM_ID = "avatar-photo";
+/** "O'tkaz" — chatda pul o'tkazish vositasi (bir marta sotib olinadi) */
+export const OTKAZ_ITEM_ID = "otkaz";
 
 /** Maxsus tovarlar — foydalanuvchi bergan narxlar */
 const SPECIAL: ShopItem[] = [
@@ -51,6 +53,14 @@ const SPECIAL: ShopItem[] = [
     category: "special",
     kind: "avatar",
     name: "Avatar rasmi",
+  },
+  {
+    id: OTKAZ_ITEM_ID,
+    content: "💸",
+    price: 2,
+    category: "special",
+    kind: "tool",
+    name: "O'tkaz",
   },
 ];
 

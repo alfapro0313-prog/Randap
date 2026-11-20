@@ -197,7 +197,7 @@ export type ChatProfileItem = {
 
 export type ChatMessageItem = {
   id: string;
-  kind: "text" | "sticker" | "image" | "system";
+  kind: "text" | "sticker" | "image" | "system" | "dzf";
   content: string;
   mine: boolean;
   createdAt: string;

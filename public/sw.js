@@ -45,3 +45,44 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(req).then((r) => r || caches.match("/")))
   );
 });
+
+/* ---------- Push bildirishnomalar (Telegram uslubi) ---------- */
+
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    data = { body: event.data ? event.data.text() : "" };
+  }
+  const title = (data && data.title) || "Randap";
+  const options = {
+    body: (data && data.body) || "",
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    tag: (data && data.tag) || "randap",
+    renotify: true,
+    vibrate: [100, 50, 100],
+    data: { url: (data && data.url) || "/" },
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url =
+    (event.notification.data && event.notification.data.url) || "/";
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((list) => {
+        for (const client of list) {
+          if (client.url.indexOf(self.location.origin) === 0) {
+            client.navigate(url).catch(() => undefined);
+            return client.focus();
+          }
+        }
+        return self.clients.openWindow(url);
+      })
+  );
+});

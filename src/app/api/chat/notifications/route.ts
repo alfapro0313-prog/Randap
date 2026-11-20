@@ -58,9 +58,11 @@ export async function GET(req: Request) {
       const preview =
         m.kind === "image"
           ? "[photo]"
-          : m.kind === "sticker"
-            ? m.content
-            : m.content.slice(0, 60);
+          : m.kind === "dzf"
+            ? `💸 ${Number(m.content) / 100} DZF`
+            : m.kind === "sticker"
+              ? m.content
+              : m.content.slice(0, 60);
       return {
         conversationId: m.conversationId,
         senderName: sender?.name ?? "Randap",

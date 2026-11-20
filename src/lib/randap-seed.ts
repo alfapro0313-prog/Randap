@@ -15,6 +15,15 @@ import {
   type SubjectDef2,
 } from "./randap-seed-more";
 import { BANK_TARGET, GEN_QUESTIONS } from "./randap-banks";
+import type { QGen } from "./banks/gen-core";
+import {
+  genLegacyArifmetika,
+  genLegacyAlgebraMantiq,
+  genLegacyGrammatika,
+  genLegacyJahonTarixi,
+  genLegacySozBoyligi,
+  genLegacyUzTarixi,
+} from "./banks/gen-legacy";
 
 const DIF = { easy: "easy", middle: "middle", hard: "hard" } as const;
 type Dif = keyof typeof DIF;
@@ -860,6 +869,64 @@ const CONTENT: SubjectDef[] = [
  * GEN savollar (id: *_gen*) seed bo'lgach marker mavjud bo'ladi → qayta ishga tushmaydi. */
 const MARKER_QUIZ_ID = "quiz_uz_7_easy_gen1";
 
+/**
+ * Eski (legacy) 6 ta testni 300 savolga to'ldirish.
+ * Bu testlar dastlabki seed-data.json orqali 10 ta savol bilan yaratilgan edi:
+ *   Tarix: "Jahon tarixi", "O'zbekiston tarixi"
+ *   Matematika: "Arifmetika asoslari", "Algebra va mantiq"
+ *   Ingliz tili: "Grammatika asoslari", "So'z boyligi"
+ * Idlar barqaror: `${quiz.id}_leg${i+1}` — qayta ishga tushsa ikki nusxa hosil bo'lmaydi.
+ */
+function normTitle(s: string): string {
+  return s.replace(/[\u2018\u2019']/g, "'").toLowerCase().trim();
+}
+
+const LEGACY_TARGETS: Array<{ slug: string; title: string; gen: () => QGen[] }> = [
+  { slug: "tarix", title: "Jahon tarixi", gen: genLegacyJahonTarixi },
+  { slug: "tarix", title: "O'zbekiston tarixi", gen: genLegacyUzTarixi },
+  { slug: "matematika", title: "Arifmetika asoslari", gen: genLegacyArifmetika },
+  { slug: "matematika", title: "Algebra va mantiq", gen: genLegacyAlgebraMantiq },
+  { slug: "ingliz-tili", title: "Grammatika asoslari", gen: genLegacyGrammatika },
+  { slug: "ingliz-tili", title: "So'z boyligi", gen: genLegacySozBoyligi },
+];
+
+async function topUpLegacyQuizzes(): Promise<void> {
+  for (const tgt of LEGACY_TARGETS) {
+    const subject = await db.subject.findUnique({ where: { slug: tgt.slug } });
+    if (!subject) continue;
+    const quizzes = await db.quiz.findMany({ where: { subjectId: subject.id } });
+    const quiz = quizzes.find((q) => normTitle(q.title) === normTitle(tgt.title));
+    if (!quiz) continue;
+    const existing = await db.question.count({ where: { quizId: quiz.id } });
+    const need = Math.max(0, BANK_TARGET - existing);
+    if (need === 0) continue;
+    const genQs = tgt.gen().slice(0, need);
+    const legacyQs = genQs.map((qq, i) => ({
+      id: `${quiz.id}_leg${i + 1}`,
+      quizId: quiz.id,
+      text: qq.t.uz,
+      options: JSON.stringify(qq.o.map((x) => x.uz)),
+      correctIndex: qq.correct,
+      audio: qq.audio ?? null,
+      order: 1000 + i,
+      textRu: qq.t.ru,
+      textEn: qq.t.en,
+      optionsRu: JSON.stringify(qq.o.map((x) => x.ru)),
+      optionsEn: JSON.stringify(qq.o.map((x) => x.en)),
+    }));
+    const ids = legacyQs.map((x) => x.id);
+    const existingRows = await db.question.findMany({
+      where: { id: { in: ids } },
+      select: { id: true },
+    });
+    const have = new Set(existingRows.map((x) => x.id));
+    const toInsert = legacyQs.filter((x) => !have.has(x.id));
+    if (toInsert.length) {
+      await db.question.createMany({ data: toInsert });
+    }
+  }
+}
+
 let running: Promise<void> | null = null;
 
 /** Kontent bazada yo'q bo'lsa — bir marta yaratadi. Har safar xavfsiz. */
@@ -867,11 +934,15 @@ export async function ensureContentSeeded(): Promise<void> {
   if (running) return running;
   running = (async () => {
     try {
-      const marker = await db.quiz.findUnique({
+      const marker = await db.question.findUnique({
         where: { id: MARKER_QUIZ_ID },
         select: { id: true },
       });
-      if (marker) return;
+      if (marker) {
+        // Asosiy kontent allaqachon bazada — faqat eski 6 testni 300 taga tekshiramiz
+        await topUpLegacyQuizzes();
+        return;
+      }
 
       for (const s of CONTENT) {
         // Qo'shimcha savollarni mavjud testlarga qo'shib chiqamiz
@@ -997,8 +1068,9 @@ export async function ensureContentSeeded(): Promise<void> {
           }
         }
       }
+      await topUpLegacyQuizzes();
       const qCount = await db.question.count();
-      console.log(`[seed] kontent tayyor: tarix (uz/jahon 7-11), ingliz (CEFR/IELTS/Listening), matematika, fizika, kimyo, geografiya, ona tili, adabiyot — jami ${qCount} savol (har test ~${BANK_TARGET} ta bazadan 10 tasi tasodifiy)`);
+      console.log(`[seed] kontent tayyor: tarix (uz/jahon 7-11), ingliz (CEFR/IELTS/Listening), matematika, fizika, kimyo, geografiya, ona tili, adabiyot + eski 6 test (har biri ${BANK_TARGET} savol) — jami ${qCount} savol`);
     } catch (e) {
       console.error("[seed] xatolik:", e);
     } finally {

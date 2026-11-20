@@ -14,6 +14,7 @@ import { toast } from "@/hooks/use-toast";
 import { useLang } from "./lang-provider";
 import {
   SHOP_ITEMS,
+  OTKAZ_ITEM_ID,
   type ShopItem,
 } from "@/lib/shop-catalog";
 import type { ShopData } from "@/lib/randap-types";
@@ -95,6 +96,7 @@ export function ShopView({
 
   const ownedSet = new Set(data?.ownedIds ?? []);
   const avatarItem = SHOP_ITEMS.find((i) => i.id === "avatar-photo")!;
+  const otkazItem = SHOP_ITEMS.find((i) => i.id === OTKAZ_ITEM_ID)!;
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 pb-6">
@@ -187,6 +189,45 @@ export function ShopView({
                 className="flex h-9 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
               >
                 {buying === avatarItem.id ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                ) : null}
+                {t("shopBuy")}
+              </button>
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {/* O'tkaz — chatda pul o'tkazish vositasi */}
+      {category === "special" ? (
+        <div className="flex items-center gap-4 rounded-2xl border border-sky-200 bg-sky-50/60 p-5">
+          <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-3xl">
+            💸
+          </span>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-base font-bold text-foreground">
+              {t("shopOtkazCard")}
+            </h3>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {t("shopOtkazDesc")}
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-col items-end gap-1.5">
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-extrabold text-amber-700">
+              {otkazItem.price} DZF
+            </span>
+            {ownedSet.has(otkazItem.id) ? (
+              <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-700">
+                <Check className="size-3.5" aria-hidden="true" />
+                {t("shopOwned")}
+              </span>
+            ) : (
+              <button
+                onClick={() => void buy(otkazItem)}
+                disabled={buying === otkazItem.id}
+                className="flex h-9 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+              >
+                {buying === otkazItem.id ? (
                   <Loader2 className="size-4 animate-spin" aria-hidden="true" />
                 ) : null}
                 {t("shopBuy")}

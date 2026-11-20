@@ -84,6 +84,16 @@ const en = {
   stickerNotOwned: "This sticker is not yours — buy it in the shop",
   myStickers: "My stickers",
   freeStickers: "Free",
+  transferTitle: "Send DZF",
+  transferAmount: "Amount (DZF)",
+  transferBalance: "Your balance",
+  transferSent: "DZF sent",
+  transferNeedBuy: "First buy \u201cO\u2019tkaz\u201d in the shop (2 DZF)",
+  transferNotEnough: "Not enough DZF",
+  transferBadAmount: "Enter a valid amount (min 0.1)",
+  transferMine: "You sent",
+  transferGot: "Sent to you",
+  transferFail: "Transfer failed",
 };
 
 type ChatStrings = typeof en;
@@ -164,6 +174,16 @@ const ru: ChatStrings = {
   stickerNotOwned: "Этот стикер не ваш — купите его в магазине",
   myStickers: "Мои стикеры",
   freeStickers: "Бесплатные",
+  transferTitle: "Отправить DZF",
+  transferAmount: "Сумма (DZF)",
+  transferBalance: "Ваш баланс",
+  transferSent: "DZF отправлен",
+  transferNeedBuy: "Сначала купите «О’тказ» в магазине (2 DZF)",
+  transferNotEnough: "Недостаточно DZF",
+  transferBadAmount: "Введите корректную сумму (мин. 0,1)",
+  transferMine: "Вы отправили",
+  transferGot: "Вам отправили",
+  transferFail: "Не удалось отправить",
 };
 
 const uz: ChatStrings = {
@@ -242,6 +262,16 @@ const uz: ChatStrings = {
   stickerNotOwned: "Bu stiker sizniki emas — do'kondan oling",
   myStickers: "Mening stikerlarim",
   freeStickers: "Bepul",
+  transferTitle: "DZF o'tkazish",
+  transferAmount: "Summa (DZF)",
+  transferBalance: "Balansingiz",
+  transferSent: "DZF o'tkazildi",
+  transferNeedBuy: "Avval do'kondan \u201cO'tkaz\u201d ni oling (2 DZF)",
+  transferNotEnough: "DZF yetarli emas",
+  transferBadAmount: "To'g'ri summa kiriting (min 0,1)",
+  transferMine: "Siz o'tkazdingiz",
+  transferGot: "Sizga o'tkazildi",
+  transferFail: "O'tkazib bo'lmadi",
 };
 
 export const CHAT_I18N: Record<ChatLang, ChatStrings> = { en, ru, uz };

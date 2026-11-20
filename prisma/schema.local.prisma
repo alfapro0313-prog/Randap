@@ -258,6 +258,18 @@ model RandomQueue {
   joinedAt  DateTime @default(now())
 }
 
+/// Telegram-uslubidagi tashqi push bildirishnomalar (Web Push, VAPID).
+model PushSubscription {
+  id        String   @id @default(cuid())
+  deviceKey String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@index([deviceKey])
+}
+
 /* ---------- Gmail asosidagi hisoblar (accountKey) ---------- */
 
 /// Bitta gmail = bitta hisob: barcha ma'lumotlar accountKey atrofida saqlanadi.

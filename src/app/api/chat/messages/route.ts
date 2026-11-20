@@ -11,6 +11,7 @@ import {
 } from "@/lib/chat-server";
 import { CHAT_STICKERS } from "@/lib/chat-i18n";
 import { findShopItemByContent } from "@/lib/shop-catalog";
+import { sendPushToUser } from "@/lib/push-server";
 
 const TYPING_WINDOW_MS = 3000;
 const MAX_TEXT_LEN = 2000;
@@ -138,6 +139,9 @@ export async function POST(req: Request) {
           { status: 400 }
         );
       }
+    } else if (kind === "dzf") {
+      // DZF xabarlarini faqat /api/dzf/transfer yaratadi — soxta yuborish taqiqlanadi
+      return NextResponse.json({ ok: false, error: "Xabar turi noto'g'ri" }, { status: 400 });
     } else if (kind === "sticker") {
       if (!content || content.length > 16) {
         return NextResponse.json({ ok: false, error: "Stiker noto'g'ri" }, { status: 400 });
@@ -163,6 +167,7 @@ export async function POST(req: Request) {
     await ensureChatProfile(deviceKey);
 
     const partnerKey = partnerKeyOf(conv, deviceKey);
+    const senderProfile = await ensureChatProfile(deviceKey);
     const [message] = await Promise.all([
       db.message.create({
         data: { conversationId: conv.id, senderKey: deviceKey, kind, content },
@@ -185,6 +190,20 @@ export async function POST(req: Request) {
       }),
     ]);
     await touchPresence(deviceKey);
+
+    // Tashqi push bildirishnoma (sayt yopiq bo'lsa ham chiqadi)
+    const pushPreview =
+      kind === "image"
+        ? "\ud83d\udcf7 [photo]"
+        : kind === "sticker"
+          ? content
+          : content.slice(0, 80);
+    void sendPushToUser(partnerKey, {
+      title: senderProfile.name,
+      body: pushPreview,
+      url: "/",
+      tag: "chat",
+    });
 
     return NextResponse.json({
       ok: true,
