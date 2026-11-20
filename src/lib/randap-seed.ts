@@ -897,18 +897,43 @@ async function topUpLegacyQuizzes(): Promise<void> {
     const quizzes = await db.quiz.findMany({ where: { subjectId: subject.id } });
     const quiz = quizzes.find((q) => normTitle(q.title) === normTitle(tgt.title));
     if (!quiz) continue;
-    const existing = await db.question.count({ where: { quizId: quiz.id } });
-    const need = Math.max(0, BANK_TARGET - existing);
+
+    // Eski (tarjimasiz) savollarni o'chiramiz — hamma savol 3 tilda tarjima bilan bo'lishi kerak
+    const allRows = await db.question.findMany({
+      where: { quizId: quiz.id },
+      select: { id: true, textRu: true },
+    });
+    const withTr = allRows.filter((r) => r.textRu !== null);
+    const withoutTr = allRows.filter((r) => r.textRu === null);
+    if (withoutTr.length) {
+      await db.question.deleteMany({
+        where: { id: { in: withoutTr.map((r) => r.id) } },
+      });
+    }
+
+    const need = Math.max(0, BANK_TARGET - withTr.length);
     if (need === 0) continue;
-    const genQs = tgt.gen().slice(0, need);
+
+    // Mavjud _leg indekslaridan keyingisini boshlaymiz (dubl bo'lmasligi uchun)
+    let maxIdx = 0;
+    for (const r of withTr) {
+      const m = /_leg(\d+)$/.exec(r.id);
+      if (m) maxIdx = Math.max(maxIdx, Number(m[1]));
+    }
+
+    const bank = tgt.gen();
+    const genQs: QGen[] = [];
+    for (let i = 0; i < need && maxIdx + i < bank.length; i++) {
+      genQs.push(bank[maxIdx + i] as QGen);
+    }
     const legacyQs = genQs.map((qq, i) => ({
-      id: `${quiz.id}_leg${i + 1}`,
+      id: `${quiz.id}_leg${maxIdx + i + 1}`,
       quizId: quiz.id,
       text: qq.t.uz,
       options: JSON.stringify(qq.o.map((x) => x.uz)),
       correctIndex: qq.correct,
       audio: qq.audio ?? null,
-      order: 1000 + i,
+      order: 2000 + maxIdx + i,
       textRu: qq.t.ru,
       textEn: qq.t.en,
       optionsRu: JSON.stringify(qq.o.map((x) => x.ru)),
