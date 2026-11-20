@@ -4,13 +4,15 @@ import { ensureUser } from "@/lib/randap-server";
 import { dzfFromCents } from "@/lib/shop-catalog";
 
 /**
- * GET /api/leaderboard?deviceKey=
- * "Dapzif" sahifasi: kimning DZF (dapzif) puli eng ko'p — umumiy reyting.
+ * GET /api/leaderboard?deviceKey=&mode=dzf|points
+ * "Dapzif" sahifasi: 2 ta reyting — DZF (pul) bo'yicha va ballar (testlar)
+ * bo'yicha alohida. mode=points bo'lsa ball bo'yicha teriladi.
  */
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const deviceKey = (searchParams.get("deviceKey") ?? "").trim();
+    const mode = (searchParams.get("mode") ?? "dzf").trim() === "points" ? "points" : "dzf";
 
     let meId: string | null = null;
     if (deviceKey) {
@@ -19,7 +21,10 @@ export async function GET(req: Request) {
     }
 
     const users = await db.user.findMany({
-      orderBy: [{ dzfCents: "desc" }, { points: "desc" }, { createdAt: "asc" }],
+      orderBy:
+        mode === "points"
+          ? [{ points: "desc" }, { dzfCents: "desc" }, { createdAt: "asc" }]
+          : [{ dzfCents: "desc" }, { points: "desc" }, { createdAt: "asc" }],
       take: 50,
       select: {
         id: true,
@@ -49,7 +54,7 @@ export async function GET(req: Request) {
         ? { ...leaders[meIndex], rank: meIndex + 1 }
         : null;
 
-    return NextResponse.json({ ok: true, leaders, me });
+    return NextResponse.json({ ok: true, mode, leaders, me });
   } catch (error) {
     console.error("/api/leaderboard error:", error);
     return NextResponse.json(

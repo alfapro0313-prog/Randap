@@ -7,6 +7,8 @@ import {
 } from "@/lib/randap-content-i18n";
 import { ensureContentSeeded } from "@/lib/randap-seed";
 
+export const maxDuration = 60; // Vercel: birinchi seed uchun
+
 /**
  * GET /api/sections?deviceKey=&lang=
  * Barcha fanlar (Bo'limlar) + har birining testlari va darslari.

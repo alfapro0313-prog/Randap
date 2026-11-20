@@ -208,7 +208,9 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
               <span className="text-sm font-bold text-amber-700">
                 {t("dzfAdded", { dzf: result.dzfEarned })}
               </span>
-              <span className="text-[11px] text-amber-600/80">{t("dzfAddedHint")}</span>
+              <span className="text-[11px] text-amber-600/80">
+                {t("dzfAddedHint", { dzf: result.dzfPer ?? 0.2 })}
+              </span>
               <span className="text-[11px] font-semibold text-amber-700">
                 {t("dzfTotal", { dzf: result.userDzf })}
               </span>

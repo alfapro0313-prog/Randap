@@ -216,9 +216,11 @@ const en = {
 
   // Dapzif (reyting)
   ballarTitle: "Dapzif",
-  ballarSub: "Who has the most money? Ranking by DZF (dapzif)",
+  ballarSub: "Two rankings: Points (tests) and DZF (money)",
   ballarHow:
-    "How is DZF earned? Solve the tests in the sections — every correct answer gives 0.2 DZF (dapzif) and 10 points. The list ranks by money (DZF); the points earned in tests are shown next to each name. It updates instantly.",
+    "How is DZF earned? Solve tests — easy quiz: 0.2 DZF, medium: 0.5 DZF, hard: 1 DZF per correct answer, plus 10 points. Switch between the Points and DZF tabs to see who has the most points or money.",
+  tabPoints: "Points",
+  tabDzf: "DZF (money)",
 
   // Profile
   profileUpdated: "Profile updated",
@@ -396,7 +398,7 @@ const en = {
   listeningStop: "Stop",
   listeningHint: "Press play, listen carefully and answer.",
   dzfAdded: "+{dzf} DZF",
-  dzfAddedHint: "0.2 DZF for each correct answer",
+  dzfAddedHint: "{dzf} DZF for each correct answer",
   dzfTotal: "DZF balance: {dzf}",
   loginGoogleBtn: "Sign in with Google",
   loginGoogleTitle: "Sign in with Google",
@@ -637,9 +639,11 @@ const ru: Dict = {
   go: "Перейти →",
 
   ballarTitle: "Дапзиф",
-  ballarSub: "У кого больше всего денег? Рейтинг по DZF (дапзиф)",
+  ballarSub: "Два рейтинга: баллы (тесты) и DZF (деньги)",
   ballarHow:
-    "Как зарабатывается DZF? Решайте тесты в разделах — за каждый правильный ответ даётся 0.2 DZF (дапзиф) и 10 баллов. Рейтинг строится по деньгам (DZF), а баллы, заработанные в тестах, показаны рядом с каждым именем. Обновляется мгновенно.",
+    "Как зарабатывается DZF? Решайте тесты — лёгкий тест: 0.2 DZF, средний: 0.5 DZF, сложный: 1 DZF за каждый правильный ответ, плюс 10 баллов. Переключайте вкладки «Баллы» и «DZF», чтобы увидеть, у кого больше баллов или денег.",
+  tabPoints: "Баллы",
+  tabDzf: "DZF (деньги)",
 
   profileUpdated: "Профиль обновлён",
   saveError: "Ошибка при сохранении",
@@ -812,7 +816,7 @@ const ru: Dict = {
   listeningStop: "Стоп",
   listeningHint: "Нажмите воспроизведение, внимательно послушайте и ответьте.",
   dzfAdded: "+{dzf} DZF",
-  dzfAddedHint: "0.2 DZF за каждый правильный ответ",
+  dzfAddedHint: "{dzf} DZF за каждый правильный ответ",
   dzfTotal: "Баланс DZF: {dzf}",
   loginGoogleBtn: "Войти через Google",
   loginGoogleTitle: "Вход через Google",
@@ -1050,9 +1054,11 @@ const uz: Dict = {
   go: "O'tish →",
 
   ballarTitle: "Dapzif",
-  ballarSub: "Kimning puli ko'p? Dapzif (DZF) bo'yicha umumiy reyting",
+  ballarSub: "Ikki reyting: Ballar (testlar) va DZF (pul)",
   ballarHow:
-    "DZF qanday to'planadi? Bo'limlardagi testlarni yeching — har bir to'g'ri javob uchun 0,2 DZF (dapzif) va 10 ball beriladi. Reyting pul (DZF) bo'yicha quriladi, testlarda yig'ilgan balllar esa har bir ism yonida ko'rinadi. Ro'yxat darhol yangilanadi.",
+    "DZF qanday to'planadi? Testlarni yeching — oson test: har to'g'ri javob uchun 0,2 DZF, o'rtacha: 0,5 DZF, qiyin: 1 DZF + har biri 10 ball. Ballar va DZF tablari orasida o'tib, kimda ko'p ball/pul borini ko'ring.",
+  tabPoints: "Ballar",
+  tabDzf: "DZF (pul)",
 
   profileUpdated: "Profil yangilandi",
   saveError: "Saqlashda xatolik",
@@ -1223,7 +1229,7 @@ const uz: Dict = {
   listeningStop: "To'xtatish",
   listeningHint: "Tugmani bosib tinglang va javobni tanlang.",
   dzfAdded: "+{dzf} DZF",
-  dzfAddedHint: "Har bir to'g'ri javob uchun 0.2 DZF",
+  dzfAddedHint: "Har bir to'g'ri javob uchun {dzf} DZF",
   dzfTotal: "DZF balansi: {dzf}",
   loginGoogleBtn: "Google orqali kirish",
   loginGoogleTitle: "Google orqali kirish",

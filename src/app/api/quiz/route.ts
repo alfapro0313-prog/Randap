@@ -81,18 +81,36 @@ export async function GET(req: Request) {
         poolSize: quiz.questions.length,
         kind: quiz.kind,
         questions: picked.map((q) => {
+          const rawOptions = JSON.parse(q.options) as string[];
           const qtr = localizeQuestion(
             quiz.subject.slug,
             quiz.order,
             q.order,
             q.text,
-            JSON.parse(q.options) as string[],
+            rawOptions,
             lang
           );
+          // Bazadagi tarjima ustunlari (GEN savollar uchun) — pack tarjimasi yo'q bo'lsa
+          let text = qtr.text;
+          let options = qtr.options;
+          if ((lang === "ru" || lang === "en") && qtr.text === q.text) {
+            const trText = lang === "ru" ? q.textRu : q.textEn;
+            const trOptions = lang === "ru" ? q.optionsRu : q.optionsEn;
+            if (trText) {
+              text = trText;
+              if (trOptions) {
+                try {
+                  options = JSON.parse(trOptions) as string[];
+                } catch {
+                  options = rawOptions;
+                }
+              }
+            }
+          }
           return {
             id: q.id,
-            text: qtr.text,
-            options: qtr.options,
+            text,
+            options,
             audio: q.audio ?? null,
           };
         }),

@@ -123,6 +123,11 @@ model Question {
   correctIndex Int
   /// Listening testlar uchun — tinglatiladigan (o'qib beriladigan) matn
   audio        String?
+  /// Tarjimalar (lang=ru|en da ishlatiladi; yo'q bo'lsa — asl matn)
+  textRu       String?
+  textEn       String?
+  optionsRu    String?
+  optionsEn    String?
   order        Int     @default(0)
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Medal, Trophy } from "lucide-react";
+import { Loader2, Medal, Star, Coins, Trophy } from "lucide-react";
 import { AvatarBubble } from "./avatar";
 import { useLang } from "./lang-provider";
 import { formatCount } from "@/lib/randap-client";
@@ -10,17 +10,21 @@ import { cn } from "@/lib/utils";
 
 const RANK_CLASSES = ["text-amber-500", "text-zinc-400", "text-amber-700"];
 
+type Mode = "dzf" | "points";
+
 export function BallarView({ deviceKey }: { deviceKey: string }) {
   const { t, lang } = useLang();
   const [leaders, setLeaders] = useState<LeaderEntry[]>([]);
   const [me, setMe] = useState<LeaderMe | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mode, setMode] = useState<Mode>("dzf");
 
   useEffect(() => {
     let cancelled = false;
+    setLoading(true);
     const url = deviceKey
-      ? `/api/leaderboard?deviceKey=${encodeURIComponent(deviceKey)}`
-      : "/api/leaderboard";
+      ? `/api/leaderboard?deviceKey=${encodeURIComponent(deviceKey)}&mode=${mode}`
+      : `/api/leaderboard?mode=${mode}`;
     fetch(url)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
@@ -38,7 +42,7 @@ export function BallarView({ deviceKey }: { deviceKey: string }) {
     return () => {
       cancelled = true;
     };
-  }, [deviceKey]);
+  }, [deviceKey, mode]);
 
   if (loading) {
     return (
@@ -60,6 +64,36 @@ export function BallarView({ deviceKey }: { deviceKey: string }) {
             {t("ballarSub")}
           </p>
         </div>
+      </div>
+
+      {/* Ballar / DZF tablari */}
+      <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border bg-card p-1.5">
+        <button
+          type="button"
+          onClick={() => setMode("points")}
+          className={cn(
+            "flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold transition-colors",
+            mode === "points"
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:bg-secondary"
+          )}
+        >
+          <Star className="size-4" aria-hidden="true" />
+          {t("tabPoints")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode("dzf")}
+          className={cn(
+            "flex items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold transition-colors",
+            mode === "dzf"
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:bg-secondary"
+          )}
+        >
+          <Coins className="size-4" aria-hidden="true" />
+          {t("tabDzf")}
+        </button>
       </div>
 
       {/* Mening ballim */}

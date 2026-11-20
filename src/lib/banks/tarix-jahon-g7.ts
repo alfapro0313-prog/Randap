@@ -1,0 +1,598 @@
+/**
+ * Jahon tarixi 7-sinf — O'rta asrlar (generator xomashyosi).
+ */
+import type { HistFact } from "./tarix-types";
+
+export const TARIX_JAHON_G7: HistFact[] = [
+  // ── Vizantiya imperiyasi ──
+  {
+    who: { uz: "Arkadiy va Goneriy", ru: "Аркадий и Гонорий", en: "Arcadius and Honorius" },
+    what: { uz: "Rim imperiyasining Sharqiy va G'arbiy qismlarga bo'linishi", ru: "Разделение Римской империи на Восточную и Западную части", en: "The division of the Roman Empire into Eastern and Western parts" },
+    year: "395",
+    where: { uz: "Rim imperiyasi", ru: "Римская империя", en: "Roman Empire" },
+    result: { uz: "Sharqiy (Vizantiya) va G'arbiy Rim imperiyalarining mustaqil davlatlar sifatida shakllanishi", ru: "Формирование Восточной (Византийской) и Западной Римской империй как самостоятельных государств", en: "The formation of the Eastern (Byzantine) and Western Roman empires as independent states" },
+  },
+  {
+    who: { uz: "Yustinian I", ru: "Юстиниан I", en: "Justinian I" },
+    what: { uz: "Yustinian I ning Vizantiya imperiyasida hukmronlik qilishi", ru: "Правление Юстиниана I в Византийской империи", en: "The reign of Justinian I in the Byzantine Empire" },
+    year: "527-565",
+    where: { uz: "Konstantinopol", ru: "Константинополь", en: "Constantinople" },
+    result: { uz: "Vizantiya qudratining tiklanishi va imperiya hududining sezilarli kengayishi", ru: "Восстановление могущества Византии и значительное расширение территории империи", en: "The restoration of Byzantine power and considerable expansion of the empire's territory" },
+  },
+  {
+    who: { uz: "Yustinian I", ru: "Юстиниан I", en: "Justinian I" },
+    what: { uz: "Ayo Sofiya soborining qurilishi", ru: "Строительство собора Святой Софии", en: "The construction of the Hagia Sophia cathedral" },
+    year: "532-537",
+    where: { uz: "Konstantinopol", ru: "Константинополь", en: "Constantinople" },
+    result: { uz: "Dunyodagi eng ulug' ibodatxonalardan birining yaratilishi va Vizantiya me'morchiligining yuksalishi", ru: "Создание одного из величайших храмов мира и расцвет византийской архитектуры", en: "The creation of one of the world's greatest temples and the flourishing of Byzantine architecture" },
+  },
+  {
+    who: { uz: "Knyaz Vladimir", ru: "Князь Владимир", en: "Prince Vladimir" },
+    what: { uz: "Kiev Rusining Vizantiyadan xristianlik dinini qabul qilishi", ru: "Принятие Киевской Русью христианства из Византии", en: "The adoption of Christianity by Kievan Rus' from Byzantium" },
+    year: "988",
+    where: { uz: "Kiev", ru: "Киев", en: "Kiev" },
+    result: { uz: "Rus' va Vizantiya o'rtasida diniy-madaniy aloqalarning mustahkamlanishi", ru: "Укрепление религиозно-культурных связей между Русью и Византией", en: "The strengthening of religious and cultural ties between Rus' and Byzantium" },
+  },
+  {
+    who: { uz: "Rim papasi va Vizantiya patriarxi", ru: "Папа Римский и патриарх Византии", en: "The Pope and the Patriarch of Constantinople" },
+    what: { uz: "Xristian cherkovining katolik va pravoslav yo'nalishlariga bo'linishi", ru: "Разделение христианской церкви на католическую и православную ветви", en: "The split of the Christian church into Catholic and Orthodox branches" },
+    year: "1054",
+    where: { uz: "Konstantinopol", ru: "Константинополь", en: "Constantinople" },
+    result: { uz: "Sharqiy va G'arbiy cherkovlarning butunlay ayrilishi (buyuk schizma)", ru: "Окончательное отделение Восточной и Западной церквей (великая схизма)", en: "The final separation of the Eastern and Western churches (the Great Schism)" },
+  },
+
+  // ── Arab xalifaligi ──
+  {
+    who: { uz: "Muhammad payg'ambar", ru: "Пророк Мухаммед", en: "Prophet Muhammad" },
+    what: { uz: "Muhammad payg'ambarning Makka shahrida dunyoga kelishi", ru: "Рождение пророка Мухаммеда в городе Мекка", en: "The birth of Prophet Muhammad in the city of Mecca" },
+    year: "570",
+    where: { uz: "Makka", ru: "Мекка", en: "Mecca" },
+    result: { uz: "Islom diniga asos solgan buyuk shaxsning o'sib yetishga kirishishi", ru: "Начало становления великой личности, основавшей исламскую религию", en: "The beginning of the life journey of the great figure who founded Islam" },
+  },
+  {
+    who: { uz: "Muhammad payg'ambar", ru: "Пророк Мухаммед", en: "Prophet Muhammad" },
+    what: { uz: "Muhammad payg'ambarning Makka aholisiga islom dinini targ'ib qilishni boshlashi", ru: "Начало проповеди пророком Мухаммедом ислама среди жителей Мекки", en: "The beginning of Prophet Muhammad's preaching of Islam to the people of Mecca" },
+    year: "610",
+    where: { uz: "Makka", ru: "Мекка", en: "Mecca" },
+    result: { uz: "Qur'on oyatlari e'lon qilinishi va dastlabki musulmon jamoasining shakllanishi", ru: "Ниспосылание аятов Корана и формирование первой мусульманской общины", en: "The revelation of the Quranic verses and the formation of the first Muslim community" },
+  },
+  {
+    who: { uz: "Muhammad payg'ambar", ru: "Пророк Мухаммед", en: "Prophet Muhammad" },
+    what: { uz: "Makka musulmonlarining Madinaga hijrat qilishi", ru: "Переселение (хиджра) мекканских мусульман в Медину", en: "The migration (Hijra) of Meccan Muslims to Medina" },
+    year: "622",
+    where: { uz: "Makka — Madina", ru: "Мекка — Медина", en: "Mecca — Medina" },
+    result: { uz: "Islom dini davlatining poydevori qo'yilishi va hijrat yili hijriy taqvimning boshlanishi", ru: "Заложение основы исламского государства и начало лунного календаря от года хиджры", en: "Laying the foundation of the Islamic state and the start of the lunar calendar from the year of Hijra" },
+  },
+  {
+    who: { uz: "Muhammad payg'ambar", ru: "Пророк Мухаммед", en: "Prophet Muhammad" },
+    what: { uz: "Makka shahrining musulmon qo'shinlari tomonidan qo'lga olinishi", ru: "Захват города Мекка мусульманскими войсками", en: "The capture of the city of Mecca by Muslim forces" },
+    year: "630",
+    where: { uz: "Makka", ru: "Мекка", en: "Mecca" },
+    result: { uz: "Arabiston yarim orolida islom dinining mavqei mustahkamlanishi", ru: "Укрепление позиций ислама на Аравийском полуострове", en: "The strengthening of the position of Islam on the Arabian Peninsula" },
+  },
+  {
+    who: { uz: "Muhammad payg'ambar", ru: "Пророк Мухаммед", en: "Prophet Muhammad" },
+    what: { uz: "Muhammad payg'ambarning vafot etishi", ru: "Кончина пророка Мухаммеда", en: "The death of Prophet Muhammad" },
+    year: "632",
+    where: { uz: "Madina", ru: "Медина", en: "Medina" },
+    result: { uz: "Islom davlatining arab xalifaligi sifatida davom etishi", ru: "Продолжение исламского государства как Арабского халифата", en: "The continuation of the Islamic state as the Arab Caliphate" },
+  },
+  {
+    who: { uz: "Halid ibn Valid", ru: "Халид ибн Валид", en: "Khalid ibn al-Walid" },
+    what: { uz: "Yarmuk jangining bo'lib o'tishi", ru: "Проведение битвы при Ярмуке", en: "The Battle of Yarmuk" },
+    year: "636",
+    where: { uz: "Yarmuk daryosi", ru: "Река Ярмук", en: "Yarmuk River" },
+    result: { uz: "Vizantiya qo'shinlarining tor-mor etilishi va Shom yerlarining arablar qo'liga o'tishi", ru: "Разгром византийских войск и переход Сирии под власть арабов", en: "The defeat of Byzantine forces and the fall of Syria to the Arabs" },
+  },
+  {
+    who: { uz: "Xalifa Muoviya", ru: "Халиф Муавия", en: "Caliph Muawiya" },
+    what: { uz: "Umaviylar sulolasi hokimiyatining o'rnatilishi", ru: "Установление власти династии Омейядов", en: "The establishment of Umayyad dynasty rule" },
+    year: "661",
+    where: { uz: "Damashq", ru: "Дамаск", en: "Damascus" },
+    result: { uz: "Arab xalifaligi poytaxtining Damashqqa ko'chirilishi", ru: "Перенос столицы Арабского халифата в Дамаск", en: "The transfer of the Arab Caliphate capital to Damascus" },
+  },
+  {
+    who: { uz: "Toriq ibn Ziyod", ru: "Тарик ибн Зияд", en: "Tariq ibn Ziyad" },
+    what: { uz: "Arablar tomonidan Vizigotlar qirolligining bosib olinishi", ru: "Завоевание королевства вестготов арабами", en: "The Arab conquest of the Visigothic kingdom" },
+    year: "711",
+    where: { uz: "Ispaniya", ru: "Испания", en: "Spain" },
+    result: { uz: "Pireney yarim orolida arab hukmronligining o'rnatilishi", ru: "Установление арабского владычества на Пиренейском полуострове", en: "The establishment of Arab rule on the Iberian Peninsula" },
+  },
+  {
+    who: { uz: "Karl Mardikor", ru: "Карл Мартелл", en: "Charles Martel" },
+    what: { uz: "Puatye jangida arab qo'shinlarining to'xtatilishi", ru: "Остановка арабских войск в битве при Пуатье", en: "The halting of Arab forces at the Battle of Poitiers" },
+    year: "732",
+    where: { uz: "Puatye", ru: "Пуатье", en: "Poitiers" },
+    result: { uz: "Arablarning Yevropa chuqurliklarga yurishining to'xtatilishi va franklar qo'shinlari g'alabasi", ru: "Прекращение походов арабов в глубь Европы и победа франкского войска", en: "The stopping of the Arab advance into Europe and the victory of the Frankish army" },
+  },
+  {
+    who: { uz: "As-Saffoh", ru: "Ас-Саффах", en: "As-Saffah" },
+    what: { uz: "Abbosiylar sulolasi hokimiyatining o'rnatilishi", ru: "Установление власти династии Аббасидов", en: "The establishment of Abbasid dynasty rule" },
+    year: "750",
+    where: { uz: "Iroq", ru: "Ирак", en: "Iraq" },
+    result: { uz: "Umaviylar xalifaligining tugatilishi va xalifalik markazining sharqqa ko'chishi", ru: "Свержение халифата Омейядов и перенос центра халифата на восток", en: "The overthrow of the Umayyad caliphate and the eastward shift of the caliphate's center" },
+  },
+  {
+    who: { uz: "Xalifa Mansur", ru: "Халиф Мансур", en: "Caliph al-Mansur" },
+    what: { uz: "Bag'dod shahriga asos solinishi", ru: "Основание города Багдад", en: "The founding of the city of Baghdad" },
+    year: "762",
+    where: { uz: "Bag'dod", ru: "Багдад", en: "Baghdad" },
+    result: { uz: "Bag'dodning Abbosiylar xalifaligi poytaxtiga aylanishi va yirik ilmiy-savdo markazi bo'lib shakllanishi", ru: "Превращение Багдада в столицу Аббасидского халифата и крупный научно-торговый центр", en: "Baghdad becoming the capital of the Abbasid Caliphate and a major scientific and trade center" },
+  },
+  {
+    who: { uz: "Muhammad al-Xorazmiy", ru: "Мухаммад аль-Хорезми", en: "Muhammad al-Khwarizmi" },
+    what: { uz: "Al-Xorazmiyning 'Kitob al-Jabr' asarini yozib tugatishi", ru: "Завершение аль-Хорезми труда «Китаб аль-джабр»", en: "The completion of al-Khwarizmi's work 'Kitab al-Jabr'" },
+    year: "830",
+    where: { uz: "Bag'dod", ru: "Багдад", en: "Baghdad" },
+    result: { uz: "Algebra fanining asos solinishi va 'algoritm' atamasining dunyoga kirib kelishi", ru: "Зарождение науки алгебры и проникновение в мир термина «алгоритм»", en: "The foundation of algebra as a science and the spread of the term 'algorithm'" },
+  },
+
+  // ── Franklar davlati, Karolinglar va Muqaddas Rim imperiyasi ──
+  {
+    who: { uz: "Xlodvig I", ru: "Хлодвиг I", en: "Clovis I" },
+    what: { uz: "Franklar qirolligining Xlodvig I tomonidan barpo etilishi", ru: "Создание Франкского королевства Хлодвигом I", en: "The founding of the Frankish kingdom by Clovis I" },
+    year: "481-511",
+    where: { uz: "Franklar davlati", ru: "Франкское государство", en: "Frankish state" },
+    result: { uz: "Franklar orasida xristianlikning tarqalishi va qudratli davlatning asos solinishi", ru: "Распространение христианства среди франков и закладка основы могущественного государства", en: "The spread of Christianity among the Franks and the foundation of a powerful state" },
+  },
+  {
+    who: { uz: "Karl Buyuk", ru: "Карл Великий", en: "Charlemagne" },
+    what: { uz: "Karl Buyukning Franklar davlatida hukmronlik qilishi", ru: "Правление Карла Великого во Франкском государстве", en: "The reign of Charlemagne in the Frankish state" },
+    year: "768-814",
+    where: { uz: "Franklar davlati", ru: "Франкское государство", en: "Frankish state" },
+    result: { uz: "Franklar davlati hududining kengayishi va buyuk imperiyaning shakllanishi", ru: "Расширение территории Франкского государства и формирование великой империи", en: "The expansion of the Frankish state and the formation of a great empire" },
+  },
+  {
+    who: { uz: "Karl Buyuk va Papa Leo III", ru: "Карл Великий и папа Лев III", en: "Charlemagne and Pope Leo III" },
+    what: { uz: "Karl Buyukga imperator tojining kiydirilishi", ru: "Коронация Карла Великого императорской короной", en: "The coronation of Charlemagne as emperor" },
+    year: "800",
+    where: { uz: "Rim", ru: "Рим", en: "Rome" },
+    result: { uz: "G'arbiy Yevropada buyuk imperiyaning e'lon qilinishi", ru: "Провозглашение великой империи в Западной Европе", en: "The proclamation of a great empire in Western Europe" },
+  },
+  {
+    who: { uz: "Lotar, Ludvig Nemis va Karl Cho'l", ru: "Лотарь, Людовик Немецкий и Карл Лысый", en: "Lothair, Louis the German and Charles the Bald" },
+    what: { uz: "Verdun shartnomasining imzolanishi", ru: "Подписание Верденского договора", en: "The signing of the Treaty of Verdun" },
+    year: "843",
+    where: { uz: "Verdun", ru: "Верден", en: "Verdun" },
+    result: { uz: "Karl Buyuk imperiyasining uch davlatga bo'linishi (Fransiya, Germaniya va Italiya asoslarining vujudga kelishi)", ru: "Раздел империи Карла Великого на три государства (зарождение основ Франции, Германии и Италии)", en: "The division of Charlemagne's empire into three states (the origins of France, Germany and Italy)" },
+  },
+  {
+    who: { uz: "Otto I", ru: "Оттон I", en: "Otto I" },
+    what: { uz: "Otto I ga Muqaddas Rim imperatori tojining kiydirilishi", ru: "Коронация Оттона I короной императора Священной Римской империи", en: "The coronation of Otto I as Holy Roman Emperor" },
+    year: "962",
+    where: { uz: "Rim", ru: "Рим", en: "Rome" },
+    result: { uz: "Muqaddas Rim imperiyasining tashkil topishi", ru: "Образование Священной Римской империи", en: "The establishment of the Holy Roman Empire" },
+  },
+
+  // ── Angliya ──
+  {
+    who: { uz: "Vikinglar", ru: "Викинги", en: "Vikings" },
+    what: { uz: "Vikinglarning Lindisfarne monastiriga hujum qilishi", ru: "Нападение викингов на монастырь Линдисфарн", en: "The Viking raid on the Lindisfarne monastery" },
+    year: "793",
+    where: { uz: "Angliya", ru: "Англия", en: "England" },
+    result: { uz: "Yevropada vikinglar davri bosqinchilik yurishlarining boshlanishi", ru: "Начало эпохи завоевательных походов викингов в Европе", en: "The beginning of the Viking age of raids in Europe" },
+  },
+  {
+    who: { uz: "Vilyam (Normand gertsogi)", ru: "Вильгельм (герцог Нормандии)", en: "William (Duke of Normandy)" },
+    what: { uz: "Gastings jangining bo'lib o'tishi", ru: "Проведение битвы при Гастингсе", en: "The Battle of Hastings" },
+    year: "1066",
+    where: { uz: "Gastings", ru: "Гастингс", en: "Hastings" },
+    result: { uz: "Angliyaning normandlar tomonidan bosib olinishi va u yerda feodal tartib-oqining o'rnatilishi", ru: "Завоевание Англии норманнами и установление там феодальных порядков", en: "The Norman conquest of England and the establishment of feudal order there" },
+  },
+  {
+    who: { uz: "Qirol Ioann", ru: "Король Иоанн", en: "King John" },
+    what: { uz: "Buyuk erkinlik xartiyasining imzolanishi", ru: "Подписание Великой хартии вольностей", en: "The signing of the Magna Carta" },
+    year: "1215",
+    where: { uz: "Angliya", ru: "Англия", en: "England" },
+    result: { uz: "Qirol hokimiyatining cheklanishi va lord-vassallar huquqlarining mustahkamlanishi", ru: "Ограничение королевской власти и укрепление прав лордов-вассалов", en: "The limitation of royal power and the consolidation of the rights of lord-vassals" },
+  },
+
+  // ── Fransiya ──
+  {
+    who: { uz: "Hugo Kapet", ru: "Гуго Капет", en: "Hugh Capet" },
+    what: { uz: "Kapetinglar sulolasi hokimiyatining o'rnatilishi", ru: "Установление власти династии Капетингов", en: "The establishment of Capetian dynasty rule" },
+    year: "987",
+    where: { uz: "Fransiya", ru: "Франция", en: "France" },
+    result: { uz: "Fransiya qirolligida yangi sulola hukmronligining boshlanishi", ru: "Начало правления новой династии во Французском королевстве", en: "The beginning of the rule of a new dynasty in the Kingdom of France" },
+  },
+  {
+    who: { uz: "Qirol Filip IV", ru: "Король Филипп IV", en: "King Philip IV" },
+    what: { uz: "Fransiyada General shatlar majlisining ilk bor chaqirilishi", ru: "Первый созыв Генеральных штатов во Франции", en: "The first convocation of the Estates General in France" },
+    year: "1302",
+    where: { uz: "Parij", ru: "Париж", en: "Paris" },
+    result: { uz: "Davlat boshqaruvida tabaqa vakillarining ishtirok etishining yo'lga qo'yilishi", ru: "Введение участия сословных представителей в управлении государством", en: "The introduction of estate representatives' participation in state governance" },
+  },
+
+  // ── Saljuqiylar ──
+  {
+    who: { uz: "Alp Arslon", ru: "Алп Арслан", en: "Alp Arslan" },
+    what: { uz: "Malazgirt jangining bo'lib o'tishi", ru: "Проведение битвы при Манцикерте", en: "The Battle of Manzikert" },
+    year: "1071",
+    where: { uz: "Malazgirt", ru: "Манцикерт", en: "Manzikert" },
+    result: { uz: "Vizantiya qo'shinining tor-mor etilishi va Anadoluning turk-islom dunyosi ta'siriga kirishining boshlanishi", ru: "Разгром византийской армии и начало перехода Анатолии в сферу влияния тюркско-исламского мира", en: "The defeat of the Byzantine army and the beginning of Anatolia's entry into the Turkic-Islamic sphere" },
+  },
+  {
+    who: { uz: "Salodin", ru: "Саладин", en: "Saladin" },
+    what: { uz: "Salodin tomonidan Misrda Ayyubiylar sulolasining asos solinishi", ru: "Основание Салахаддином династии Айюбидов в Египте", en: "The founding of the Ayyubid dynasty in Egypt by Saladin" },
+    year: "1171",
+    where: { uz: "Misr", ru: "Египет", en: "Egypt" },
+    result: { uz: "Fatimiylar xalifaligining tugatilishi va musulmonlarning salibchilarga qarshi kurash birligining kuchayishi", ru: "Ликвидация халифата Фатимидов и укрепление единства мусульман в борьбе с крестоносцами", en: "The abolition of the Fatimid caliphate and the strengthening of Muslim unity against the crusaders" },
+  },
+
+  // ── Salib yurishlari ──
+  {
+    who: { uz: "Papa Urban II", ru: "Папа Урбан II", en: "Pope Urban II" },
+    what: { uz: "Klermon majlisida salib yurishiga umumxalq chaqiruvining berilishi", ru: "Всеобщий призыв к крестовому походу на Клермонском соборе", en: "The universal call to crusade at the Council of Clermont" },
+    year: "1095",
+    where: { uz: "Klermon", ru: "Клермон", en: "Clermont" },
+    result: { uz: "Salib yurishlari harakatining boshlanishiga zamin yaratilishi", ru: "Заложение основы начала движения крестовых походов", en: "Laying the groundwork for the launch of the crusade movement" },
+  },
+  {
+    who: { uz: "Salibchilar", ru: "Крестоносцы", en: "Crusaders" },
+    what: { uz: "I salib yurishining amalga oshirilishi", ru: "Осуществление Первого крестового похода", en: "The carrying out of the First Crusade" },
+    year: "1096-1099",
+    where: { uz: "Yaqin Sharq", ru: "Ближний Восток", en: "The Near East" },
+    result: { uz: "Yaqin Sharqdagi salibchilar davlatlarining vujudga kelishi", ru: "Возникновение государств крестоносцев на Ближнем Востоке", en: "The emergence of crusader states in the Near East" },
+  },
+  {
+    who: { uz: "Salibchilar", ru: "Крестоносцы", en: "Crusaders" },
+    what: { uz: "Quddus shahrining salibchilar tomonidan qo'lga olinishi", ru: "Захват города Иерусалим крестоносцами", en: "The capture of Jerusalem by the crusaders" },
+    year: "1099",
+    where: { uz: "Quddus", ru: "Иерусалим", en: "Jerusalem" },
+    result: { uz: "Quddus salibchilar qirolligining tashkil topishi", ru: "Образование Иерусалимского королевства крестоносцев", en: "The establishment of the crusader Kingdom of Jerusalem" },
+  },
+  {
+    who: { uz: "Salodin", ru: "Саладин", en: "Saladin" },
+    what: { uz: "Hattin jangida salibchilar qo'shinining tor-mor etilishi", ru: "Разгром войска крестоносцев в битве при Хаттине", en: "The defeat of the crusader army at the Battle of Hattin" },
+    year: "1187",
+    where: { uz: "Hattin", ru: "Хаттин", en: "Hattin" },
+    result: { uz: "Quddus shahrining musulmonlar tomonidan qaytarib olinishi", ru: "Возвращение города Иерусалим под власть мусульман", en: "The recapture of Jerusalem by the Muslims" },
+  },
+  {
+    who: { uz: "Salibchilar", ru: "Крестоносцы", en: "Crusaders" },
+    what: { uz: "IV salib yurishida Konstantinopolning talon-taroj qilinishi", ru: "Разграбление Константинополя в ходе Четвёртого крестового похода", en: "The sack of Constantinople during the Fourth Crusade" },
+    year: "1204",
+    where: { uz: "Konstantinopol", ru: "Константинополь", en: "Constantinople" },
+    result: { uz: "Vizantiya hududida Lotin imperiyasining tashkil topishi", ru: "Образование Латинской империи на территории Византии", en: "The establishment of the Latin Empire on Byzantine territory" },
+  },
+  {
+    who: { uz: "Mamluklar", ru: "Мамлюки", en: "Mamluks" },
+    what: { uz: "Akka qal'asining salibchilardan ozod etilishi", ru: "Освобождение крепости Акка от крестоносцев", en: "The liberation of the fortress of Acre from the crusaders" },
+    year: "1291",
+    where: { uz: "Akka", ru: "Акка", en: "Acre" },
+    result: { uz: "Yaqin Sharqdagi salibchilar davlatlarining tugatilishi va salib yurishlari davrining yakunlanishi", ru: "Ликвидация государств крестоносцев на Ближнем Востоке и завершение эпохи крестовых походов", en: "The end of the crusader states in the Near East and the close of the era of crusades" },
+  },
+
+  // ── Mo'g'ullar va Oltin O'rda ──
+  {
+    who: { uz: "Temujin", ru: "Темучжин", en: "Temujin" },
+    what: { uz: "Temujinning kurultoyda Chingizxon deb e'lon qilinishi", ru: "Провозглашение Темучжина Чингисханом на курултае", en: "Temujin's proclamation as Genghis Khan at the kurultai" },
+    year: "1206",
+    where: { uz: "Mongoliya", ru: "Монголия", en: "Mongolia" },
+    result: { uz: "Yagona mo'g'il davlatining tashkil topishi va istilolar boshlanishiga tayyorgarlik ko'rilishi", ru: "Образование единого монгольского государства и подготовка к завоевательным походам", en: "The establishment of a unified Mongol state and preparations for wars of conquest" },
+  },
+  {
+    who: { uz: "Inalchuq", ru: "Иналчук", en: "Inalchuq" },
+    what: { uz: "Mo'g'il karvonining O'tror shahrida qirg'in qilinishi (karvon voqeasi)", ru: "Истребление монгольского каравана в городе Отрар (караванный инцидент)", en: "The massacre of the Mongol caravan in the city of Otrar (the caravan incident)" },
+    year: "1218",
+    where: { uz: "O'tror", ru: "Отрар", en: "Otrar" },
+    result: { uz: "Mo'g'ullarning Xorazmshohlar davlatiga qarshi yurishiga bahana yaratilishi", ru: "Создание повода для похода монголов против государства хорезмшахов", en: "The creation of a pretext for the Mongol campaign against the Khwarazmshah state" },
+  },
+  {
+    who: { uz: "Chingizxon", ru: "Чингисхан", en: "Genghis Khan" },
+    what: { uz: "Mo'g'ullar tomonidan Xorazmshohlar mamlakatining bosib olinishi", ru: "Завоевание владений хорезмшахов монголами", en: "The Mongol conquest of the Khwarazmshah realm" },
+    year: "1219-1221",
+    where: { uz: "Xorazm", ru: "Хорезм", en: "Khwarazm" },
+    result: { uz: "Movarounnahr va Xorazm shaharlarining vayron bo'lishi", ru: "Разрушение городов Мавераннахра и Хорезма", en: "The destruction of the cities of Transoxiana and Khwarazm" },
+  },
+  {
+    who: { uz: "Chingizxon", ru: "Чингисхан", en: "Genghis Khan" },
+    what: { uz: "Chingizxonning vafot etishi", ru: "Кончина Чингисхана", en: "The death of Genghis Khan" },
+    year: "1227",
+    where: { uz: "Mongoliya", ru: "Монголия", en: "Mongolia" },
+    result: { uz: "Mo'g'il imperiyasining o'g'illar o'rtasida uluslarga bo'linishi", ru: "Раздел Монгольской империи на улусы между сыновьями", en: "The division of the Mongol Empire into uluses among his sons" },
+  },
+  {
+    who: { uz: "Batuxon", ru: "Бату-хан", en: "Batu Khan" },
+    what: { uz: "Batuxonning Sharqiy Yevropa yurishining amalga oshirilishi", ru: "Осуществление похода Бату-хана в Восточную Европу", en: "The carrying out of Batu Khan's campaign into Eastern Europe" },
+    year: "1236-1242",
+    where: { uz: "Sharqiy Yevropa", ru: "Восточная Европа", en: "Eastern Europe" },
+    result: { uz: "Rus' va Markaziy Yevropa yerlarining qisman bo'ysundirilishi", ru: "Частичное подчинение земель Руси и Центральной Европы", en: "The partial subjugation of the lands of Rus' and Central Europe" },
+  },
+  {
+    who: { uz: "Aleksandr Nevskiy", ru: "Александр Невский", en: "Alexander Nevsky" },
+    what: { uz: "Chud ko'lidagi Muz jangida xochchilar qo'shinining tor-mor etilishi", ru: "Разгром войска крестоносцев в Ледовом побоище на Чудском озере", en: "The defeat of the crusader army in the Battle on the Ice at Lake Peipus" },
+    year: "1242",
+    where: { uz: "Chud ko'li", ru: "Чудское озеро", en: "Lake Peipus" },
+    result: { uz: "Rus'ning shimoli-g'arbiy chegaralari xavfsizligining ta'minlanishi", ru: "Обеспечение безопасности северо-западных рубежей Руси", en: "The securing of the north-western borders of Rus'" },
+  },
+  {
+    who: { uz: "Batuxon", ru: "Бату-хан", en: "Batu Khan" },
+    what: { uz: "Oltin O'rda davlatining tashkil topishi", ru: "Образование государства Золотая Орда", en: "The establishment of the Golden Horde state" },
+    year: "1243",
+    where: { uz: "Saray", ru: "Сарай", en: "Sarai" },
+    result: { uz: "Sharqiy Yevropa va Dashti Qipchoq hududida ko'chmanchi davlatning qaror topishi", ru: "Утверждение кочевого государства на территории Восточной Европы и Дешт-и-Кипчака", en: "The establishment of a nomadic state in Eastern Europe and the Dasht-i Kipchak" },
+  },
+  {
+    who: { uz: "Xulagu", ru: "Хулагу", en: "Hulagu" },
+    what: { uz: "Bag'dodning mo'g'ullar tomonidan vayron etilishi", ru: "Разрушение Багдада монголами", en: "The destruction of Baghdad by the Mongols" },
+    year: "1258",
+    where: { uz: "Bag'dod", ru: "Багдад", en: "Baghdad" },
+    result: { uz: "Abbosiylar xalifaligining tugatilishi", ru: "Ликвидация Аббасидского халифата", en: "The abolition of the Abbasid Caliphate" },
+  },
+  {
+    who: { uz: "Xubilayxon", ru: "Хубилай-хан", en: "Kublai Khan" },
+    what: { uz: "Mo'g'ullarning Yaponiyaga yurishlarining muvaffaqiyatsizlikka uchrashi", ru: "Провал походов монголов на Японию", en: "The failure of the Mongol invasions of Japan" },
+    year: "1274-1281",
+    where: { uz: "Yaponiya", ru: "Япония", en: "Japan" },
+    result: { uz: "Yaponiya mustaqilligining saqlanishi va 'kamikaze' (samoviy shamol) tushunchasining paydo bo'lishi", ru: "Сохранение независимости Японии и появление понятия «камикадзе» (божественный ветер)", en: "The preservation of Japan's independence and the emergence of the notion of 'kamikaze' (divine wind)" },
+  },
+  {
+    who: { uz: "Ivan III", ru: "Иван III", en: "Ivan III" },
+    what: { uz: "Rus'ning O'rda asoratidan qutulishi (Ugra daryosidagi qarshilik)", ru: "Освобождение Руси от ордынской зависимости (стояние на реке Угре)", en: "The liberation of Rus' from Horde dependence (the Stand on the Ugra River)" },
+    year: "1480",
+    where: { uz: "Rus'", ru: "Русь", en: "Rus'" },
+    result: { uz: "Rus' yerlarining to'liq mustaqillikka erishishi", ru: "Обретение русских земель полной независимости", en: "The achievement of full independence by the Russian lands" },
+  },
+
+  // ── Buyuk ipak yo'li va Markaziy Osiyo ──
+  {
+    who: { uz: "Syuan Szan", ru: "Сюань Цзан", en: "Xuanzang" },
+    what: { uz: "Syuan Szanning Ipak yo'li orqali Hindistonga ilmiy-ziyorat safari", ru: "Научно-паломническое путешествие Сюань Цзана в Индию по Великому шёлковому пути", en: "Xuanzang's scholarly pilgrimage journey to India along the Great Silk Road" },
+    year: "629-645",
+    where: { uz: "Ipak yo'li", ru: "Шёлковый путь", en: "The Silk Road" },
+    result: { uz: "Markaziy Osiyo, Xitoy va Hindiston o'rtasida ilmiy-madaniy aloqalarning rivojlanishi", ru: "Развитие научно-культурных связей между Средней Азией, Китаем и Индией", en: "The development of scientific and cultural ties between Central Asia, China and India" },
+  },
+  {
+    who: { uz: "Ziyod ibn Salih", ru: "Зияд ибн Салих", en: "Ziyad ibn Salih" },
+    what: { uz: "Talas jangining bo'lib o'tishi", ru: "Проведение Таласской битвы", en: "The Battle of Talas" },
+    year: "751",
+    where: { uz: "Talas daryosi", ru: "Река Талас", en: "Talas River" },
+    result: { uz: "Xitoy ta'sirining Markaziy Osiyoda cheklanishi va qog'oz tayyorlash texnologiyasining g'arbga tarqalishi", ru: "Ограничение влияния Китая в Средней Азии и распространение технологии производства бумаги на запад", en: "The containment of Chinese influence in Central Asia and the westward spread of papermaking technology" },
+  },
+  {
+    who: { uz: "Bilge Qodiraxon", ru: "Бильге Кадыр-хан", en: "Bilge Kadir Khan" },
+    what: { uz: "Qoraxoniylar davlatining tashkil topishi", ru: "Образование государства Караханидов", en: "The establishment of the Karakhanid state" },
+    year: "840",
+    where: { uz: "Markaziy Osiyo", ru: "Средняя Азия", en: "Central Asia" },
+    result: { uz: "Turkiy sulolalar boshqaruvidagi yirik davlatning vujudga kelishi", ru: "Возникновение крупного государства под управлением тюркских династий", en: "The emergence of a large state ruled by Turkic dynasties" },
+  },
+  {
+    who: { uz: "Qoraxoniylar", ru: "Караханиды", en: "Karakhanids" },
+    what: { uz: "Buxoroning Qoraxoniylar tomonidan egallanishi", ru: "Захват Бухары Караханидами", en: "The capture of Bukhara by the Karakhanids" },
+    year: "999",
+    where: { uz: "Buxoro", ru: "Бухара", en: "Bukhara" },
+    result: { uz: "Somoniylar davlatining tugatilishi va Movarounnahrda Qoraxoniylar hokimiyatining qaror topishi", ru: "Ликвидация государства Саманидов и утверждение власти Караханидов в Мавераннахре", en: "The end of the Samanid state and the consolidation of Karakhanid rule in Transoxiana" },
+  },
+  {
+    who: { uz: "Ibn Sino", ru: "Ибн Сина", en: "Avicenna" },
+    what: { uz: "Ibn Sinoning vafot etishi", ru: "Кончина Ибн Сины", en: "The death of Avicenna" },
+    year: "1037",
+    where: { uz: "Hamadon", ru: "Хамадан", en: "Hamadan" },
+    result: { uz: "'Tibb qonunlari' kabi asarlarining Sharq va G'arb ilm-fani rivojiga xizmat qilishi", ru: "Служение таких трудов, как «Канон врачебной науки», развитию науки Востока и Запада", en: "The contribution of works like the 'Canon of Medicine' to the advancement of Eastern and Western science" },
+  },
+  {
+    who: { uz: "Anushtegin Garchaliy", ru: "Ануштегин Гарчаи", en: "Anushtegin Gharchai" },
+    what: { uz: "Xorazmshohlar (Anushteginiylar) sulolasi hokimiyatining o'rnatilishi", ru: "Установление власти династии хорезмшахов (Ануштегинов)", en: "The establishment of the Khwarazmshah (Anushteginid) dynasty rule" },
+    year: "1097",
+    where: { uz: "Xorazm", ru: "Хорезм", en: "Khwarazm" },
+    result: { uz: "Xorazmning mustaqil davlat markaziga aylanishi", ru: "Превращение Хорезма в центр самостоятельного государства", en: "Khwarazm becoming the center of an independent state" },
+  },
+  {
+    who: { uz: "Omar Xayyom", ru: "Омар Хайям", en: "Omar Khayyam" },
+    what: { uz: "Omar Xayyom rahbarligida Jaloliy taqvimning tuzilishi", ru: "Составление календаря «Джалали» под руководством Омара Хайяма", en: "The compilation of the Jalali calendar under the leadership of Omar Khayyam" },
+    year: "1079",
+    where: { uz: "Isfahon", ru: "Исфахан", en: "Isfahan" },
+    result: { uz: "O'rta asr astronomiyasining yuksak darajada rivojlanganligi namoyish etilishi", ru: "Демонстрация высокого уровня развития средневековой астрономии", en: "A demonstration of the high development of medieval astronomy" },
+  },
+  {
+    who: { uz: "Jaloliddin Manguberdi", ru: "Джалалиддин Мангуберди", en: "Jalal ad-Din Manguberdi" },
+    what: { uz: "Xorazmshohlar davlatining mo'g'ul istilosi natijasida tugatilishi", ru: "Ликвидация государства хорезмшахов в результате монгольского нашествия", en: "The end of the Khwarazmshah state as a result of the Mongol invasion" },
+    year: "1231",
+    where: { uz: "Xorazm", ru: "Хорезм", en: "Khwarazm" },
+    result: { uz: "Xorazm va Movarounnahrning mo'g'ullar tasarrufiga to'liq o'tishi", ru: "Полный переход Хорезма и Мавераннахра под власть монголов", en: "The complete transfer of Khwarazm and Transoxiana under Mongol control" },
+  },
+  {
+    who: { uz: "Marko Polo", ru: "Марко Поло", en: "Marco Polo" },
+    what: { uz: "Marko Poloning Xubilayxon saroyiga yetib borishi", ru: "Прибытие Марко Поло ко двору Хубилай-хана", en: "Marco Polo's arrival at the court of Kublai Khan" },
+    year: "1275",
+    where: { uz: "Xitoy", ru: "Китай", en: "China" },
+    result: { uz: "Yevropa va Sharq o'rtasida savdo-madaniy aloqalarning jonlanishi", ru: "Оживление торгово-культурных связей между Европой и Востоком", en: "The revival of trade and cultural ties between Europe and the East" },
+  },
+  {
+    who: { uz: "Chju Yuanchjan", ru: "Чжу Юаньчжан", en: "Zhu Yuanzhang" },
+    what: { uz: "Min sulolasi hokimiyatining o'rnatilishi", ru: "Установление власти династии Мин", en: "The establishment of Ming dynasty rule" },
+    year: "1368",
+    where: { uz: "Xitoy", ru: "Китай", en: "China" },
+    result: { uz: "Mo'g'il Yuan sulolasi hokimiyatining tugatilishi va xitoy milliy davlatining qayta tiklanishi", ru: "Свержение монгольской династии Юань и восстановление китайского национального государства", en: "The overthrow of the Mongol Yuan dynasty and the restoration of the Chinese national state" },
+  },
+
+  // ── Yuz yillik urush ──
+  {
+    who: { uz: "Filip VI va Edvard III", ru: "Филипп VI и Эдуард III", en: "Philip VI and Edward III" },
+    what: { uz: "Angliya va Fransiya o'rtasida Yuz yillik urushning boshlanishi", ru: "Начало Столетней войны между Англией и Францией", en: "The start of the Hundred Years' War between England and France" },
+    year: "1337",
+    where: { uz: "Fransiya", ru: "Франция", en: "France" },
+    result: { uz: "Taxt merosi va janubiy yerlar uchun ikki davlat o'rtasida uzoq kurashning boshlanishi", ru: "Начало длительной борьбы двух государств за наследство престола и южные земли", en: "The beginning of a long struggle between the two states for the succession and southern lands" },
+  },
+  {
+    who: { uz: "Edvard III", ru: "Эдуард III", en: "Edward III" },
+    what: { uz: "Kresi jangining bo'lib o'tishi", ru: "Проведение битвы при Креси", en: "The Battle of Crécy" },
+    year: "1346",
+    where: { uz: "Kresi", ru: "Креси", en: "Crécy" },
+    result: { uz: "Angliya qo'shinlari g'alabasi va uzun yoylardan foydalanish ustunligining namoyish etilishi", ru: "Победа английских войск и демонстрация превосходства длинных луков", en: "The English victory and a demonstration of the superiority of longbows" },
+  },
+  {
+    who: { uz: "Genri V", ru: "Генрих V", en: "Henry V" },
+    what: { uz: "Azinkur jangining bo'lib o'tishi", ru: "Проведение битвы при Азенкуре", en: "The Battle of Agincourt" },
+    year: "1415",
+    where: { uz: "Azinkur", ru: "Азенкур", en: "Agincourt" },
+    result: { uz: "Angliya qo'shinlarining yirik g'alabasi va Fransiyaning og'ir yo'qotishlarga uchrashi", ru: "Крупная победа английских войск и тяжёлые потери Франции", en: "A major English victory and heavy losses for France" },
+  },
+  {
+    who: { uz: "Janna d'Ark", ru: "Жанна д'Арк", en: "Joan of Arc" },
+    what: { uz: "Orlean shahri qamalining ozod etilishi", ru: "Снятие осады города Орлеан", en: "The lifting of the siege of Orléans" },
+    year: "1429",
+    where: { uz: "Orlean", ru: "Орлеан", en: "Orléans" },
+    result: { uz: "Fransiyada ozodlik kurashi ruhining ko'tarilishi va urushda burilishning boshlanishi", ru: "Подъём духа освободительной борьбы во Франции и начало перелома в войне", en: "The rise of the spirit of liberation in France and the beginning of the turning point in the war" },
+  },
+  {
+    who: { uz: "Janna d'Ark", ru: "Жанна д'Арк", en: "Joan of Arc" },
+    what: { uz: "Janna d'Arkning sudlanib, gulxanda yoqilishi", ru: "Осуждение и сожжение Жанны д'Арк на костре", en: "The trial and burning of Joan of Arc at the stake" },
+    year: "1431",
+    where: { uz: "Ruan", ru: "Руан", en: "Rouen" },
+    result: { uz: "Fransiya ozodligi yo'lidagi qahramon xotirasining abadiylashuvi", ru: "Вечная память героине борьбы за свободу Франции", en: "The eternal memory of a heroine of the struggle for France's freedom" },
+  },
+  {
+    who: { uz: "Karl VII", ru: "Карл VII", en: "Charles VII" },
+    what: { uz: "Yuz yillik urushning yakunlanishi (Kastiyon jangi)", ru: "Завершение Столетней войны (битва при Кастийоне)", en: "The end of the Hundred Years' War (the Battle of Castillon)" },
+    year: "1453",
+    where: { uz: "Fransiya", ru: "Франция", en: "France" },
+    result: { uz: "Angliyaning qit'adagi mulklaridan deyarli butunlay mahrum bo'lishi", ru: "Почти полная утрата Англией владений на континенте", en: "England's loss of almost all its possessions on the continent" },
+  },
+
+  // ── Usmonlilar ──
+  {
+    who: { uz: "Usmon bek", ru: "Осман-бей", en: "Osman Bey" },
+    what: { uz: "Usmonlilar bekligining tashkil topishi", ru: "Образование бейлика османов", en: "The establishment of the Ottoman beylik" },
+    year: "1299",
+    where: { uz: "Anadolu", ru: "Анатолия", en: "Anatolia" },
+    result: { uz: "Bo'lajak buyuk Usmonlilar imperiyasining boshlanishi", ru: "Начало будущей великой Османской империи", en: "The beginning of the future great Ottoman Empire" },
+  },
+  {
+    who: { uz: "Orhon bek", ru: "Орхан-бей", en: "Orhan Bey" },
+    what: { uz: "Bursaning Usmonlilar tomonidan qo'lga olinishi", ru: "Захват Бурсы османами", en: "The capture of Bursa by the Ottomans" },
+    year: "1326",
+    where: { uz: "Bursa", ru: "Бурса", en: "Bursa" },
+    result: { uz: "Bursaning Usmonlilar davlatining ilk poytaxtiga aylanishi", ru: "Превращение Бурсы в первую столицу Османского государства", en: "Bursa becoming the first capital of the Ottoman state" },
+  },
+  {
+    who: { uz: "Sulton Murod I", ru: "Султан Мурад I", en: "Sultan Murad I" },
+    what: { uz: "Kosovo jangining bo'lib o'tishi", ru: "Проведение битвы на Косовом поле", en: "The Battle of Kosovo" },
+    year: "1389",
+    where: { uz: "Kosovo", ru: "Косово", en: "Kosovo" },
+    result: { uz: "Balkan yarim orolida Usmonlilar mavqeining mustahkamlanishi", ru: "Укрепление позиций османов на Балканском полуострове", en: "The strengthening of the Ottoman position in the Balkans" },
+  },
+  {
+    who: { uz: "Sulton Mehmed II", ru: "Султан Мехмед II", en: "Sultan Mehmed II" },
+    what: { uz: "Konstantinopolning Usmonlilar tomonidan zabt etilishi", ru: "Завоевание Константинополя османами", en: "The Ottoman conquest of Constantinople" },
+    year: "1453",
+    where: { uz: "Konstantinopol", ru: "Константинополь", en: "Constantinople" },
+    result: { uz: "Vizantiya imperiyasining tugatilishi va shaharning Istanbul nomi bilan poytaxt qilinishi", ru: "Ликвидация Византийской империи и превращение города в столицу под названием Стамбул", en: "The end of the Byzantine Empire and the city becoming the capital named Istanbul" },
+  },
+
+  // ── Feodal jamiyat ──
+  {
+    who: { uz: "Lordlar, vassallar va dehqonlar", ru: "Лорды, вассалы и крестьяне", en: "Lords, vassals and peasants" },
+    what: { uz: "G'arbiy Yevropada feodal ierarxiyasining shakllanishi", ru: "Формирование феодальной иерархии в Западной Европе", en: "The formation of the feudal hierarchy in Western Europe" },
+    year: "900-1100",
+    where: { uz: "G'arbiy Yevropa", ru: "Западная Европа", en: "Western Europe" },
+    result: { uz: "Yer mulki (feod) va shaxsiy bog'liqlik asosida jamiyat piramidasining qaror topishi", ru: "Утверждение общественной пирамиды на основе земельного держания (фьефа) и личной зависимости", en: "The consolidation of a social pyramid based on land holding (fief) and personal dependence" },
+  },
+  {
+    who: { uz: "Dehqonlar va shaharliklar", ru: "Крестьяне и горожане", en: "Peasants and townspeople" },
+    what: { uz: "Yevropada 'qora o'lim' vabosining yoyilishi", ru: "Распространение эпидемии «чёрной смерти» в Европе", en: "The spread of the Black Death plague in Europe" },
+    year: "1348",
+    where: { uz: "Yevropa", ru: "Европа", en: "Europe" },
+    result: { uz: "Aholining katta qismi halok bo'lishi va mehnat kuchining qadr-o'qibati oshishi", ru: "Гибель значительной части населения и рост ценности рабочей силы", en: "The death of a large part of the population and the rise in the value of labour" },
+  },
+  {
+    who: { uz: "Giyom Kal", ru: "Гильом Каль", en: "Guillaume Cale" },
+    what: { uz: "Fransiyada Jakariya dehqon qo'zg'olonining ko'tarilishi", ru: "Вспыхивание Жакерии — крестьянского восстания во Франции", en: "The outbreak of the Jacquerie peasant uprising in France" },
+    year: "1358",
+    where: { uz: "Fransiya", ru: "Франция", en: "France" },
+    result: { uz: "Dehqonlarning og'ir feodal yuklaridan noroziligining ochiq namoyon bo'lishi", ru: "Открытое проявление недовольства крестьян тяжёлыми феодальными повинностями", en: "The open expression of peasants' discontent with heavy feudal burdens" },
+  },
+
+  // ── Shaharlar va savdo ──
+  {
+    who: { uz: "Shimoliy Italiya shaharlari", ru: "Города Северной Италии", en: "Northern Italian cities" },
+    what: { uz: "Lombard shaharlari ittifoqining tuzilishi", ru: "Создание Ломбардской лиги городов", en: "The formation of the Lombard League of cities" },
+    year: "1167",
+    where: { uz: "Italiya", ru: "Италия", en: "Italy" },
+    result: { uz: "Imperator Fridrix Barbarossaga qarshi shaharlar mustaqilligi kurashining kuchayishi", ru: "Усиление борьбы городов за независимость против императора Фридриха Барбароссы", en: "The intensification of the cities' struggle for independence against Emperor Frederick Barbarossa" },
+  },
+  {
+    who: { uz: "Lyubek va Gamburg", ru: "Любек и Гамбург", en: "Lübeck and Hamburg" },
+    what: { uz: "Lyubek va Gamburg o'rtasida savdo shartnomasining tuzilishi", ru: "Заключение торгового договора между Любеком и Гамбургом", en: "The conclusion of a trade agreement between Lübeck and Hamburg" },
+    year: "1241",
+    where: { uz: "Lyubek", ru: "Любек", en: "Lübeck" },
+    result: { uz: "Hanza savdo ittifoqining boshlanishi", ru: "Начало Ганзейского торгового союза", en: "The beginning of the Hanseatic trade league" },
+  },
+  {
+    who: { uz: "Hanza shaharlari", ru: "Ганзейские города", en: "Hanseatic cities" },
+    what: { uz: "Hanza ittifoqi umumiy majlisining ilk bor o'tkazilishi", ru: "Первое проведение общего собрания Ганзейского союза", en: "The first holding of the general assembly of the Hanseatic League" },
+    year: "1356",
+    where: { uz: "Lyubek", ru: "Любек", en: "Lübeck" },
+    result: { uz: "Boltiq va Shimoliy dengiz savdosida Hanza ustunligining mustahkamlanishi", ru: "Укрепление преобладания Ганзы в торговле на Балтийском и Северном морях", en: "The consolidation of the Hansa's dominance in Baltic and North Sea trade" },
+  },
+
+  // ── Ilm-fan va madaniyat ──
+  {
+    who: { uz: "Bolonya shahri", ru: "Город Болонья", en: "The city of Bologna" },
+    what: { uz: "Yevropaning ilk universiteti — Bolonya universitetining tashkil topishi", ru: "Образование первого университета Европы — Болонского университета", en: "The establishment of Europe's first university, the University of Bologna" },
+    year: "1088",
+    where: { uz: "Bolonya", ru: "Болонья", en: "Bologna" },
+    result: { uz: "Yevropaning oliy ta'lim tizimida universitetlar davrining boshlanishi", ru: "Начало эпохи университетов в системе высшего образования Европы", en: "The beginning of the era of universities in European higher education" },
+  },
+  {
+    who: { uz: "Parij shahri", ru: "Город Париж", en: "The city of Paris" },
+    what: { uz: "Parij universitetining tashkil topishi", ru: "Образование Парижского университета", en: "The establishment of the University of Paris" },
+    year: "1150",
+    where: { uz: "Parij", ru: "Париж", en: "Paris" },
+    result: { uz: "Yevropada ilohiyot va fan markazlaridan birining vujudga kelishi", ru: "Возникновение одного из центров теологии и науки в Европе", en: "The emergence of one of Europe's centres of theology and scholarship" },
+  },
+  {
+    who: { uz: "Oksford shahri", ru: "Город Оксфорд", en: "The city of Oxford" },
+    what: { uz: "Oksford universitetining tashkil topishi", ru: "Образование Оксфордского университета", en: "The establishment of the University of Oxford" },
+    year: "1167",
+    where: { uz: "Oksford", ru: "Оксфорд", en: "Oxford" },
+    result: { uz: "Angliyada yuqori ta'limning boshlanishi", ru: "Начало высшего образования в Англии", en: "The beginning of higher education in England" },
+  },
+  {
+    who: { uz: "Dante Aligyeri", ru: "Данте Алигьери", en: "Dante Alighieri" },
+    what: { uz: "Dante Aligyeri 'Ilohiy komediya' dostonini yozib tugatishi", ru: "Завершение Данте Алигьери поэмы «Божественная комедия»", en: "Dante Alighieri's completion of the poem 'The Divine Comedy'" },
+    year: "1321",
+    where: { uz: "Italiya", ru: "Италия", en: "Italy" },
+    result: { uz: "O'rta asr adabiyotining cho'qqilaridan birining yaratilishi", ru: "Создание одного из вершинных произведений средневековой литературы", en: "The creation of one of the peaks of medieval literature" },
+  },
+  {
+    who: { uz: "Yoxannes Gutenberg", ru: "Иоганнес Гутенберг", en: "Johannes Gutenberg" },
+    what: { uz: "Yevropada kitob chop etish usulining ixtiro qilinishi", ru: "Изобретение способа книгопечатания в Европе", en: "The invention of the method of printing books in Europe" },
+    year: "1440",
+    where: { uz: "Maynts", ru: "Майнц", en: "Mainz" },
+    result: { uz: "Kitoblar arzonlashuvi va ilm-fan hamda madaniyat bilimlarining jadal tarqalishi", ru: "Удешевление книг и быстрое распространение научных и культурных знаний", en: "The cheapening of books and the rapid spread of scientific and cultural knowledge" },
+  },
+
+  // ── Rekonkista ──
+  {
+    who: { uz: "Izabella va Ferdinand", ru: "Изабелла и Фердинанд", en: "Isabella and Ferdinand" },
+    what: { uz: "Granada amirligining qulashi (Rekonkista tugashi)", ru: "Падение Гранадского эмирата (завершение Реконкисты)", en: "The fall of the Emirate of Granada (the end of the Reconquista)" },
+    year: "1492",
+    where: { uz: "Granada", ru: "Гранада", en: "Granada" },
+    result: { uz: "Pireney yarim orolida arab (mavr) hukmronligining tugatilishi", ru: "Ликвидация арабского (мавританского) владычества на Пиренейском полуострове", en: "The end of Arab (Moorish) rule on the Iberian Peninsula" },
+  },
+
+  // ── Boshqa mintaqalar ──
+  {
+    who: { uz: "Minamoto Yoritomo", ru: "Минамото Ёритомо", en: "Minamoto Yoritomo" },
+    what: { uz: "Yaponiyada Kamakura syogunatining tashkil topishi", ru: "Образование сёгуната Камакура в Японии", en: "The establishment of the Kamakura shogunate in Japan" },
+    year: "1192",
+    where: { uz: "Yaponiya", ru: "Япония", en: "Japan" },
+    result: { uz: "Samuraylar hokimiyati davrining boshlanishi", ru: "Начало эпохи власти самураев", en: "The beginning of the era of samurai rule" },
+  },
+  {
+    who: { uz: "Qutbuddin Aybek", ru: "Кутб ад-Дин Айбак", en: "Qutb al-Din Aibak" },
+    what: { uz: "Dehli sultonligining tashkil topishi", ru: "Образование Делийского султаната", en: "The establishment of the Delhi Sultanate" },
+    year: "1206",
+    where: { uz: "Dehli", ru: "Дели", en: "Delhi" },
+    result: { uz: "Hindistonda musulmon davlat hokimiyatining boshlanishi", ru: "Начало власти мусульманского государства в Индии", en: "The beginning of Muslim state rule in India" },
+  },
+  {
+    who: { uz: "Mansa Musa", ru: "Манса Муса", en: "Mansa Musa" },
+    what: { uz: "Mansa Musaning Makka tomon hajj safariga chiqishi", ru: "Совершение Мансой Мусой паломничества (хаджа) в Мекку", en: "Mansa Musa's pilgrimage (hajj) to Mecca" },
+    year: "1324",
+    where: { uz: "Kairo", ru: "Каир", en: "Cairo" },
+    result: { uz: "Mali davlatining boylik va qudratining butun Shimoliy Afrikada mashhur bo'lishi", ru: "Прославление богатства и могущества государства Мали по всей Северной Африке", en: "The fame of the wealth and power of the Mali state across North Africa" },
+  },
+];

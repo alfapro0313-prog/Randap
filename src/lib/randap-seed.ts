@@ -14,6 +14,7 @@ import {
   EXTRA_QUESTIONS,
   type SubjectDef2,
 } from "./randap-seed-more";
+import { BANK_TARGET, GEN_QUESTIONS } from "./randap-banks";
 
 const DIF = { easy: "easy", middle: "middle", hard: "hard" } as const;
 type Dif = keyof typeof DIF;
@@ -855,8 +856,9 @@ const CONTENT: SubjectDef[] = [
   ...NEW_SUBJECTS,
 ];
 
-/** Yangi kontent ham seed qilinishi uchun marker yangi testga ko'chirildi */
-const MARKER_QUIZ_ID = "quiz_adab_hard";
+/** Yangi kontent ham seed qilinishi uchun marker yangi testga ko'chirildi.
+ * GEN savollar (id: *_gen*) seed bo'lgach marker mavjud bo'ladi → qayta ishga tushmaydi. */
+const MARKER_QUIZ_ID = "quiz_uz_7_easy_gen1";
 
 let running: Promise<void> | null = null;
 
@@ -942,15 +944,27 @@ export async function ensureContentSeeded(): Promise<void> {
             },
           });
 
+          // Generatsiya qilingan savollar — 300 taga to'ldirish
+          const need = Math.max(0, BANK_TARGET - q.questions.length);
+          const genQs = (GEN_QUESTIONS[q.id] ?? []).slice(0, need);
+          const genIds = genQs.map((_, i) => `${q.id}_gen${i + 1}`);
           // Savollar — mavjudlarini o'tkazib yuboramiz
-          const questionIds = q.questions.map((_, i) => `${q.id}_q${i + 1}`);
+          const questionIds = [
+            ...q.questions.map((_, i) => `${q.id}_q${i + 1}`),
+            ...genIds,
+          ];
           const existingQuestions = await db.question.findMany({
             where: { id: { in: questionIds } },
             select: { id: true },
           });
           const existingQuestionSet = new Set(existingQuestions.map((x) => x.id));
-          const newQuestions = q.questions
-            .map((qq, i) => ({
+          const allQs: Array<{
+            id: string; quizId: string; text: string; options: string;
+            correctIndex: number; audio: string | null; order: number;
+            textRu: string | null; textEn: string | null;
+            optionsRu: string | null; optionsEn: string | null;
+          }> = [
+            ...q.questions.map((qq, i) => ({
               id: `${q.id}_q${i + 1}`,
               quizId: q.id,
               text: qq.text,
@@ -958,14 +972,33 @@ export async function ensureContentSeeded(): Promise<void> {
               correctIndex: qq.correct,
               audio: qq.audio ?? null,
               order: i,
-            }))
-            .filter((x) => !existingQuestionSet.has(x.id));
+              textRu: null as string | null,
+              textEn: null as string | null,
+              optionsRu: null as string | null,
+              optionsEn: null as string | null,
+            })),
+            ...genQs.map((qq, i) => ({
+              id: `${q.id}_gen${i + 1}`,
+              quizId: q.id,
+              text: qq.t.uz,
+              options: JSON.stringify(qq.o.map((x) => x.uz)),
+              correctIndex: qq.correct,
+              audio: qq.audio ?? null,
+              order: 1000 + i,
+              textRu: qq.t.ru,
+              textEn: qq.t.en,
+              optionsRu: JSON.stringify(qq.o.map((x) => x.ru)),
+              optionsEn: JSON.stringify(qq.o.map((x) => x.en)),
+            })),
+          ];
+          const newQuestions = allQs.filter((x) => !existingQuestionSet.has(x.id));
           if (newQuestions.length) {
             await db.question.createMany({ data: newQuestions });
           }
         }
       }
-      console.log("[seed] kontent tayyor: tarix (uz/jahon 7-11), ingliz (CEFR/IELTS/Listening), matematika, fizika, kimyo, geografiya, ona tili, adabiyot");
+      const qCount = await db.question.count();
+      console.log(`[seed] kontent tayyor: tarix (uz/jahon 7-11), ingliz (CEFR/IELTS/Listening), matematika, fizika, kimyo, geografiya, ona tili, adabiyot — jami ${qCount} savol (har test ~${BANK_TARGET} ta bazadan 10 tasi tasodifiy)`);
     } catch (e) {
       console.error("[seed] xatolik:", e);
     } finally {

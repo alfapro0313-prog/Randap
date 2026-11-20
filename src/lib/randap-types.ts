@@ -131,8 +131,11 @@ export type QuizResult = {
   total: number;
   pointsEarned: number;
   userPoints: number;
+  /** Har bir to'g'ri javob uchun DZF (qiyinlikka qarab: 0.2/0.5/1.0) */
+  dzfPer: number;
   dzfEarned: number;
   userDzf: number;
+  difficulty?: string;
   correctIndexes: number[];
   bestScore: number;
 };

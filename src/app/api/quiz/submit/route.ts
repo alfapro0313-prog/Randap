@@ -3,9 +3,14 @@ import { db } from "@/lib/db";
 import { ensureUser } from "@/lib/randap-server";
 import { dzfFromCents } from "@/lib/shop-catalog";
 
-/** To'g'ri javob uchun ball va DZF (dapzif) */
+/** To'g'ri javob uchun ball va DZF (dapzif) — qiyinlik darajasiga qarab */
 const POINTS_PER_CORRECT = 10;
-const DZF_CENTS_PER_CORRECT = 20; // 0.2 DZF = 20 sent
+/** DZF sentlari: oson 0.2, o'rtacha 0.5, qiyin 1.0 DZF har to'g'ri javob uchun */
+const DZF_CENTS: Record<string, number> = {
+  easy: 20,
+  middle: 50,
+  hard: 100,
+};
 
 /**
  * POST /api/quiz/submit
@@ -68,7 +73,8 @@ export async function POST(req: Request) {
 
     const total = graded.length;
     const pointsEarned = score * POINTS_PER_CORRECT;
-    const dzfEarnedCents = score * DZF_CENTS_PER_CORRECT;
+    const dzfPerCorrectCents = DZF_CENTS[quiz.difficulty] ?? DZF_CENTS.middle!;
+    const dzfEarnedCents = score * dzfPerCorrectCents;
 
     // Urinishni saqlash + ball va DZF ni qo'shish
     await db.quizAttempt.create({
@@ -103,8 +109,10 @@ export async function POST(req: Request) {
       total,
       pointsEarned,
       userPoints: updated.points,
+      dzfPer: dzfFromCents(dzfPerCorrectCents),
       dzfEarned: dzfFromCents(dzfEarnedCents),
       userDzf: dzfFromCents(updated.dzfCents),
+      difficulty: quiz.difficulty,
       correctIndexes,
       bestScore,
     });
