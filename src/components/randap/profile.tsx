@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   BarChart3,
+  Bell,
   Camera,
   Eye,
   Heart,
@@ -16,7 +17,14 @@ import {
   Users,
   Video as VideoIcon,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
+import {
+  getPushState,
+  enablePush,
+  disablePush,
+  type PushState,
+} from "@/lib/push-client";
 import { AvatarBubble } from "./avatar";
 import { VideoGrid } from "./video-card";
 import { useLang } from "./lang-provider";
@@ -58,6 +66,10 @@ export function ProfileView({
   const [complaintBusy, setComplaintBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
+  /* Tashqi bildirishnomalar — profil ichidan yoqish/o'chirish */
+  const [pushState, setPushState] = useState<PushState | null>(null);
+  const [pushBusy, setPushBusy] = useState(false);
+
   /* Profil statistikasi — /api/me/stats */
   const [stats, setStats] = useState<{
     videos: number;
@@ -80,6 +92,42 @@ export function ProfileView({
       alive = false;
     };
   }, [deviceKey]);
+
+  useEffect(() => {
+    let alive = true;
+    void getPushState().then((s) => {
+      if (alive) setPushState(s);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  async function togglePush(on: boolean) {
+    if (pushBusy) return;
+    setPushBusy(true);
+    if (on) {
+      const res = await enablePush();
+      if (res === "granted") {
+        setPushState("on");
+        toast({ title: t("pushTurnedOnToast") });
+      } else if (res === "denied") {
+        setPushState("blocked");
+        toast({
+          title: t("pushBlockedToast"),
+          description: t("pushBlockedHint"),
+          variant: "destructive",
+        });
+      } else {
+        toast({ title: t("pushErrorToast"), variant: "destructive" });
+      }
+    } else {
+      await disablePush();
+      setPushState("off");
+      toast({ title: t("pushTurnedOffToast") });
+    }
+    setPushBusy(false);
+  }
 
   async function saveName(e: React.FormEvent) {
     e.preventDefault();
@@ -304,6 +352,52 @@ export function ProfileView({
           onOpenChannel={onOpenChannel}
           emptyText={t("watchLaterEmpty")}
         />
+      </section>
+
+      {/* Tashqi bildirishnomalar — yoqish/o'chirish kaliti */}
+      <section
+        aria-label={t("pushTitle")}
+        className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5"
+      >
+        <div className="flex items-center gap-2">
+          <Bell className="size-4 text-sky-500" aria-hidden="true" />
+          <h2 className="text-sm font-bold text-foreground">{t("pushTitle")}</h2>
+        </div>
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          {t("pushDesc")}
+        </p>
+        {pushState !== "unsupported" ? (
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-background px-4 py-3">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-foreground">
+                {pushState === null
+                  ? t("loading")
+                  : pushState === "on"
+                    ? t("pushEnabled")
+                    : t("pushDisabled")}
+              </p>
+              {pushState === "blocked" && (
+                <p className="mt-1 text-[11px] leading-snug text-amber-600">
+                  {t("pushBlockedHint")}
+                </p>
+              )}
+            </div>
+            {pushBusy ? (
+              <Loader2 className="size-5 shrink-0 animate-spin text-muted-foreground" aria-hidden="true" />
+            ) : (
+              <Switch
+                checked={pushState === "on"}
+                disabled={pushState === "blocked"}
+                onCheckedChange={(v) => void togglePush(v)}
+                aria-label={t("pushTitle")}
+              />
+            )}
+          </div>
+        ) : (
+          <p className="text-[11px] text-muted-foreground">
+            {t("pushUnsupportedHint")}
+          </p>
+        )}
       </section>
 
       <section

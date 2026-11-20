@@ -247,6 +247,21 @@ const en = {
   resetConfirm: "Yes, reset profile",
   resetDevice: "Reset device profile",
 
+  // Push notifications (profile)
+  pushTitle: "Push notifications",
+  pushDesc:
+    "When someone writes you a message or sends you DZF, an external notification appears even if the site or the browser is closed. You can turn them on or off here at any time.",
+  pushEnabled: "Notifications on",
+  pushDisabled: "Notifications off",
+  pushTurnedOnToast: "Notifications enabled — check it: let someone write you a message",
+  pushTurnedOffToast: "Notifications turned off",
+  pushErrorToast: "Could not enable notifications. Please try again.",
+  pushBlockedToast: "The browser has blocked notifications",
+  pushBlockedHint:
+    "Notifications are blocked in browser settings. Open site settings via the icon next to the address bar, allow notifications, then reload the page.",
+  pushUnsupportedHint:
+    "This device or browser does not support external notifications.",
+
   // Channel
   channelStats:
     "{subs} subscribers · {v} videos · {p} points",
@@ -671,6 +686,21 @@ const ru: Dict = {
   resetConfirm: "Да, сбросить профиль",
   resetDevice: "Сбросить профиль устройства",
 
+  // Push-уведомления (профиль)
+  pushTitle: "Push-уведомления",
+  pushDesc:
+    "Когда кто-то пишет вам сообщение или переводит DZF, внешнее уведомление появляется, даже если сайт или браузер закрыт. Здесь можно включать и выключать их в любой момент.",
+  pushEnabled: "Уведомления включены",
+  pushDisabled: "Уведомления выключены",
+  pushTurnedOnToast: "Уведомления включены — проверьте: пусть кто-нибудь напишет вам сообщение",
+  pushTurnedOffToast: "Уведомления выключены",
+  pushErrorToast: "Не удалось включить уведомления. Попробуйте ещё раз.",
+  pushBlockedToast: "Браузер заблокировал уведомления",
+  pushBlockedHint:
+    "Уведомления заблокированы в настройках браузера. Откройте настройки сайта через значок рядом с адресной строкой, разрешите уведомления и перезагрузите страницу.",
+  pushUnsupportedHint:
+    "Это устройство или браузер не поддерживает внешние уведомления.",
+
   channelStats: "{subs} подписчиков · {v} видео · {p} баллов",
   subscribed: "Вы подписаны",
   subscribe: "Подписаться",
@@ -1087,6 +1117,21 @@ const uz: Dict = {
     "Randap ro'yxatdan o'tishni talab qilmaydi: profilingiz shu brauzerdagi qurilma kalitiga bog'langan ({key}). Pastdagi tugmani bossangiz, bu qurilmadagi profil va shu qurilma qo'ygan layklar/obunalar tiklanadi.",
   resetConfirm: "Ha, profilni tiklash",
   resetDevice: "Qurilma profilini tiklash",
+
+  // Tashqi bildirishnomalar (profil)
+  pushTitle: "Tashqi bildirishnomalar",
+  pushDesc:
+    "Kimdir sizga xabar yozsa yoki DZF o'tkazsa, sayt yoki brauzer yopiq bo'lsa ham tashqi bildirishnoma chiqadi. Bularni shu yerda istalgan vaqtda yoqib o'chirish mumkin.",
+  pushEnabled: "Bildirishnomalar yoqilgan",
+  pushDisabled: "Bildirishnomalar o'chirilgan",
+  pushTurnedOnToast: "Bildirishnomalar yoqildi — sinang: kimdir sizga xabar yozsin",
+  pushTurnedOffToast: "Bildirishnomalar o'chirildi",
+  pushErrorToast: "Bildirishnomalarni yoqib bo'lmadi. Yana urinib ko'ring.",
+  pushBlockedToast: "Brauzer bildirishnomalarni bloklagan",
+  pushBlockedHint:
+    "Brauzer sozlamalarida bloklangan. Manzil satri yonidagi belgi orqali sayt sozlamalarini ochib, bildirishnomalarga ruxsat bering va sahifani yangilang.",
+  pushUnsupportedHint:
+    "Bu qurilma yoki brauzer tashqi bildirishnomalarni qo'llab-quvvatlamaydi.",
 
   channelStats: "{subs} obunachi · {v} video · {p} ball",
   subscribed: "Obuna bo'lingan",

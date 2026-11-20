@@ -1,72 +1,33 @@
 "use client";
 
 import { useEffect } from "react";
-import { getDeviceKey } from "@/lib/randap-client";
-
-/** VAPID public kalitni Uint8Array ga aylantirish */
-function urlBase64ToUint8Array(base64: string): Uint8Array {
-  const padding = "=".repeat((4 - (base64.length % 4)) % 4);
-  const normalized = (base64 + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const raw = atob(normalized);
-  const out = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) {
-    out[i] = raw.charCodeAt(i);
-  }
-  return out;
-}
+import { pushOffFlag, enablePush, pushSupported } from "@/lib/push-client";
 
 /**
  * Service worker'ni ro'yxatdan o'tkazadi — PWA installability uchun.
  * Undan tashqari Web Push obunasini yaratadi: ruxsat berilgan bo'lsa yangi
  * xabar / DZF o'tkazma haqida sayt yopiq bo'lsa ham tashqi bildirishnoma chiqadi.
- * Ruxsat hali so'ralmagan bo'lsa — birinchi bosishda so'raladi (Chrome talabi).
+ *
+ * Foydalanuvchi profil sahifasida bildirishnomalarni O'CHIRGAN bo'lsa
+ * (localStorage flag) — bu yerda avtomatik qayta yoqilmaydi va ruxsat
+ * so'ralmaydi; uni faqat profil ichidagi kalit yoqadi.
  */
 export function SwRegister() {
   useEffect(() => {
-    if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
-    if (!("PushManager" in window) || typeof Notification === "undefined") return;
+    if (!pushSupported()) return;
+
+    // Service worker har doim ro'yxatdan o'tadi — PWA offline va push uchun
+    void navigator.serviceWorker.register("/sw.js").catch(() => undefined);
 
     let done = false;
 
-    async function subscribe() {
-      if (done) return;
-      done = true;
-      try {
-        const reg = await navigator.serviceWorker.register("/sw.js");
-        const deviceKey = getDeviceKey();
-        if (!deviceKey) return;
-
-        const cfgRes = await fetch("/api/push/config", { cache: "no-store" });
-        const cfg = (await cfgRes.json()) as { ok?: boolean; publicKey?: string };
-        if (!cfg?.ok || !cfg.publicKey) return;
-
-        const existing = await reg.pushManager.getSubscription();
-        const sub =
-          existing ??
-          (await reg.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(cfg.publicKey) as BufferSource,
-          }));
-
-        await fetch("/api/push/subscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ deviceKey, subscription: sub.toJSON() }),
-        });
-      } catch {
-        // push ishlamasa — sayt baribir ishlaydi
-      }
-    }
-
     async function trySubscribe(ask: boolean) {
+      if (done) return;
+      if (pushOffFlag()) return; // profil ichidan o'chirilgan — aralashmaymiz
       const perm = Notification.permission;
-      if (perm === "granted") {
-        await subscribe();
-        return;
-      }
-      if (perm === "default" && ask) {
-        const p = await Notification.requestPermission();
-        if (p === "granted") await subscribe();
+      if (perm === "granted" || (perm === "default" && ask)) {
+        done = true;
+        await enablePush();
       }
     }
 
