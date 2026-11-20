@@ -19,6 +19,17 @@ export type ShopItem = {
 export const AVATAR_ITEM_ID = "avatar-photo";
 /** "O'tkaz" — chatda pul o'tkazish vositasi (bir marta sotib olinadi) */
 export const OTKAZ_ITEM_ID = "otkaz";
+/** "B" — omad barabani: har sotib olishda baraban aylanadi va sovg'a chiqadi (takroriy sotib olish mumkin) */
+export const BARABAN_ITEM_ID = "baraban-b";
+/** B baraban narxi (DZF) va sovg'alar */
+export const BARABAN_PRICE = 30;
+export const BARABAN_PRIZES = {
+  d50: 50,
+  d40: 40,
+  d10: 10,
+  /** Stiker chiqsa — tasodifiy stiker; hammasi bor bo'lsa 0.1 DZF */
+  cash: 0.1,
+} as const;
 
 /** Maxsus tovarlar — foydalanuvchi bergan narxlar */
 const SPECIAL: ShopItem[] = [
@@ -61,6 +72,14 @@ const SPECIAL: ShopItem[] = [
     category: "special",
     kind: "tool",
     name: "O'tkaz",
+  },
+  {
+    id: BARABAN_ITEM_ID,
+    content: "🎰",
+    price: BARABAN_PRICE,
+    category: "special",
+    kind: "tool",
+    name: "B — omad barabani",
   },
 ];
 

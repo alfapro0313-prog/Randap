@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { ensureUser } from "@/lib/randap-server";
 import {
   SHOP_ITEMS,
+  BARABAN_ITEM_ID,
   dzfFromCents,
   findShopItem,
 } from "@/lib/shop-catalog";
@@ -68,6 +69,14 @@ export async function POST(req: Request) {
     if (!deviceKey || !itemId) {
       return NextResponse.json(
         { ok: false, error: "deviceKey va itemId kerak" },
+        { status: 400 }
+      );
+    }
+
+    // B baraban — takroriy tovar: alohida /api/shop/baraban endpointida olinadi
+    if (itemId === BARABAN_ITEM_ID) {
+      return NextResponse.json(
+        { ok: false, error: "Baraban /api/shop/baraban orqali olinadi" },
         { status: 400 }
       );
     }

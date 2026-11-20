@@ -11,7 +11,7 @@ import {
   Play,
   User,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LANGS, type Lang } from "@/lib/randap-i18n";
 import {
   getBaseDeviceKey,
@@ -102,6 +102,31 @@ export function LoginView({
   const [checking, setChecking] = useState(false);
   const [googleErr, setGoogleErr] = useState("");
   const [success, setSuccess] = useState<LoginSession | null>(null);
+  const [googleReal, setGoogleReal] = useState<boolean | null>(null);
+  const [manualOpen, setManualOpen] = useState(false);
+
+  // Haqiqiy Google OAuth sozlanganligini tekshirish
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/auth/google?status=1")
+      .then((r) => r.json())
+      .then((d) => {
+        if (alive) setGoogleReal(Boolean(d?.configured));
+      })
+      .catch(() => {
+        if (alive) setGoogleReal(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  /** Haqiqiy Google OAuth — Google'ning rasmiy sahifasiga yo'naltiradi */
+  function startRealGoogle() {
+    window.location.href = `/api/auth/google?deviceKey=${encodeURIComponent(
+      getBaseDeviceKey()
+    )}&lang=${lang}`;
+  }
 
   const openGoogle = () => {
     setNameErr("");
@@ -282,6 +307,31 @@ export function LoginView({
                 {t("loginSub")}
               </p>
 
+              {/* Haqiqiy Google OAuth — GOOGLE_CLIENT_ID/SECRET sozlangan bo'lsa */}
+              {googleReal === true ? (
+                <div className="mt-6 flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={startRealGoogle}
+                    className="flex min-h-[50px] w-full items-center justify-center gap-3 rounded-xl bg-white text-sm font-semibold text-zinc-900 shadow-md transition-colors hover:bg-zinc-100"
+                  >
+                    <GoogleG className="size-5" />
+                    {t("loginGoogleBtn")}
+                  </button>
+                  <p className="text-center text-[11px] leading-snug text-muted-foreground">
+                    {t("loginGoogleRealNote")}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setManualOpen((v) => !v)}
+                    className="mx-auto mt-1 text-xs font-semibold text-primary hover:underline"
+                  >
+                    {t("loginManualToggle")}
+                  </button>
+                </div>
+              ) : null}
+
+              {googleReal !== true || manualOpen ? (
               <form
                 className="mt-6 flex flex-col gap-4"
                 onSubmit={(e) => {
@@ -415,6 +465,7 @@ export function LoginView({
                   {t("loginGoogleBtn")}
                 </button>
               </form>
+              ) : null}
             </>
           )}
         </div>
