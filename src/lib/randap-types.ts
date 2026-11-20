@@ -45,6 +45,7 @@ export type Me = {
   handle: string;
   avatar: string | null;
   points: number;
+  dzf: number;
   videoCount: number;
 };
 
@@ -75,12 +76,17 @@ export type LessonItem = {
   durationMin: number;
 };
 
+export type QuizDifficulty = "easy" | "middle" | "hard";
+
 export type QuizSummary = {
   id: string;
   title: string;
   description: string;
   questionCount: number;
   bestScore: number | null;
+  difficulty: QuizDifficulty;
+  grade: number | null;
+  kind: "quiz" | "listening";
 };
 
 export type SectionItem = {
@@ -98,6 +104,7 @@ export type QuizQuestion = {
   id: string;
   text: string;
   options: string[];
+  audio?: string | null;
 };
 
 export type QuizData = {
@@ -112,6 +119,7 @@ export type QuizData = {
     color: string;
   };
   total: number;
+  kind: "quiz" | "listening";
   questions: QuizQuestion[];
 };
 
@@ -120,6 +128,8 @@ export type QuizResult = {
   total: number;
   pointsEarned: number;
   userPoints: number;
+  dzfEarned: number;
+  userDzf: number;
   correctIndexes: number[];
   bestScore: number;
 };
@@ -171,6 +181,7 @@ export type ChatProfileItem = {
   emoji: string;
   color: string;
   bio: string;
+  avatarImage: string | null;
   online: boolean;
   lastSeenAt: string;
 };
@@ -205,4 +216,17 @@ export type ChatNotificationItem = {
   senderColor: string;
   preview: string;
   createdAt: string;
+};
+
+/* ---------- Do'kon (DZF) ---------- */
+
+export type ShopOwnedItem = {
+  itemId: string;
+  content: string | null;
+};
+
+export type ShopData = {
+  dzf: number;
+  owned: ShopOwnedItem[];
+  ownedIds: string[];
 };

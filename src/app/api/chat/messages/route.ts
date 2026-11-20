@@ -9,9 +9,26 @@ import {
   serializeMessage,
   touchPresence,
 } from "@/lib/chat-server";
+import { CHAT_STICKERS } from "@/lib/chat-i18n";
+import { findShopItemByContent } from "@/lib/shop-catalog";
 
 const TYPING_WINDOW_MS = 3000;
 const MAX_TEXT_LEN = 2000;
+
+/**
+ * Stiker yuborish huquqini tekshiradi:
+ *  - bepul stikerlar (CHAT_STICKERS) hammaga ochiq;
+ *  - do'kon stikeri faqat olib bo'lgan (OwnedItem) foydalanuvchiga.
+ */
+async function canUseSticker(deviceKey: string, content: string): Promise<boolean> {
+  if (CHAT_STICKERS.includes(content)) return true;
+  const item = findShopItemByContent(content);
+  if (!item) return false;
+  const owned = await db.ownedItem.findUnique({
+    where: { deviceKey_itemId: { deviceKey, itemId: item.id } },
+  });
+  return Boolean(owned);
+}
 
 async function loadConversation(conversationId: string, deviceKey: string) {
   const conv = await db.conversation.findUnique({ where: { id: conversationId } });
@@ -124,6 +141,13 @@ export async function POST(req: Request) {
     } else if (kind === "sticker") {
       if (!content || content.length > 16) {
         return NextResponse.json({ ok: false, error: "Stiker noto'g'ri" }, { status: 400 });
+      }
+      // Do'kon stikeri — faqat olib bo'lgan foydalanuvchi yubora oladi
+      if (!(await canUseSticker(deviceKey, content))) {
+        return NextResponse.json(
+          { ok: false, stickerNotOwned: true, error: "Bu stiker sizniki emas — do'kondan oling" },
+          { status: 403 }
+        );
       }
     } else if (kind === "image") {
       // Yangi format: bazadagi rasm (chat-images/<id>) yoki eski fayl yo'li

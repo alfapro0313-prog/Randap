@@ -7,6 +7,7 @@ import {
   GraduationCap,
   ListChecks,
   MessageCircle,
+  ShoppingBag,
   Trophy,
   Users,
 } from "lucide-react";
@@ -22,6 +23,7 @@ type PortalProps = {
   onEnterTests: () => void;
   onEnterOrganish: () => void;
   onEnterChat: () => void;
+  onEnterShop: () => void;
   onOpenBallar: () => void;
 };
 
@@ -34,6 +36,7 @@ export function PortalView({
   onEnterTests,
   onEnterOrganish,
   onEnterChat,
+  onEnterShop,
   onOpenBallar,
 }: PortalProps) {
   const { t } = useLang();
@@ -224,6 +227,21 @@ export function PortalView({
           </span>
         </button>
       </div>
+
+      {/* Do'kon — DZF balansi uchun */}
+      <button
+        onClick={onEnterShop}
+        className="flex items-center gap-3 rounded-xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-3 text-left transition-colors hover:bg-amber-100"
+      >
+        <ShoppingBag className="size-5 shrink-0 text-amber-600" aria-hidden="true" />
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold text-amber-900">
+            {t("navShop")} — DZF
+          </span>
+          <span className="block text-xs text-amber-700">{t("shopEarnHint")}</span>
+        </span>
+        <ArrowRight className="size-4 shrink-0 text-amber-600" aria-hidden="true" />
+      </button>
 
       {/* Ballar — alohida reyting */}
       <button

@@ -4,11 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ArrowLeft,
   CheckCircle2,
+  Headphones,
   ListChecks,
   Loader2,
+  PauseCircle,
   PartyPopper,
   RotateCcw,
   Trophy,
+  Volume2,
   XCircle,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -35,6 +38,44 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
   const [idx, setIdx] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<QuizResult | null>(null);
+  const [audioPlaying, setAudioPlaying] = useState(false);
+
+  /** Listening savolining audioning ovoz bilan o'qish (Web Speech API) */
+  const stopAudio = useCallback(() => {
+    try {
+      window.speechSynthesis?.cancel();
+    } catch {
+      // ignore
+    }
+    setAudioPlaying(false);
+  }, []);
+
+  useEffect(() => () => stopAudio(), [stopAudio]);
+
+  const playAudio = useCallback(
+    (text: string) => {
+      if (!text) return;
+      try {
+        const synth = window.speechSynthesis;
+        if (!synth) return;
+        synth.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = "en-US";
+        utter.rate = 0.92;
+        const voice = synth
+          .getVoices()
+          .find((v) => v.lang.startsWith("en"));
+        if (voice) utter.voice = voice;
+        setAudioPlaying(true);
+        utter.onend = () => setAudioPlaying(false);
+        utter.onerror = () => setAudioPlaying(false);
+        synth.speak(utter);
+      } catch {
+        setAudioPlaying(false);
+      }
+    },
+    []
+  );
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -55,6 +96,11 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
   useEffect(() => {
     void load();
   }, [load]);
+
+  // Savol almashganda audio to'xtatiladi
+  useEffect(() => {
+    stopAudio();
+  }, [idx, stopAudio]);
 
   function pick(optionIndex: number) {
     setAnswers((prev) => {
@@ -146,14 +192,25 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
                 : t("resultBad")}
           </p>
 
-          <div className="mt-2 flex w-full items-center justify-center gap-3 rounded-xl bg-primary/10 px-4 py-3">
-            <Trophy className="size-5 text-primary" aria-hidden="true" />
-            <p className="text-base font-bold text-foreground">
-              {t("pointsAdded", { n: result.pointsEarned })}
-            </p>
-            <span className="text-sm text-muted-foreground">
-              {t("totalParen", { n: result.userPoints })}
-            </span>
+          <div className="mt-2 flex w-full flex-col items-center gap-2 rounded-xl bg-primary/10 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Trophy className="size-5 text-primary" aria-hidden="true" />
+              <p className="text-base font-bold text-foreground">
+                {t("pointsAdded", { n: result.pointsEarned })}
+              </p>
+              <span className="text-sm text-muted-foreground">
+                {t("totalParen", { n: result.userPoints })}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2 rounded-lg bg-amber-100 px-3 py-1.5">
+              <span className="text-sm font-bold text-amber-700">
+                {t("dzfAdded", { dzf: result.dzfEarned })}
+              </span>
+              <span className="text-[11px] text-amber-600/80">{t("dzfAddedHint")}</span>
+              <span className="text-[11px] font-semibold text-amber-700">
+                {t("dzfTotal", { dzf: result.userDzf })}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -273,6 +330,33 @@ export function QuizView({ quizId, deviceKey, onBack, onFinished }: QuizViewProp
 
       {/* Savol */}
       <div className="rounded-2xl border border-border bg-card p-6">
+        {/* Listening audio tugmasi */}
+        {question.audio ? (
+          <div className="mb-4 flex flex-col gap-2 rounded-xl bg-sky-50 p-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() =>
+                  audioPlaying ? stopAudio() : playAudio(question.audio!)
+                }
+                aria-label={audioPlaying ? t("listeningStop") : t("listeningPlay")}
+                className="flex size-12 shrink-0 items-center justify-center rounded-full bg-sky-600 text-white transition-colors hover:bg-sky-700"
+              >
+                {audioPlaying ? (
+                  <PauseCircle className="size-6" aria-hidden="true" />
+                ) : (
+                  <Volume2 className="size-6" aria-hidden="true" />
+                )}
+              </button>
+              <div className="min-w-0">
+                <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
+                  <Headphones className="size-4 text-sky-600" aria-hidden="true" />
+                  {audioPlaying ? t("listeningPlay") + "..." : t("listeningPlay")}
+                </p>
+                <p className="text-xs text-muted-foreground">{t("listeningHint")}</p>
+              </div>
+            </div>
+          </div>
+        ) : null}
         <p className="text-lg font-bold leading-relaxed text-foreground">
           {question.text}
         </p>

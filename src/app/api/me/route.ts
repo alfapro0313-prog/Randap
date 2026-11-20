@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { ensureUser } from "@/lib/randap-server";
+import { dzfFromCents } from "@/lib/shop-catalog";
 
 function mePayload(user: {
   id: string;
@@ -8,6 +9,7 @@ function mePayload(user: {
   handle: string;
   avatar: string | null;
   points: number;
+  dzfCents: number;
 }, videoCount: number) {
   return {
     id: user.id,
@@ -15,6 +17,7 @@ function mePayload(user: {
     handle: user.handle,
     avatar: user.avatar,
     points: user.points,
+    dzf: dzfFromCents(user.dzfCents),
     videoCount,
   };
 }

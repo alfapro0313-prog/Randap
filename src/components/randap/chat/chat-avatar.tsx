@@ -5,31 +5,42 @@ type ChatAvatarProps = {
   emoji: string;
   color: string;
   name: string;
+  /** Do'kondan olingan avatar rasmi (data URL) — bo'lsa rasm ko'rsatiladi */
+  image?: string | null;
   className?: string;
   emojiClassName?: string;
   online?: boolean;
 };
 
-/** Chat avatari — emoji + rangli doira (ixtiyoriy online nuqta) */
+/** Chat avatari — rasm (agar bo'lsa) yoki emoji + rangli doira (ixtiyoriy online nuqta) */
 export function ChatAvatar({
   emoji,
   color,
   name,
+  image,
   className,
   emojiClassName,
   online,
 }: ChatAvatarProps) {
   return (
     <span className={cn("relative inline-flex shrink-0", className)}>
-      <span
-        aria-label={`${name} avatari`}
-        className={cn(
-          "flex size-full select-none items-center justify-center rounded-full",
-          CHAT_AVATAR_COLORS[color] ?? CHAT_AVATAR_COLORS.sky
-        )}
-      >
-        <span className={cn("leading-none", emojiClassName ?? "text-lg")}>{emoji}</span>
-      </span>
+      {image ? (
+        <img
+          src={image}
+          alt={`${name} avatari`}
+          className="size-full select-none rounded-full object-cover"
+        />
+      ) : (
+        <span
+          aria-label={`${name} avatari`}
+          className={cn(
+            "flex size-full select-none items-center justify-center rounded-full",
+            CHAT_AVATAR_COLORS[color] ?? CHAT_AVATAR_COLORS.sky
+          )}
+        >
+          <span className={cn("leading-none", emojiClassName ?? "text-lg")}>{emoji}</span>
+        </span>
+      )}
       {online !== undefined ? (
         <span
           className={cn(

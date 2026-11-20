@@ -19,6 +19,7 @@ import { BallarView } from "./ballar";
 import { SearchView } from "./search";
 import { PortalView } from "./portal";
 import { AdminView } from "./admin";
+import { ShopView } from "./shop";
 import { ChatApp } from "./chat/chat-app";
 import { ChatSms } from "./chat-sms";
 import { readSession, useDeviceMe, getWatchLater, WATCH_LATER_EVENT } from "@/lib/randap-client";
@@ -380,6 +381,7 @@ export function RandapApp() {
                 onEnterTests={() => navigate("sections")}
                 onEnterOrganish={() => navigate("organish")}
                 onEnterChat={() => navigate("chat")}
+                onEnterShop={() => navigate("shop")}
                 onOpenBallar={() => navigate("ballar")}
               />
             ) : null}
@@ -564,6 +566,13 @@ export function RandapApp() {
             ) : null}
 
             {view === "ballar" ? <BallarView deviceKey={deviceKey} /> : null}
+
+            {view === "shop" ? (
+              <ShopView
+                deviceKey={deviceKey}
+                onGoToTests={() => navigate("sections")}
+              />
+            ) : null}
 
             {view === "admin" ? <AdminView deviceKey={deviceKey} /> : null}
 

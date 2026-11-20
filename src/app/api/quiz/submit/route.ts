@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { ensureUser } from "@/lib/randap-server";
+import { dzfFromCents } from "@/lib/shop-catalog";
 
-/** To'g'ri javob uchun ball */
+/** To'g'ri javob uchun ball va DZF (dapzif) */
 const POINTS_PER_CORRECT = 10;
+const DZF_CENTS_PER_CORRECT = 20; // 0.2 DZF = 20 sent
 
 /**
  * POST /api/quiz/submit
@@ -51,8 +53,9 @@ export async function POST(req: Request) {
 
     const total = quiz.questions.length;
     const pointsEarned = score * POINTS_PER_CORRECT;
+    const dzfEarnedCents = score * DZF_CENTS_PER_CORRECT;
 
-    // Urinishni saqlash + ballni qo'shish
+    // Urinishni saqlash + ball va DZF ni qo'shish
     await db.quizAttempt.create({
       data: {
         quizId,
@@ -66,8 +69,11 @@ export async function POST(req: Request) {
     const user = await ensureUser(deviceKey);
     const updated = await db.user.update({
       where: { id: user.id },
-      data: { points: { increment: pointsEarned } },
-      select: { id: true, name: true, handle: true, avatar: true, points: true },
+      data: {
+        points: { increment: pointsEarned },
+        dzfCents: { increment: dzfEarnedCents },
+      },
+      select: { id: true, name: true, handle: true, avatar: true, points: true, dzfCents: true },
     });
 
     const bestAttempts = await db.quizAttempt.findMany({
@@ -82,6 +88,8 @@ export async function POST(req: Request) {
       total,
       pointsEarned,
       userPoints: updated.points,
+      dzfEarned: dzfFromCents(dzfEarnedCents),
+      userDzf: dzfFromCents(updated.dzfCents),
       correctIndexes,
       bestScore,
     });

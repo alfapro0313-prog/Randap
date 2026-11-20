@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Check,
+  ImagePlus,
   Loader2,
   MessageCircle,
   MessagesSquare,
@@ -30,6 +31,7 @@ import type {
   ChatConversationItem,
   ChatProfileItem,
 } from "@/lib/randap-types";
+import { AVATAR_ITEM_ID } from "@/lib/shop-catalog";
 import { cn } from "@/lib/utils";
 
 type ChatAppProps = {
@@ -63,6 +65,10 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
   const [emojiDraft, setEmojiDraft] = useState("🙂");
   const [colorDraft, setColorDraft] = useState("sky");
   const [saving, setSaving] = useState(false);
+  // Do'kon: olingan narsalar (avatar rasmi huquqi + stikerlar)
+  const [ownedIds, setOwnedIds] = useState<string[]>([]);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarFileRef = useRef<HTMLInputElement | null>(null);
 
   const t = getChatStrings(lang);
 
@@ -79,7 +85,7 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
     }
   }, [deviceKey]);
 
-  // Profil + suhbatlar
+  // Profil + suhbatlar + do'kon holati
   useEffect(() => {
     if (!deviceKey) return;
     let stopped = false;
@@ -100,6 +106,17 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
         // ignore
       } finally {
         if (!stopped) setLoading(false);
+      }
+      try {
+        const shopRes = await fetch(
+          `/api/shop?deviceKey=${encodeURIComponent(deviceKey)}`
+        );
+        const shopData = await shopRes.json();
+        if (!stopped && shopData?.ok) {
+          setOwnedIds((shopData.ownedIds as string[]) ?? []);
+        }
+      } catch {
+        // ignore
       }
     })();
     return () => {
@@ -394,6 +411,94 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
     }
   }
 
+  /** Rasmni kichiklantirish (128x128 JPEG) — data URL qaytaradi */
+  function shrinkAvatarImage(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("read"));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error("decode"));
+        img.onload = () => {
+          const size = 128;
+          const canvas = document.createElement("canvas");
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            reject(new Error("canvas"));
+            return;
+          }
+          // Kvadrat crop — markazi saqlanadi
+          const minSide = Math.min(img.width, img.height);
+          const sx = (img.width - minSide) / 2;
+          const sy = (img.height - minSide) / 2;
+          ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+          resolve(canvas.toDataURL("image/jpeg", 0.82));
+        };
+        img.src = String(reader.result);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /** Chat avatariga rasm qo'yish (do'kondan "avatar rasmi" olingan bo'lsa) */
+  async function uploadAvatarImage(file: File) {
+    if (!deviceKey || !profile) return;
+    setAvatarUploading(true);
+    try {
+      const dataUrl = await shrinkAvatarImage(file);
+      if (dataUrl.length > 80_000) {
+        toast({ title: t.avatarTooBig, variant: "destructive" });
+        return;
+      }
+      const res = await fetch("/api/chat/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceKey, avatarImage: dataUrl }),
+      });
+      const data = await res.json();
+      if (data?.ok) {
+        setProfile(data.profile as ChatProfileItem);
+        toast({ title: t.avatarSaved });
+        void loadConversations();
+      } else if (data?.avatarNotOwned) {
+        toast({ title: t.avatarNeedBuy, variant: "destructive" });
+      } else {
+        toast({ title: t.avatarFailed, variant: "destructive" });
+      }
+    } catch {
+      toast({ title: t.avatarFailed, variant: "destructive" });
+    } finally {
+      setAvatarUploading(false);
+    }
+  }
+
+  /** Avatar rasmini o'chirish */
+  async function removeAvatarImage() {
+    if (!deviceKey || !profile) return;
+    try {
+      const res = await fetch("/api/chat/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceKey, avatarImage: null }),
+      });
+      const data = await res.json();
+      if (data?.ok) {
+        setProfile(data.profile as ChatProfileItem);
+        toast({ title: t.avatarSaved });
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  function onPickAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (file) void uploadAvatarImage(file);
+  }
+
   if (!deviceKey) {
     return (
       <div className="flex h-[60vh] items-center justify-center rounded-2xl border border-border bg-card">
@@ -445,6 +550,7 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
                     emoji={profile.emoji}
                     color={profile.color}
                     name={profile.name}
+                    image={profile.avatarImage}
                     className="size-9"
                     emojiClassName="text-base"
                     online
@@ -570,6 +676,7 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
                         emoji={p.emoji}
                         color={p.color}
                         name={p.name}
+                        image={p.avatarImage}
                         className="size-10"
                         emojiClassName="text-xl"
                         online={p.online}
@@ -716,6 +823,7 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
                           emoji={c.partner.emoji}
                           color={c.partner.color}
                           name={c.partner.name}
+                          image={c.partner.avatarImage}
                           className="size-10"
                           emojiClassName="text-xl"
                           online={c.partner.online}
@@ -883,6 +991,59 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
             {/* Mening profilim */}
             <div className="flex flex-col gap-2">
               <p className="text-sm font-semibold text-foreground">{t.myProfile}</p>
+
+              {/* Avatar rasmi (do'kon tovari) */}
+              <div className="flex items-center gap-3 rounded-xl border border-border bg-background p-3">
+                <ChatAvatar
+                  emoji={emojiDraft}
+                  color={colorDraft}
+                  name={nameDraft || "R"}
+                  image={profile.avatarImage}
+                  className="size-12"
+                  emojiClassName="text-xl"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-foreground">{t.avatarPhoto}</p>
+                  {ownedIds.includes(AVATAR_ITEM_ID) ? (
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => avatarFileRef.current?.click()}
+                        disabled={avatarUploading}
+                        className="flex h-8 items-center gap-1.5 rounded-lg bg-sky-600 px-3 text-xs font-bold text-white transition-colors hover:bg-sky-700 disabled:opacity-60"
+                      >
+                        {avatarUploading ? (
+                          <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                        ) : (
+                          <ImagePlus className="size-3.5" aria-hidden="true" />
+                        )}
+                        {t.avatarUpload}
+                      </button>
+                      {profile.avatarImage ? (
+                        <button
+                          type="button"
+                          onClick={() => void removeAvatarImage()}
+                          className="flex h-8 items-center rounded-lg border border-border bg-secondary px-3 text-xs font-bold text-foreground transition-colors hover:bg-secondary/80"
+                        >
+                          {t.avatarRemove}
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+                      {t.avatarNeedBuy}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <input
+                ref={avatarFileRef}
+                type="file"
+                accept="image/*"
+                onChange={onPickAvatar}
+                className="sr-only"
+                aria-label={t.avatarUpload}
+              />
               <label className="flex flex-col gap-1 text-xs text-muted-foreground">
                 {t.name}
                 <input
@@ -974,6 +1135,7 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
               emoji={peer.emoji}
               color={peer.color}
               name={peer.name}
+              image={peer.avatarImage}
               className="mx-auto size-16"
               emojiClassName="text-3xl"
               online={peer.online}

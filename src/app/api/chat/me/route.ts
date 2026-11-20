@@ -1,6 +1,24 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { ensureChatProfile, serializeChatProfile, touchPresence, validColor } from "@/lib/chat-server";
+import {
+  ensureChatProfile,
+  serializeChatProfile,
+  touchPresence,
+  validColor,
+} from "@/lib/chat-server";
+import { AVATAR_ITEM_ID } from "@/lib/shop-catalog";
+
+/** Avatar rasmi: faqat data:image/* URL, maks ~60KB (kichiklantirilgan bo'ladi) */
+const AVATAR_IMAGE_RE = /^data:image\/(jpeg|png|webp|gif);base64,[A-Za-z0-9+/=]+$/;
+const AVATAR_IMAGE_MAX = 80_000;
+
+/** Do'kondan "avatar rasmi" olinganini tekshiradi */
+async function ownsAvatarPhoto(deviceKey: string): Promise<boolean> {
+  const owned = await db.ownedItem.findUnique({
+    where: { deviceKey_itemId: { deviceKey, itemId: AVATAR_ITEM_ID } },
+  });
+  return Boolean(owned);
+}
 
 export async function GET(req: Request) {
   try {
@@ -28,6 +46,7 @@ export async function PATCH(req: Request) {
       emoji?: string;
       color?: string;
       bio?: string;
+      avatarImage?: string | null;
     } | null;
 
     const deviceKey = (body?.deviceKey ?? "").trim();
@@ -36,7 +55,13 @@ export async function PATCH(req: Request) {
     }
 
     await ensureChatProfile(deviceKey);
-    const data: { name?: string; emoji?: string; color?: string; bio?: string } = {};
+    const data: {
+      name?: string;
+      emoji?: string;
+      color?: string;
+      bio?: string;
+      avatarImage?: string | null;
+    } = {};
 
     if (body?.name !== undefined) {
       const name = body.name.trim();
@@ -73,6 +98,33 @@ export async function PATCH(req: Request) {
         );
       }
       data.bio = bio;
+    }
+
+    // Avatar rasmi: do'kondan olingan bo'lsa rasm yuklash mumkin
+    if (body?.avatarImage !== undefined) {
+      const img = body.avatarImage;
+      if (img === null || img === "") {
+        data.avatarImage = null;
+      } else if (typeof img === "string") {
+        if (!AVATAR_IMAGE_RE.test(img) || img.length > AVATAR_IMAGE_MAX) {
+          return NextResponse.json(
+            { ok: false, error: "Rasm formati yoki hajmi noto'g'ri" },
+            { status: 400 }
+          );
+        }
+        if (!(await ownsAvatarPhoto(deviceKey))) {
+          return NextResponse.json(
+            {
+              ok: false,
+              avatarNotOwned: true,
+              error:
+                "Avatarga rasm qo'yish uchun do'kondan avatar rasmini oling (200 DZF)",
+            },
+            { status: 403 }
+          );
+        }
+        data.avatarImage = img;
+      }
     }
 
     const updated = await db.chatProfile.update({

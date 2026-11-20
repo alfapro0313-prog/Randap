@@ -11,6 +11,7 @@ import {
   getChatStrings,
 } from "@/lib/chat-i18n";
 import type { ChatLang, ChatMessageItem, ChatProfileItem } from "@/lib/randap-types";
+import type { ShopData } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
 
 type ChatWindowProps = {
@@ -59,6 +60,8 @@ export function ChatWindow({
   const [sending, setSending] = useState(false);
   const [showStickers, setShowStickers] = useState(false);
   const [uploading, setUploading] = useState(false);
+  // Do'kondan olingan stikerlar (maxsus panel bo'limi)
+  const [ownedStickers, setOwnedStickers] = useState<string[]>([]);
   // "Rasm o'chirilsinmi?" tasdiqlashi ko'rsatilayotgan xabar
   const [confirmDeleteMsgId, setConfirmDeleteMsgId] = useState<string | null>(null);
 
@@ -66,6 +69,29 @@ export function ChatWindow({
   const stickRef = useRef(true);
   const lastTypingRef = useRef(0);
   const fileRef = useRef<HTMLInputElement | null>(null);
+
+  // Do'kon stikerlari — panel ochilganda yuklanadi
+  useEffect(() => {
+    if (!showStickers || !deviceKey) return;
+    let stopped = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/shop?deviceKey=${encodeURIComponent(deviceKey)}`);
+        const data = (await res.json()) as ShopData & { ok?: boolean };
+        if (!stopped && data?.ok) {
+          const stickers = (data.owned ?? [])
+            .map((o) => o.content)
+            .filter((c): c is string => Boolean(c));
+          setOwnedStickers(stickers);
+        }
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      stopped = true;
+    };
+  }, [showStickers, deviceKey]);
 
   // Polling — yangi xabarlar, typing, online holat
   useEffect(() => {
@@ -150,6 +176,8 @@ export function ChatWindow({
       if (data?.ok) {
         stickRef.current = true;
         await refresh();
+      } else if (data?.stickerNotOwned) {
+        toast({ title: t.stickerNotOwned, variant: "destructive" });
       }
     } catch {
       // ignore
@@ -277,6 +305,7 @@ export function ChatWindow({
               emoji={meta.partner.emoji}
               color={meta.partner.color}
               name={meta.partner.name}
+              image={meta.partner.avatarImage}
               className="size-10"
               emojiClassName="text-xl"
               online={meta.online}
@@ -482,20 +511,47 @@ export function ChatWindow({
       ) : (
         <div className="relative border-t border-border bg-card px-2 py-2.5 sm:px-3">
           {showStickers ? (
-            <div className="absolute bottom-full left-2 z-10 mb-2 grid w-64 grid-cols-5 gap-1 rounded-2xl border border-border bg-card p-3 shadow-lg">
-              {CHAT_STICKERS.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => {
-                    setShowStickers(false);
-                    void send("sticker", s);
-                  }}
-                  aria-label={`Stiker ${s}`}
-                  className="flex size-11 items-center justify-center rounded-xl text-2xl transition-colors hover:bg-secondary"
-                >
-                  {s}
-                </button>
-              ))}
+            <div className="absolute bottom-full left-2 z-10 mb-2 max-h-72 w-64 overflow-y-auto rounded-2xl border border-border bg-card p-3 shadow-lg scrollbar-thin">
+              {ownedStickers.length > 0 ? (
+                <>
+                  <p className="pb-1 text-[10px] font-bold uppercase tracking-wide text-amber-600">
+                    {t.myStickers}
+                  </p>
+                  <div className="grid grid-cols-5 gap-1">
+                    {ownedStickers.map((s) => (
+                      <button
+                        key={`own-${s}`}
+                        onClick={() => {
+                          setShowStickers(false);
+                          void send("sticker", s);
+                        }}
+                        aria-label={`Stiker ${s}`}
+                        className="flex size-11 items-center justify-center rounded-xl text-2xl transition-colors hover:bg-secondary"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="pb-1 pt-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+                    {t.freeStickers}
+                  </p>
+                </>
+              ) : null}
+              <div className="grid grid-cols-5 gap-1">
+                {CHAT_STICKERS.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => {
+                      setShowStickers(false);
+                      void send("sticker", s);
+                    }}
+                    aria-label={`Stiker ${s}`}
+                    className="flex size-11 items-center justify-center rounded-xl text-2xl transition-colors hover:bg-secondary"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : null}
 

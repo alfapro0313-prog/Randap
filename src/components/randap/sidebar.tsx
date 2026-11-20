@@ -10,6 +10,7 @@ import {
   MessageCircle,
   Plus,
   Shield,
+  ShoppingBag,
   Trophy,
   User,
   Users,
@@ -40,6 +41,7 @@ export type ViewName =
   | "organishTopic"
   | "ballar"
   | "chat"
+  | "shop"
   | "search"
   | "admin";
 
@@ -66,6 +68,7 @@ const NAV_ITEMS: Array<{
   { key: "sections", labelKey: "navSections", icon: GraduationCap },
   { key: "organish", labelKey: "navOrganish", icon: BookOpen },
   { key: "chat", labelKey: "navChat", icon: MessageCircle },
+  { key: "shop", labelKey: "navShop", icon: ShoppingBag },
   { key: "ballar", labelKey: "navBallar", icon: Trophy },
   { key: "profile", labelKey: "navProfile", icon: User },
 ];

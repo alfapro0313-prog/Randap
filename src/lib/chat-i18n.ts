@@ -73,6 +73,17 @@ const en = {
   deleteImageAsk: "Delete this screenshot?",
   deleteImageHint: "Disappears for both of you",
   deletedImageToast: "Screenshot deleted",
+  avatarPhoto: "Avatar photo",
+  avatarHave: "You own the avatar photo",
+  avatarNeedBuy: "To put a photo on your avatar, buy “Chat avatar photo” in the shop (200 DZF).",
+  avatarUpload: "Upload photo",
+  avatarRemove: "Remove photo",
+  avatarTooBig: "Photo is too large after shrinking — try another one",
+  avatarSaved: "Avatar updated",
+  avatarFailed: "Avatar could not be saved",
+  stickerNotOwned: "This sticker is not yours — buy it in the shop",
+  myStickers: "My stickers",
+  freeStickers: "Free",
 };
 
 type ChatStrings = typeof en;
@@ -142,6 +153,17 @@ const ru: ChatStrings = {
   deleteImageAsk: "Удалить этот скриншот?",
   deleteImageHint: "Исчезнет у вас обоих",
   deletedImageToast: "Скриншот удалён",
+  avatarPhoto: "Фото аватара",
+  avatarHave: "Фото аватара у вас есть",
+  avatarNeedBuy: "Чтобы поставить фото на аватар, купите «Фото для аватара чата» в магазине (200 DZF).",
+  avatarUpload: "Загрузить фото",
+  avatarRemove: "Удалить фото",
+  avatarTooBig: "Фото слишком большое после сжатия — попробуйте другое",
+  avatarSaved: "Аватар обновлён",
+  avatarFailed: "Аватар не удалось сохранить",
+  stickerNotOwned: "Этот стикер не ваш — купите его в магазине",
+  myStickers: "Мои стикеры",
+  freeStickers: "Бесплатные",
 };
 
 const uz: ChatStrings = {
@@ -209,6 +231,17 @@ const uz: ChatStrings = {
   deleteImageAsk: "Bu skrinshot o'chirilsinmi?",
   deleteImageHint: "Ikkala tomonda ham yo'qoladi",
   deletedImageToast: "Skrinshot o'chirildi",
+  avatarPhoto: "Avatar rasmi",
+  avatarHave: "Avatar rasmi sizda bor",
+  avatarNeedBuy: "Avataringizga rasm qo'yish uchun do'kondan “Chat avatariga rasm” ni oling (200 DZF).",
+  avatarUpload: "Rasm yuklash",
+  avatarRemove: "Rasmni o'chirish",
+  avatarTooBig: "Kichiklantirilgandan keyin ham rasm juda katta — boshqasini urinib ko'ring",
+  avatarSaved: "Avatar yangilandi",
+  avatarFailed: "Avatar saqlanmadi",
+  stickerNotOwned: "Bu stiker sizniki emas — do'kondan oling",
+  myStickers: "Mening stikerlarim",
+  freeStickers: "Bepul",
 };
 
 export const CHAT_I18N: Record<ChatLang, ChatStrings> = { en, ru, uz };

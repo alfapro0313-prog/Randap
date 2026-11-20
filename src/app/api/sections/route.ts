@@ -5,6 +5,7 @@ import {
   localizeQuiz,
   localizeSubject,
 } from "@/lib/randap-content-i18n";
+import { ensureContentSeeded } from "@/lib/randap-seed";
 
 /**
  * GET /api/sections?deviceKey=&lang=
@@ -18,6 +19,9 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const deviceKey = (searchParams.get("deviceKey") ?? "").trim();
     const lang = (searchParams.get("lang") ?? "").trim();
+
+    // Yangi fanlar/testlar bazada yo'q bo'lsa — bir marta avtomatik yaratiladi
+    await ensureContentSeeded();
 
     const subjects = await db.subject.findMany({
       orderBy: { order: "asc" },
@@ -70,6 +74,9 @@ export async function GET(req: Request) {
             title: qtr.title,
             description: qtr.description,
             questionCount: q._count.questions,
+            difficulty: q.difficulty,
+            grade: q.grade,
+            kind: q.kind,
             bestScore:
               deviceKey && bestByQuiz[q.id] !== undefined ? bestByQuiz[q.id] : null,
           };

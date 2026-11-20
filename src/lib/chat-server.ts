@@ -9,6 +9,7 @@ type ChatProfileRow = {
   emoji: string;
   color: string;
   bio: string;
+  avatarImage: string | null;
   lastSeenAt: Date;
   createdAt: Date;
 };
@@ -28,6 +29,7 @@ export function serializeChatProfile(row: ChatProfileRow): ChatProfileItem {
     emoji: row.emoji,
     color: row.color,
     bio: row.bio,
+    avatarImage: row.avatarImage ?? null,
     online: isOnline(row.lastSeenAt),
     lastSeenAt: row.lastSeenAt.toISOString(),
   };

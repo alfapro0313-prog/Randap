@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import {
   ArrowLeft,
   BookOpen,
@@ -7,6 +8,7 @@ import {
   ChevronRight,
   FlaskConical,
   Globe2,
+  Headphones,
   Landmark,
   Languages,
   ListChecks,
@@ -14,7 +16,7 @@ import {
   PlayCircle,
   Trophy,
 } from "lucide-react";
-import type { SectionItem } from "@/lib/randap-types";
+import type { QuizDifficulty, SectionItem } from "@/lib/randap-types";
 import { useLang } from "./lang-provider";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +33,14 @@ const TILE_CLASSES: Record<string, string> = {
   amber: "bg-amber-100 text-amber-700",
   emerald: "bg-emerald-100 text-emerald-700",
   rose: "bg-rose-100 text-rose-700",
+  sky: "bg-sky-100 text-sky-700",
+  violet: "bg-violet-100 text-violet-700",
+};
+
+const DIFF_BADGE: Record<QuizDifficulty, string> = {
+  easy: "bg-emerald-100 text-emerald-700",
+  middle: "bg-amber-100 text-amber-700",
+  hard: "bg-rose-100 text-rose-700",
 };
 
 export function SectionTile({
@@ -139,6 +149,27 @@ export function SectionDetail({
   onOpenLesson: (lessonId: string) => void;
 }) {
   const { t } = useLang();
+  // Sinf va qiyinlik filtrlari (7-11 sinf tarix fanlari uchun asosiy)
+  const [gradeFilter, setGradeFilter] = useState<number | null>(null);
+  const [diffFilter, setDiffFilter] = useState<QuizDifficulty | null>(null);
+
+  const grades = useMemo(() => {
+    const set = new Set<number>();
+    subject?.quizzes.forEach((q) => {
+      if (q.grade !== null && q.grade !== undefined) set.add(q.grade);
+    });
+    return Array.from(set).sort((a, b) => a - b);
+  }, [subject]);
+
+  const filteredQuizzes = useMemo(() => {
+    if (!subject) return [];
+    return subject.quizzes.filter((q) => {
+      if (gradeFilter !== null && q.grade !== gradeFilter) return false;
+      if (diffFilter !== null && q.difficulty !== diffFilter) return false;
+      return true;
+    });
+  }, [subject, gradeFilter, diffFilter]);
+
   if (loading || !subject) {
     return (
       <div className="flex items-center justify-center py-24 text-muted-foreground">
@@ -146,6 +177,13 @@ export function SectionDetail({
       </div>
     );
   }
+
+  const diffChips: Array<[QuizDifficulty | null, string]> = [
+    [null, t("diffAll")],
+    ["easy", t("diffEasy")],
+    ["middle", t("diffMiddle")],
+    ["hard", t("diffHard")],
+  ];
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-7 pb-6">
@@ -179,8 +217,61 @@ export function SectionDetail({
           <ListChecks className="size-5 text-primary" aria-hidden="true" />
           {t("navSections")}
         </h2>
+
+        {/* Sinf filtri — faqat sinf testlari bor fanlarda */}
+        {grades.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setGradeFilter(null)}
+              aria-pressed={gradeFilter === null}
+              className={cn(
+                "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                gradeFilter === null
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-secondary/60 text-foreground hover:bg-secondary"
+              )}
+            >
+              {t("gradeAll")}
+            </button>
+            {grades.map((g) => (
+              <button
+                key={g}
+                onClick={() => setGradeFilter(g)}
+                aria-pressed={gradeFilter === g}
+                className={cn(
+                  "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                  gradeFilter === g
+                    ? "bg-primary text-primary-foreground"
+                    : "border border-border bg-secondary/60 text-foreground hover:bg-secondary"
+                )}
+              >
+                {g}-{t("gradeClass")}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        {/* Qiyinlik filtri */}
+        <div className="flex flex-wrap items-center gap-2">
+          {diffChips.map(([key, label]) => (
+            <button
+              key={label}
+              onClick={() => setDiffFilter(key)}
+              aria-pressed={diffFilter === key}
+              className={cn(
+                "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
+                diffFilter === key
+                  ? "bg-foreground text-background"
+                  : "border border-border bg-secondary/60 text-foreground hover:bg-secondary"
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {subject.quizzes.map((quiz) => (
+          {filteredQuizzes.map((quiz) => (
             <div
               key={quiz.id}
               className="flex flex-col rounded-2xl border border-border bg-card p-5"
@@ -192,6 +283,24 @@ export function SectionDetail({
                 {quiz.description}
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span
+                  className={cn(
+                    "rounded-full px-2.5 py-1 text-xs font-semibold",
+                    DIFF_BADGE[quiz.difficulty] ?? "bg-secondary text-secondary-foreground"
+                  )}
+                >
+                  {quiz.difficulty === "easy"
+                    ? t("diffEasy")
+                    : quiz.difficulty === "hard"
+                      ? t("diffHard")
+                      : t("diffMiddle")}
+                </span>
+                {quiz.kind === "listening" ? (
+                  <span className="flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-1 text-xs font-semibold text-sky-700">
+                    <Headphones className="size-3" aria-hidden="true" />
+                    {t("listeningBadge")}
+                  </span>
+                ) : null}
                 <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-secondary-foreground">
                   {t("savolCount", { n: quiz.questionCount })}
                 </span>
@@ -206,11 +315,20 @@ export function SectionDetail({
                 onClick={() => onStartQuiz(quiz.id)}
                 className="mt-4 flex h-10 items-center justify-center gap-2 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90"
               >
-                <ListChecks className="size-4" aria-hidden="true" />
+                {quiz.kind === "listening" ? (
+                  <Headphones className="size-4" aria-hidden="true" />
+                ) : (
+                  <ListChecks className="size-4" aria-hidden="true" />
+                )}
                 {quiz.bestScore !== null ? t("solveAgain") : t("startQuiz")}
               </button>
             </div>
           ))}
+          {filteredQuizzes.length === 0 ? (
+            <p className="col-span-full rounded-2xl border border-dashed border-border py-8 text-center text-sm text-muted-foreground">
+              {t("nothingFoundHint")}
+            </p>
+          ) : null}
         </div>
       </section>
 

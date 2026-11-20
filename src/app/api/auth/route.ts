@@ -1,12 +1,32 @@
 import { NextResponse } from "next/server";
-import { randomUUID } from "crypto";
+import { randomBytes, randomUUID, scryptSync, timingSafeEqual } from "crypto";
 import { db } from "@/lib/db";
 import { ensureUser } from "@/lib/randap-server";
 
 /** Faqat Gmail manzillar qabul qilinadi */
 const GMAIL_RE = /^[a-z0-9](?:[a-z0-9._%+-]{0,62})?@(?:gmail|googlemail)\.com$/i;
 
-function accountPayload(account: {
+const PASS_MIN = 4;
+const PASS_MAX = 64;
+
+/** Parolni scrypt bilan hashlaymiz: "salt:hash" */
+function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString("hex");
+  const hash = scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${hash}`;
+}
+
+/** Saqlangan hash bilan parolni solishtiramiz (timing-safe) */
+function verifyPassword(password: string, stored: string): boolean {
+  const [salt, hash] = stored.split(":");
+  if (!salt || !hash) return false;
+  const candidate = scryptSync(password, salt, 64);
+  const expected = Buffer.from(hash, "hex");
+  if (candidate.length !== expected.length) return false;
+  return timingSafeEqual(candidate, expected);
+}
+
+export function accountPayload(account: {
   name: string;
   gmail: string;
   viaGoogle: boolean;
@@ -113,11 +133,12 @@ export async function GET(req: Request) {
 
 /**
  * Saytga kirish (login gate):
- *  - ism va Gmail IKKALASI ham to'ldirilishi shart (validatsiya serverda ham);
- *  - ism takroriy bo'lishi mumkin (boshqalar qo'ygan ismni ham qo'yish mumkin);
+ *  - ism, parol va Gmail to'ldirilishi shart (validatsiya serverda ham);
+ *  - parol hisobni himoyalaydi: boshqalar boshqa odamning ismi+gmaili bilan kira olmaydi;
+ *  - yangi hisobda yozilgan parol saqlanadi; parol qo'yilmagan eski hisobda birinchi
+ *    kirish parolini belgilaydi; parol qo'yilgan hisobda parol xato bo'lsa kirmaydi;
  *  - Google orqali kirishda gmail @gmail.com bo'lishi shart, aks holda kirmaydi;
- *  - Bitta gmail = bitta hisob (accountKey): boshqa gmail bilan kirsa eski
- *    ma'lumotlar ko'rinmaydi, eski gmail bilan qayta kirsa hammasi qaytadi;
+ *  - Bitta gmail = bitta hisob (accountKey);
  *  - muvaffaqiyatli kirgach User va ChatProfile ismi sinxronlanadi.
  */
 export async function POST(req: Request) {
@@ -126,12 +147,14 @@ export async function POST(req: Request) {
       deviceKey?: string;
       name?: string;
       gmail?: string;
+      password?: string;
       viaGoogle?: boolean;
     } | null;
 
     const deviceKey = (body?.deviceKey ?? "").trim();
     const name = (body?.name ?? "").trim();
     const gmail = (body?.gmail ?? "").trim().toLowerCase();
+    const password = typeof body?.password === "string" ? body.password : "";
     const viaGoogle = body?.viaGoogle !== false;
 
     if (!deviceKey) {
@@ -161,6 +184,22 @@ export async function POST(req: Request) {
     if (!GMAIL_RE.test(gmail)) {
       return NextResponse.json(
         { ok: false, error: "Faqat Gmail manzil bilan kirish mumkin" },
+        { status: 400 }
+      );
+    }
+    if (!password) {
+      return NextResponse.json(
+        { ok: false, passwordRequired: true, error: "Parol yozilishi shart" },
+        { status: 400 }
+      );
+    }
+    if (password.length < PASS_MIN || password.length > PASS_MAX) {
+      return NextResponse.json(
+        {
+          ok: false,
+          passwordShort: true,
+          error: `Parol ${PASS_MIN}-${PASS_MAX} belgi orasida bo'lishi kerak`,
+        },
         { status: 400 }
       );
     }
@@ -200,8 +239,47 @@ export async function POST(req: Request) {
       );
     }
 
-    // Bitta gmail = bitta hisob
-    const account = await upsertAccount(name, gmail);
+    // Bitta gmail = bitta hisob + parol himoyasi
+    const existing = await db.account.findUnique({ where: { gmail } });
+    let account;
+    if (existing) {
+      if (existing.passwordHash) {
+        // Parol qo'yilgan hisob — parol to'g'ri bo'lsa o'tadi
+        if (!verifyPassword(password, existing.passwordHash)) {
+          return NextResponse.json(
+            {
+              ok: false,
+              passwordWrong: true,
+              error: "Bu hisob uchun parol xato",
+            },
+            { status: 403 }
+          );
+        }
+        if (existing.name !== name) {
+          await db.account.update({
+            where: { id: existing.id },
+            data: { name },
+          });
+          existing.name = name;
+        }
+        account = existing;
+      } else {
+        // Parol hali qo'yilmagan eski hisob — birinchi kirish parolini belgilaydi
+        account = await db.account.update({
+          where: { id: existing.id },
+          data: { name, passwordHash: hashPassword(password) },
+        });
+      }
+    } else {
+      account = await db.account.create({
+        data: {
+          gmail,
+          name,
+          accountKey: `acct-${randomUUID()}`,
+          passwordHash: hashPassword(password),
+        },
+      });
+    }
 
     // Profil ismini kirish ismi bilan sinxronlaymiz (accountKey ostida)
     const user = await ensureUser(account.accountKey);

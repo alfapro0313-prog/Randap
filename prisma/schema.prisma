@@ -15,6 +15,8 @@ model User {
   handle    String        @unique
   avatar    String?
   points    Int           @default(0)
+  /// DZF (dapzif) balansi — 1 DZF = 100 sent (dzfCents). To'g'ri javob = 0.2 DZF = 20 sent
+  dzfCents  Int           @default(0)
   createdAt DateTime      @default(now())
   videos    Video[]
   comments  Comment[]
@@ -102,6 +104,12 @@ model Quiz {
   title       String
   description String
   order       Int           @default(0)
+  /// Qiyinlik darajasi: easy | middle | hard
+  difficulty  String        @default("middle")
+  /// Sinflar testi uchun (7-11) — boshqa testlarda null
+  grade       Int?
+  /// Test turi: quiz (oddiy) | listening (audio tinglash)
+  kind        String        @default("quiz")
   questions   Question[]
   attempts    QuizAttempt[]
 }
@@ -113,6 +121,8 @@ model Question {
   text         String
   options      String
   correctIndex Int
+  /// Listening testlar uchun — tinglatiladigan (o'qib beriladigan) matn
+  audio        String?
   order        Int     @default(0)
 }
 
@@ -171,14 +181,16 @@ model Notification {
 /* ---------- Chat (Telegram-ga o'xshagan) ---------- */
 
 model ChatProfile {
-  id         String   @id @default(cuid())
-  deviceKey  String   @unique
-  name       String
-  emoji      String   @default("🙂")
-  color      String   @default("sky")
-  bio        String   @default("")
-  lastSeenAt DateTime @default(now())
-  createdAt  DateTime @default(now())
+  id          String   @id @default(cuid())
+  deviceKey   String   @unique
+  name        String
+  emoji       String   @default("🙂")
+  color       String   @default("sky")
+  bio         String   @default("")
+  /// Chat avatariga qo'yilgan rasm (data URL) — do'kondan "avatar rasmi" olingan bo'lsa
+  avatarImage String?
+  lastSeenAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
 }
 
 model Conversation {
@@ -251,9 +263,22 @@ model Account {
   gmail        String    @unique
   accountKey   String    @unique
   name         String
+  /// Parol (scrypt hash, "salt:hash" formatida) — boshqalar hisobni ola olmasligi uchun
+  passwordHash String?
   blockedUntil DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+}
+
+/// Do'kondan olingan narsalar (stikerlar, avatar rasmi)
+model OwnedItem {
+  id        String   @id @default(cuid())
+  deviceKey String
+  itemId    String
+  createdAt DateTime @default(now())
+
+  @@unique([deviceKey, itemId])
+  @@index([deviceKey])
 }
 
 /* ---------- Bazadagi yuklamalar (bo'laklab yuklash) ---------- */

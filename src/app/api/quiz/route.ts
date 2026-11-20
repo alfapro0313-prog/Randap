@@ -60,6 +60,7 @@ export async function GET(req: Request) {
         description: quizTr.description,
         subject: { ...quiz.subject, name: subjectTr.name },
         total: quiz.questions.length,
+        kind: quiz.kind,
         questions: quiz.questions.map((q) => {
           const qtr = localizeQuestion(
             quiz.subject.slug,
@@ -73,6 +74,7 @@ export async function GET(req: Request) {
             id: q.id,
             text: qtr.text,
             options: qtr.options,
+            audio: q.audio ?? null,
           };
         }),
       },

@@ -1,6 +1,16 @@
 "use client";
 
-import { Check, Loader2, LogIn, Mail, Play, User } from "lucide-react";
+import {
+  Check,
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  LogIn,
+  Mail,
+  Play,
+  User,
+} from "lucide-react";
 import { useState } from "react";
 import { LANGS, type Lang } from "@/lib/randap-i18n";
 import {
@@ -82,6 +92,9 @@ export function LoginView({
 }) {
   const { t, lang } = useLang();
   const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [passErr, setPassErr] = useState("");
   const [gmail, setGmail] = useState("");
   const [nameErr, setNameErr] = useState("");
   const [gmailErr, setGmailErr] = useState("");
@@ -92,8 +105,10 @@ export function LoginView({
 
   const openGoogle = () => {
     setNameErr("");
+    setPassErr("");
     setGmailErr("");
     const n = name.trim();
+    const p = password;
     const g = gmail.trim().toLowerCase();
 
     if (!n) {
@@ -102,6 +117,14 @@ export function LoginView({
     }
     if (n.length < 2 || n.length > 40) {
       setNameErr(t("loginErrNameShort"));
+      return;
+    }
+    if (!p) {
+      setPassErr(t("loginErrPassReq"));
+      return;
+    }
+    if (p.length < 4) {
+      setPassErr(t("loginErrPassShort"));
       return;
     }
     if (!g) {
@@ -119,7 +142,8 @@ export function LoginView({
   async function confirmGoogle() {
     const n = name.trim();
     const g = gmail.trim().toLowerCase();
-    if (!n || !g || !GMAIL_RE.test(g)) {
+    const p = password;
+    if (!n || !g || !p || !GMAIL_RE.test(g)) {
       setGoogleErr(t("loginGoogleErrNotFound"));
       return;
     }
@@ -135,7 +159,7 @@ export function LoginView({
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deviceKey, name: n, gmail: g, viaGoogle: true }),
+        body: JSON.stringify({ deviceKey, name: n, gmail: g, password: p, viaGoogle: true }),
       });
       const data = await res.json();
       if (data?.blocked) {
@@ -144,6 +168,13 @@ export function LoginView({
         const ms = remainingMs(activeBlockMs(data.blockedUntil) ?? 0);
         const time = formatLeft(ms, t("unitHour"), t("unitMin"));
         setGoogleErr(t("loginBlocked", { time }));
+        return;
+      }
+      if (data?.passwordWrong) {
+        // Hisob paroli xato — boshqalar biror odamning hisobini ola olmaydi
+        setChecking(false);
+        setGoogleOpen(false);
+        setPassErr(t("loginErrPassWrong"));
         return;
       }
       if (!data?.ok) {
@@ -273,6 +304,54 @@ export function LoginView({
                   ) : (
                     <p className="text-xs text-muted-foreground">
                       {t("loginNameHint")}
+                    </p>
+                  )}
+                </div>
+
+                {/* Parol — ism ostida: hisobni boshqalar ola olmaydigan qiladi */}
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    htmlFor="login-password"
+                    className="flex items-center gap-2 text-sm font-semibold text-foreground"
+                  >
+                    <Lock className="size-4 text-muted-foreground" aria-hidden="true" />
+                    {t("loginPassLabel")}
+                    <span className="text-primary">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="login-password"
+                      type={showPass ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder={t("loginPassPlaceholder")}
+                      maxLength={64}
+                      autoComplete="current-password"
+                      className={cn(
+                        "min-h-[46px] w-full rounded-xl border bg-background px-4 pr-12 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/40",
+                        passErr ? "border-red-500/60" : "border-border"
+                      )}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPass((v) => !v)}
+                      aria-label={showPass ? t("loginPassHide") : t("loginPassShow")}
+                      className="absolute right-2 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                    >
+                      {showPass ? (
+                        <EyeOff className="size-4" aria-hidden="true" />
+                      ) : (
+                        <Eye className="size-4" aria-hidden="true" />
+                      )}
+                    </button>
+                  </div>
+                  {passErr ? (
+                    <p className="text-xs font-medium text-red-500" role="alert">
+                      {passErr}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      {t("loginPassHint")}
                     </p>
                   )}
                 </div>
