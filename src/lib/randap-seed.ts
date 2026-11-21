@@ -1198,6 +1198,27 @@ async function seedContent(): Promise<void> {
 /** Bu serverless instance allaqachon to'liq sinxronizatsiya qilganmi */
 let syncedOnce = false;
 
+/**
+ * Bir martalik tozalash: tekshiruv (API test) paytida yaratilgan
+ * vaqtinchalik hisoblar. Haqiqiy deviceKey'lar UUID bo'ladi — bu
+ * oddiy satrlar hech qachon real foydalanuvchiga tegishli bo'lmaydi.
+ * Idempotent: qator bo'lmasa hech narsa qilmaydi.
+ */
+const TEST_DEVICE_KEYS = ["prod-verify-temp", "test-vhard-device"];
+
+async function cleanupTestDevices(): Promise<void> {
+  try {
+    await db.quizAttempt.deleteMany({
+      where: { deviceId: { in: TEST_DEVICE_KEYS } },
+    });
+    await db.user.deleteMany({
+      where: { deviceKey: { in: TEST_DEVICE_KEYS } },
+    });
+  } catch (e) {
+    console.error("[seed] cleanupTestDevices xatosi:", e);
+  }
+}
+
 /** Kontent bazada yo'q bo'lsa yaratadi, yangi qo'shilganni sinxronlaydi. Har safar xavfsiz. */
 export async function ensureContentSeeded(): Promise<void> {
   if (running) return running;
@@ -1216,6 +1237,7 @@ export async function ensureContentSeeded(): Promise<void> {
       await seedContent();
       await topUpLegacyQuizzes();
       await repairStaticOptions();
+      await cleanupTestDevices();
       syncedOnce = true;
       const qCount = await db.question.count();
       console.log(`[seed] kontent tayyor: tarix (uz/jahon 7-11), ingliz (CEFR/IELTS/Listening/VeryHard), matematika, fizika, kimyo, geografiya, ona tili, adabiyot + eski 6 test (har biri ${BANK_TARGET} savol) — jami ${qCount} savol`);
