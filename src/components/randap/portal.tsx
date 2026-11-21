@@ -57,7 +57,7 @@ export function PortalView({
 
       {/* To'rtta kichik bo'lim */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {/* 1-bo'lim: Randap Video — YouTubega o'xshagan */}
+        {/* 1-bo'lim: Randap Video */}
         <button
           onClick={onEnterVideos}
           aria-label={t("enterVideoAria")}
@@ -70,9 +70,6 @@ export function PortalView({
             <span className="min-w-0">
               <span className="block text-base font-extrabold text-foreground">
                 Randap Video
-              </span>
-              <span className="block text-xs text-muted-foreground">
-                {t("portalVideoSub")}
               </span>
             </span>
           </span>
@@ -185,7 +182,7 @@ export function PortalView({
           </span>
         </button>
 
-        {/* 4-bo'lim: Chat — Telegramga o'xshagan */}
+        {/* 4-bo'lim: Chat */}
         <button
           onClick={onEnterChat}
           aria-label={t("enterChatAria")}
@@ -198,9 +195,6 @@ export function PortalView({
             <span className="min-w-0">
               <span className="block text-base font-extrabold text-foreground">
                 {t("navChat")}
-              </span>
-              <span className="block text-xs text-muted-foreground">
-                {t("portalChatSub")}
               </span>
             </span>
           </span>

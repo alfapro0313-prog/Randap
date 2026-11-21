@@ -101,7 +101,6 @@ const en = {
   enterTestsAria: "Open the Tests section",
   enterOrganishAria: "Open the Learn section",
   enterChatAria: "Open the Chat section",
-  portalVideoSub: "Like YouTube",
   portalVideoDesc:
     "Watch videos and Shorts — with likes, comments and subscriptions.",
   portalTestsSub: "All subjects, a separate section",
@@ -113,7 +112,6 @@ const en = {
     "Long articles about English, memory, math and history. Below — duties of religion and life.",
   fourTopics: "4 topics",
   dinBadge: "Religion and life duties",
-  portalChatSub: "Like Telegram",
   portalChatDesc:
     "Chat with people, send stickers and photos. Random chat is here too.",
   randomChatBadge: "Random chat",
@@ -585,7 +583,6 @@ const ru: Dict = {
   enterTestsAria: "Открыть раздел Тесты",
   enterOrganishAria: "Открыть раздел Обучение",
   enterChatAria: "Открыть раздел Чат",
-  portalVideoSub: "Похоже на YouTube",
   portalVideoDesc:
     "Смотрите видео и Shorts — с лайками, комментариями и подписками.",
   portalTestsSub: "Все предметы, отдельный раздел",
@@ -597,7 +594,6 @@ const ru: Dict = {
     "Длинные статьи об английском языке, памяти, математике и истории. Ниже — обязанности религии и жизни.",
   fourTopics: "4 темы",
   dinBadge: "Обязанности религии и жизни",
-  portalChatSub: "Похоже на Telegram",
   portalChatDesc:
     "Общайтесь с людьми, отправляйте стикеры и фото. Есть и случайный чат.",
   randomChatBadge: "Случайный чат",
@@ -1056,7 +1052,6 @@ const uz: Dict = {
   enterTestsAria: "Testlar bo'limiga kirish",
   enterOrganishAria: "O'rganish bo'limiga kirish",
   enterChatAria: "Chat bo'limiga kirish",
-  portalVideoSub: "YouTubega o'xshagan",
   portalVideoDesc:
     "Videolar va Shorts ko'rish — layk, komment, obuna bo'lish bilan.",
   portalTestsSub: "Hamma fandan, alohida bo'lim",
@@ -1068,7 +1063,6 @@ const uz: Dict = {
     "Ingliz tili, xotira, matematika va tarix haqida uzun ma'lumotlar. Pastida din va hayot burchlari yozilgan.",
   fourTopics: "4 mavzu",
   dinBadge: "Din va hayot burchlari",
-  portalChatSub: "Telegramga o'xshagan",
   portalChatDesc:
     "Odamlar bilan yozishing, stiker va rasm tashishing mumkin. Random chat ham bor.",
   randomChatBadge: "Random chat",
