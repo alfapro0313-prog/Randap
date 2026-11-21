@@ -1057,7 +1057,139 @@ async function repairStaticOptions(): Promise<void> {
   }
 }
 
-/** Kontent bazada yo'q bo'lsa — bir marta yaratadi. Har safar xavfsiz. */
+/** Kontent sinxronizatsiyasi — idempotent: mavjud qatorlar o'tkazib yuboriladi,
+ * yangilari yaratiladi. Yangi fan/test qo'shilsa ham mavjud bazada paydo bo'ladi. */
+async function seedContent(): Promise<void> {
+  for (const s of CONTENT) {
+    // Qo'shimcha savollarni mavjud testlarga qo'shib chiqamiz
+    const sWithExtras: SubjectDef2 = {
+      ...s,
+      quizzes: s.quizzes.map((q) => ({
+        ...q,
+        questions: [...q.questions, ...(EXTRA_QUESTIONS[q.id] ?? [])],
+      })),
+    };
+    await db.subject.upsert({
+      where: { slug: s.slug },
+      update: { name: s.name, description: s.description, icon: s.icon, color: s.color, order: s.order },
+      create: {
+        slug: s.slug,
+        name: s.name,
+        description: s.description,
+        icon: s.icon,
+        color: s.color,
+        order: s.order,
+      },
+    });
+    const subject = await db.subject.findUnique({ where: { slug: s.slug } });
+    if (!subject) continue;
+
+    // Darslar — mavjudlarini o'tkazib yuboramiz (SQLite skipDuplicates qo'llab-quvvatlamaydi)
+    if (sWithExtras.lessons.length) {
+      const lessonIds = sWithExtras.lessons.map((l) => l.id);
+      const existingLessons = await db.lesson.findMany({
+        where: { id: { in: lessonIds } },
+        select: { id: true },
+      });
+      const existingLessonSet = new Set(existingLessons.map((l) => l.id));
+      const newLessons = sWithExtras.lessons
+        .map((l, li) => ({
+          id: l.id,
+          subjectId: subject.id,
+          title: l.title,
+          summary: l.summary,
+          content: l.content,
+          durationMin: l.durationMin,
+          order: li,
+        }))
+        .filter((l) => !existingLessonSet.has(l.id));
+      if (newLessons.length) {
+        await db.lesson.createMany({ data: newLessons });
+      }
+    }
+
+    for (const [qi, q] of sWithExtras.quizzes.entries()) {
+      await db.quiz.upsert({
+        where: { id: q.id },
+        update: {
+          title: q.title,
+          description: q.description,
+          difficulty: DIF[q.difficulty],
+          grade: q.grade ?? null,
+          kind: q.kind ?? "quiz",
+          order: qi,
+        },
+        create: {
+          id: q.id,
+          subjectId: subject.id,
+          title: q.title,
+          description: q.description,
+          difficulty: DIF[q.difficulty],
+          grade: q.grade ?? null,
+          kind: q.kind ?? "quiz",
+          order: qi,
+        },
+      });
+
+      // Generatsiya qilingan savollar — 300 taga to'ldirish
+      const need = Math.max(0, BANK_TARGET - q.questions.length);
+      const genQs = (GEN_QUESTIONS[q.id] ?? []).slice(0, need);
+      const genIds = genQs.map((_, i) => `${q.id}_gen${i + 1}`);
+      // Savollar — mavjudlarini o'tkazib yuboramiz
+      const questionIds = [
+        ...q.questions.map((_, i) => `${q.id}_q${i + 1}`),
+        ...genIds,
+      ];
+      const existingQuestions = await db.question.findMany({
+        where: { id: { in: questionIds } },
+        select: { id: true },
+      });
+      const existingQuestionSet = new Set(existingQuestions.map((x) => x.id));
+      const allQs: Array<{
+        id: string; quizId: string; text: string; options: string;
+        correctIndex: number; audio: string | null; order: number;
+        textRu: string | null; textEn: string | null;
+        optionsRu: string | null; optionsEn: string | null;
+      }> = [
+        ...q.questions.map(shuffleStaticQ).map((qq, i) => ({
+          id: `${q.id}_q${i + 1}`,
+          quizId: q.id,
+          text: qq.text,
+          options: JSON.stringify(qq.options),
+          correctIndex: qq.correct,
+          audio: qq.audio ?? null,
+          order: i,
+          textRu: null as string | null,
+          textEn: null as string | null,
+          optionsRu: null as string | null,
+          optionsEn: null as string | null,
+        })),
+        ...genQs.map((qq, i) => ({
+          id: `${q.id}_gen${i + 1}`,
+          quizId: q.id,
+          text: qq.t.uz,
+          options: JSON.stringify(qq.o.map((x) => x.uz)),
+          correctIndex: qq.correct,
+          audio: qq.audio ?? null,
+          order: 1000 + i,
+          textRu: qq.t.ru,
+          textEn: qq.t.en,
+          optionsRu: JSON.stringify(qq.o.map((x) => x.ru)),
+          optionsEn: JSON.stringify(qq.o.map((x) => x.en)),
+        })),
+      ];
+      const newQuestions = allQs.filter((x) => !existingQuestionSet.has(x.id));
+      if (newQuestions.length) {
+        await db.question.createMany({ data: newQuestions });
+      }
+    }
+  }
+}
+
+/** Bu serverless instance allaqachon to'liq sinxronizatsiya qilganmi */
+let syncedOnce = false;
+
+/** Kontent bazada yo'q bo'lsa yaratadi, yangi qo'shilganni sinxronlaydi. Har safar xavfsiz. */
 export async function ensureContentSeeded(): Promise<void> {
   if (running) return running;
   running = (async () => {
@@ -1066,141 +1198,18 @@ export async function ensureContentSeeded(): Promise<void> {
         where: { id: MARKER_QUIZ_ID },
         select: { id: true },
       });
-      if (marker) {
-        // Asosiy kontent allaqachon bazada — faqat eski 6 testni 300 taga tekshiramiz
-        await topUpLegacyQuizzes();
-        await repairStaticOptions();
+      if (marker && syncedOnce) {
+        // Asosiy kontent bor va bu instance allaqachon sinxronlagan — tez chiqish
         return;
       }
-
-      for (const s of CONTENT) {
-        // Qo'shimcha savollarni mavjud testlarga qo'shib chiqamiz
-        const sWithExtras: SubjectDef2 = {
-          ...s,
-          quizzes: s.quizzes.map((q) => ({
-            ...q,
-            questions: [...q.questions, ...(EXTRA_QUESTIONS[q.id] ?? [])],
-          })),
-        };
-        await db.subject.upsert({
-          where: { slug: s.slug },
-          update: { name: s.name, description: s.description, icon: s.icon, color: s.color, order: s.order },
-          create: {
-            slug: s.slug,
-            name: s.name,
-            description: s.description,
-            icon: s.icon,
-            color: s.color,
-            order: s.order,
-          },
-        });
-        const subject = await db.subject.findUnique({ where: { slug: s.slug } });
-        if (!subject) continue;
-
-        // Darslar — mavjudlarini o'tkazib yuboramiz (SQLite skipDuplicates qo'llab-quvvatlamaydi)
-        if (sWithExtras.lessons.length) {
-          const lessonIds = sWithExtras.lessons.map((l) => l.id);
-          const existingLessons = await db.lesson.findMany({
-            where: { id: { in: lessonIds } },
-            select: { id: true },
-          });
-          const existingLessonSet = new Set(existingLessons.map((l) => l.id));
-          const newLessons = sWithExtras.lessons
-            .map((l, li) => ({
-              id: l.id,
-              subjectId: subject.id,
-              title: l.title,
-              summary: l.summary,
-              content: l.content,
-              durationMin: l.durationMin,
-              order: li,
-            }))
-            .filter((l) => !existingLessonSet.has(l.id));
-          if (newLessons.length) {
-            await db.lesson.createMany({ data: newLessons });
-          }
-        }
-
-        for (const [qi, q] of sWithExtras.quizzes.entries()) {
-          await db.quiz.upsert({
-            where: { id: q.id },
-            update: {
-              title: q.title,
-              description: q.description,
-              difficulty: DIF[q.difficulty],
-              grade: q.grade ?? null,
-              kind: q.kind ?? "quiz",
-              order: qi,
-            },
-            create: {
-              id: q.id,
-              subjectId: subject.id,
-              title: q.title,
-              description: q.description,
-              difficulty: DIF[q.difficulty],
-              grade: q.grade ?? null,
-              kind: q.kind ?? "quiz",
-              order: qi,
-            },
-          });
-
-          // Generatsiya qilingan savollar — 300 taga to'ldirish
-          const need = Math.max(0, BANK_TARGET - q.questions.length);
-          const genQs = (GEN_QUESTIONS[q.id] ?? []).slice(0, need);
-          const genIds = genQs.map((_, i) => `${q.id}_gen${i + 1}`);
-          // Savollar — mavjudlarini o'tkazib yuboramiz
-          const questionIds = [
-            ...q.questions.map((_, i) => `${q.id}_q${i + 1}`),
-            ...genIds,
-          ];
-          const existingQuestions = await db.question.findMany({
-            where: { id: { in: questionIds } },
-            select: { id: true },
-          });
-          const existingQuestionSet = new Set(existingQuestions.map((x) => x.id));
-          const allQs: Array<{
-            id: string; quizId: string; text: string; options: string;
-            correctIndex: number; audio: string | null; order: number;
-            textRu: string | null; textEn: string | null;
-            optionsRu: string | null; optionsEn: string | null;
-          }> = [
-            ...q.questions.map(shuffleStaticQ).map((qq, i) => ({
-              id: `${q.id}_q${i + 1}`,
-              quizId: q.id,
-              text: qq.text,
-              options: JSON.stringify(qq.options),
-              correctIndex: qq.correct,
-              audio: qq.audio ?? null,
-              order: i,
-              textRu: null as string | null,
-              textEn: null as string | null,
-              optionsRu: null as string | null,
-              optionsEn: null as string | null,
-            })),
-            ...genQs.map((qq, i) => ({
-              id: `${q.id}_gen${i + 1}`,
-              quizId: q.id,
-              text: qq.t.uz,
-              options: JSON.stringify(qq.o.map((x) => x.uz)),
-              correctIndex: qq.correct,
-              audio: qq.audio ?? null,
-              order: 1000 + i,
-              textRu: qq.t.ru,
-              textEn: qq.t.en,
-              optionsRu: JSON.stringify(qq.o.map((x) => x.ru)),
-              optionsEn: JSON.stringify(qq.o.map((x) => x.en)),
-            })),
-          ];
-          const newQuestions = allQs.filter((x) => !existingQuestionSet.has(x.id));
-          if (newQuestions.length) {
-            await db.question.createMany({ data: newQuestions });
-          }
-        }
-      }
+      // Marker bor-yo'qligiga qarab to'liq seed yoki sinxronizatsiya —
+      // ikkalasi ham idempotent (mavjudlar skip, yangilar yaratiladi)
+      await seedContent();
       await topUpLegacyQuizzes();
       await repairStaticOptions();
+      syncedOnce = true;
       const qCount = await db.question.count();
-      console.log(`[seed] kontent tayyor: tarix (uz/jahon 7-11), ingliz (CEFR/IELTS/Listening), matematika, fizika, kimyo, geografiya, ona tili, adabiyot + eski 6 test (har biri ${BANK_TARGET} savol) — jami ${qCount} savol`);
+      console.log(`[seed] kontent tayyor: tarix (uz/jahon 7-11), ingliz (CEFR/IELTS/Listening/VeryHard), matematika, fizika, kimyo, geografiya, ona tili, adabiyot + eski 6 test (har biri ${BANK_TARGET} savol) — jami ${qCount} savol`);
     } catch (e) {
       console.error("[seed] xatolik:", e);
     } finally {
