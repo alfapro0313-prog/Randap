@@ -9,6 +9,7 @@ import { genFizika, genKimyo, genMatematika } from "./banks/gen-matfizkim";
 import { genGeografiya } from "./banks/gen-geo";
 import { genAdabiyot, genOnatili } from "./banks/gen-til-adab";
 import { genIngliz, genListening } from "./banks/gen-ingliz";
+import { genListeningVHard1, genListeningVHard2 } from "./banks/gen-listening-vhard";
 import { genVeryHard1, genVeryHard2 } from "./banks/gen-veryhard";
 import type { EngBank } from "./banks/gen-ingliz";
 
@@ -49,6 +50,10 @@ MAP["quiz_ielts_hard"] = genIngliz("ielts-h");
 /* VERY HARD (C2) — 300 savolga to'ldiriladigan super qiyin ingliz testlari */
 MAP["quiz_vhard_1"] = genVeryHard1();
 MAP["quiz_vhard_2"] = genVeryHard2();
+
+/* VERY HARD Listening (C2) — 300 savolli super qiyin tinglab tushunish testlari */
+MAP["quiz_listening_vhard_1"] = genListeningVHard1();
+MAP["quiz_listening_vhard_2"] = genListeningVHard2();
 
 /* Listening (audio tinglash) */
 for (const d of DIFS) {

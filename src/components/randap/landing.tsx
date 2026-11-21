@@ -11,6 +11,7 @@ import {
   Skull,
   ListChecks,
   ShieldCheck,
+  Headphones,
 } from "lucide-react";
 
 /**
@@ -26,7 +27,7 @@ const VHARD_FAQ = [
   },
   {
     q: "VERY HARD ingliz testlari qanday?",
-    a: "Ingliz tili bo'limida ikkita VERY HARD (C2 daraja) test bor: VERY HARD 1 — leksika va idiomalar, VERY HARD 2 — grammatika. Har birida 300 ta juda qiyin savol: nodir so'zlar (perspicacious, obfuscate, sycophant), idiomalar, inversiya va subjunctive kabi murakkab tuzilmalar. Har urinishda savollardan tasodifiy 10 tasi tushadi — 600 savoldan hech qachon bir xil test takrorlanmaydi.",
+    a: "Ingliz tili bo'limida to'rtta VERY HARD (C2 daraja) test bor: VERY HARD 1 — leksika va idiomalar, VERY HARD 2 — grammatika, Listening VERY HARD 1 — raqamlar va faktlar, Listening VERY HARD 2 — mazmun va xulosa. Har birida 300 ta juda qiyin savol: nodir so'zlar (perspicacious, obfuscate, sycophant), idiomalar, inversiya, subjunctive, statistika va tinglab tushunish. Har urinishda savollardan tasodifiy 10 tasi tushadi — 1200 savoldan hech qachon bir xil test takrorlanmaydi.",
   },
   {
     q: "VERY HARD testlardan qancha ball olinadi?",
@@ -100,7 +101,7 @@ export function Landing() {
         <dl className="mx-auto mt-9 grid max-w-xl grid-cols-3 gap-3">
           <div className="rounded-2xl border border-border bg-card px-3 py-4">
             <dt className="text-xs text-muted-foreground">VERY HARD testlar</dt>
-            <dd className="mt-1 text-xl font-extrabold text-foreground">2</dd>
+            <dd className="mt-1 text-xl font-extrabold text-foreground">4</dd>
           </div>
           <div className="rounded-2xl border border-border bg-card px-3 py-4">
             <dt className="text-xs text-muted-foreground">Har birida savol</dt>
@@ -199,11 +200,12 @@ export function Landing() {
             Juda juda qiyin
           </p>
           <h2 className="mt-4 text-2xl font-extrabold text-white">
-            VERY HARD ingliz testlari — 600 ta qiyin savol
+            VERY HARD ingliz testlari — 1200 ta qiyin savol
           </h2>
           <p className="mt-3 text-sm leading-relaxed text-zinc-400">
-            Ingliz tili bo'limida ikkita C2 darajadagi super qiyin test bor.
-            Har birida 300 ta savol — lekin har urinishda ulardan tasodifiy 10
+            Ingliz tili bo'limida to'rtta C2 darajadagi super qiyin test bor:
+            ikkita yozma test va ikkita listening (audio tinglash) testi. Har
+            birida 300 ta savol — lekin har urinishda ulardan tasodifiy 10
             tasi tushadi. 10/10 yig'ish deyarli imkonsiz — sinab ko'ring!
           </p>
 
@@ -230,6 +232,30 @@ export function Landing() {
               <p className="mt-2 text-sm leading-relaxed text-zinc-400">
                 Inversiya (No sooner had...), subjunctive (insisted that he be),
                 aralash shart gaplari, modal nuanslar va murakkab tuzilmalar.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-red-500/20 bg-zinc-900/80 p-5">
+              <div className="flex items-center gap-2">
+                <Headphones className="size-5 text-red-400" aria-hidden="true" />
+                <h3 className="text-sm font-extrabold text-white">
+                  Listening VERY HARD 1 — Raqamlar va faktlar
+                </h3>
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+                Ovozli jumlalar: statistika, foizlar, ko'p raqamli aralash
+                faktlar va tez hisob-kitob. Qulog'i o'tkir bo'lsin!
+              </p>
+            </div>
+            <div className="rounded-2xl border border-red-500/20 bg-zinc-900/80 p-5">
+              <div className="flex items-center gap-2">
+                <Headphones className="size-5 text-red-400" aria-hidden="true" />
+                <h3 className="text-sm font-extrabold text-white">
+                  Listening VERY HARD 2 — Mazmun va xulosa
+                </h3>
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+                Idiomalar kontekstda, inversiya qoidalar, shart gaplari,
+                implied ma'no va akademik paraphrase — tinglab tushinasizmi?
               </p>
             </div>
           </div>

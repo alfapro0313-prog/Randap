@@ -914,6 +914,161 @@ const INGLIZ: SubjectDef = {
         },
       ],
     },
+    /* VERY HARD Listening — C2 daraja, juda juda qiyin tinglab tushunish
+     * (300 savolli 2 ta test). Statik 12 ta savol joyida qoladi (_q1.._q12),
+     * qolgani GEN_QUESTIONS orqali 300 taga to'ldiriladi. */
+    {
+      id: "quiz_listening_vhard_1",
+      title: "Listening VERY HARD 1 — Raqamlar va faktlar (C2)",
+      description:
+        "300 ta juda juda qiyin tinglash savoli: statistika, foizlar, ko'p raqamli jumlalar, hisob-kitob. Har urinishda 10 tasi tasodifiy tanlanadi. Faqat ustalar uchun!",
+      difficulty: "very-hard",
+      kind: "listening",
+      questions: [
+        {
+          text: "How many applicants were finally admitted?",
+          audio: "The registrar announced that over eleven thousand applications had been received, that barely three thousand met the new criteria, and that only four hundred and fifty were finally admitted.",
+          options: ["450", "3,000", "11,000", "1,150"], correct: 0,
+        },
+        {
+          text: "How long is the room actually accessible?",
+          audio: "The archive reading room opens at half past eight and closes at seven in the evening, with a ninety-minute closure for lunch.",
+          options: ["9 hours", "10 hours 30 minutes", "11 hours", "7 hours 30 minutes"], correct: 0,
+        },
+        {
+          text: "What is the total cost of the twelve workstations?",
+          audio: "The finance director warned that each workstation costs eight hundred and forty dollars, so fitting out the annex with a dozen units would overrun the ten-thousand-dollar allowance.",
+          options: ["10,080", "840", "10,000", "9,160"], correct: 0,
+        },
+        {
+          text: "How many remained for the closing remarks?",
+          audio: "Of the four hundred delegates who registered, only seventy-five percent attended the opening plenary, and a third of those left before the closing remarks.",
+          options: ["200", "300", "100", "400"], correct: 0,
+        },
+        {
+          text: "What is the population now?",
+          audio: "According to the latest census, the district's population of sixty thousand grew by exactly fifteen percent over the decade.",
+          options: ["69,000", "75,000", "64,500", "60,000"], correct: 0,
+        },
+        {
+          text: "How long does the whole journey take?",
+          audio: "The express coach covers the four hundred and fifty kilometre route at ninety kilometres per hour, plus a thirty-minute rest at the border.",
+          options: ["5 hours 30 minutes", "5 hours", "6 hours", "4 hours 30 minutes"], correct: 0,
+        },
+        {
+          text: "When was the manuscript finally published?",
+          audio: "The manuscript was commissioned in 2009, delivered in March, and finally published in October, some twelve years after the project began.",
+          options: ["October", "March", "2009", "December"], correct: 0,
+        },
+        {
+          text: "What is the usual success rate for grant applications?",
+          audio: "The finance director estimated that barely one in five grant applications succeeds, though last year almost half of the university's submissions were approved.",
+          options: ["About 20 percent", "About 50 percent", "About 5 percent", "About 80 percent"], correct: 0,
+        },
+        {
+          text: "How much did the family pay in total?",
+          audio: "Tickets bought at the gate cost forty dollars, but online tickets cost a quarter less; a family of four bought theirs online.",
+          options: ["120 dollars", "160 dollars", "40 dollars", "100 dollars"], correct: 0,
+        },
+        {
+          text: "How many samples were rejected?",
+          audio: "The laboratory received two hundred samples on Monday and half as many on Tuesday, but a fifth of all samples were rejected as contaminated.",
+          options: ["60", "100", "40", "300"], correct: 0,
+        },
+        {
+          text: "How many people were inside at ten past two?",
+          audio: "The lecture hall seats four hundred and twenty people; by ten past two it was half full, and a further hundred were turned away at the door.",
+          options: ["210", "420", "310", "110"], correct: 0,
+        },
+        {
+          text: "How much toll money was collected on Friday?",
+          audio: "The bridge toll is nine dollars for cars and three times as much for lorries; on Friday, two hundred cars and fifty lorries crossed.",
+          options: ["3,150 dollars", "2,250 dollars", "1,800 dollars", "4,050 dollars"], correct: 0,
+        },
+      ],
+    },
+    {
+      id: "quiz_listening_vhard_2",
+      title: "Listening VERY HARD 2 — Mazmun va xulosa (C2)",
+      description:
+        "300 ta juda juda qiyin tinglash savoli: idiomalar, inversiya qoidalar, shart gaplari, implied ma'no va akademik paraphrase. Har urinishda 10 tasi tasodifiy tanlanadi.",
+      difficulty: "very-hard",
+      kind: "listening",
+      questions: [
+        {
+          text: "What is the rule?",
+          audio: "Under no circumstances are the refrigerated samples to be removed from cold storage before the assay is complete, whatever the schedule pressure.",
+          options: ["Samples must stay in cold storage until the assay finishes", "Samples may leave storage if the schedule slips", "Only finished assays need cold storage", "Storage time is irrelevant"],
+          correct: 0,
+        },
+        {
+          text: "What do we learn?",
+          audio: "Had the funding been approved in June, the fieldwork would now be complete.",
+          options: ["The funding was not approved in June", "The fieldwork finished early", "The funding was doubled in June", "Fieldwork never began"],
+          correct: 0,
+        },
+        {
+          text: "What did the manager mean?",
+          audio: "The manager's promise to leave no stone unturned in the audit reassured the investors.",
+          options: ["He would examine everything thoroughly", "He would search the storerooms physically", "He would reject the audit findings", "He would finish the audit quickly"],
+          correct: 0,
+        },
+        {
+          text: "What is the speaker's attitude?",
+          audio: "The results are encouraging, by and large, though the absence of a control group gives us pause.",
+          options: ["Positive but with reservations", "Entirely dismissive", "Completely indifferent", "Openly hostile"],
+          correct: 0,
+        },
+        {
+          text: "What happened?",
+          audio: "Not until the third hearing did the committee grasp the scale of the shortfall.",
+          options: ["The committee realised the shortfall only at the third hearing", "The committee understood at once", "The shortfall was announced twice", "The committee refused to meet"],
+          correct: 0,
+        },
+        {
+          text: "Who or what is exempt?",
+          audio: "All submissions must be written in English, appendices excepted, which may remain in the original language.",
+          options: ["The appendices", "The whole submission", "The reference list", "Nothing is exempt"],
+          correct: 0,
+        },
+        {
+          text: "What is implied?",
+          audio: "It is to the crew's lasting credit that the crossing was completed, damaged rudder and all.",
+          options: ["The voyage was hard but succeeded", "The crew abandoned the crossing", "The rudder was replaced at sea", "The crossing was routine"],
+          correct: 0,
+        },
+        {
+          text: "What does Professor Hale argue?",
+          audio: "In her keynote, Professor Hale disputed the view that the decline began with industrialisation, arguing it started decades earlier.",
+          options: ["The decline began decades before industrialisation", "The decline began with industrialisation", "The decline never happened", "Industrialisation reversed the decline"],
+          correct: 0,
+        },
+        {
+          text: "Which is closest in meaning?",
+          audio: "What the report lacks is not data but interpretation: the tables pile up while the analysis stays thin.",
+          options: ["There is plenty of data but little analysis", "The report lacks both data and analysis", "The analysis outweighs the data", "The tables are unreadable"],
+          correct: 0,
+        },
+        {
+          text: "What did the chairman do?",
+          audio: "The chairman sat firmly on the fence, endorsing neither proposal despite an hour of debate.",
+          options: ["He avoided supporting either side", "He supported both proposals", "He rejected both proposals", "He left before the debate"],
+          correct: 0,
+        },
+        {
+          text: "What happened?",
+          audio: "So sparse was the attendance that the lecture was moved to a smaller room.",
+          options: ["Very few came, so the room was changed", "The larger room was unavailable", "Attendance doubled at noon", "The lecture was cancelled"],
+          correct: 0,
+        },
+        {
+          text: "What is implied?",
+          audio: "The ceremony went off without a hitch, the storm warnings notwithstanding.",
+          options: ["Despite storm warnings, everything went smoothly", "The storm forced a delay", "The ceremony was moved indoors", "Warnings were issued too late"],
+          correct: 0,
+        },
+      ],
+    },
   ],
 };
 
