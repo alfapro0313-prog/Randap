@@ -76,7 +76,7 @@ export type LessonItem = {
   durationMin: number;
 };
 
-export type QuizDifficulty = "easy" | "middle" | "hard";
+export type QuizDifficulty = "easy" | "middle" | "hard" | "very-hard";
 
 export type QuizSummary = {
   id: string;

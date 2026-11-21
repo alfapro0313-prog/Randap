@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Ban, Loader2 } from "lucide-react";
+import { Ban } from "lucide-react";
 import {
   getBaseDeviceKey,
   getDeviceKey,
@@ -10,6 +10,7 @@ import {
   type LoginSession,
 } from "@/lib/randap-client";
 import { activeBlockMs, formatLeft, remainingMs } from "@/lib/randap-admin";
+import { Landing } from "./landing";
 import { LoginView } from "./login";
 import { RandapApp } from "./randap-app";
 import { useLang } from "./lang-provider";
@@ -28,6 +29,15 @@ export function RandapGate() {
   );
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
   const [blockedReason, setBlockedReason] = useState<string | null>(null);
+
+  // Sessiya hal qilinib bo'lgach SSR-guest-blok yashiruvchi belgini olib
+  // tashlaymiz — aks holda sessiya null bo'lsa guest blok abadiy yashirin
+  // qoladi (landing.tsx dagi inline skript shu belgi qo'yadi).
+  useEffect(() => {
+    if (session !== undefined) {
+      delete document.documentElement.dataset.randapAuth;
+    }
+  }, [session]);
 
   useEffect(() => {
     let alive = false;
@@ -98,21 +108,19 @@ export function RandapGate() {
     );
   }
 
-  if (session === undefined) {
+  if (session === undefined || session === null) {
+    // MEHMON: ochiq landing (SSR HTML — Google uchun) + kirish formasi.
+    // Kirgan foydalanuvchida bu blok inline skript + CSS orqali bir zumda
+    // yashiriladi (landing.tsx dagi randapAuth belgisi), keyin RandapApp
+    // sessiya tekshiruvidan keyin ko'rinadi — flash yo'q.
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-background">
-        <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
-          <Loader2 className="size-6 animate-spin" aria-hidden="true" />
+      <div data-gate-guest>
+        <Landing />
+        <div id="kirish">
+          <LoginView onLoggedIn={(s) => setSession(s)} />
         </div>
-        <p className="text-sm font-semibold tracking-wide text-muted-foreground">
-          Randap
-        </p>
       </div>
     );
-  }
-
-  if (session === null) {
-    return <LoginView onLoggedIn={(s) => setSession(s)} />;
   }
 
   return <RandapApp />;

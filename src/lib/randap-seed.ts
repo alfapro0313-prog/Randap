@@ -25,7 +25,12 @@ import {
   genLegacyUzTarixi,
 } from "./banks/gen-legacy";
 
-const DIF = { easy: "easy", middle: "middle", hard: "hard" } as const;
+const DIF = {
+  easy: "easy",
+  middle: "middle",
+  hard: "hard",
+  "very-hard": "very-hard",
+} as const;
 type Dif = keyof typeof DIF;
 
 type Q = { text: string; options: string[]; correct: number; audio?: string };
@@ -761,12 +766,15 @@ const INGLIZ: SubjectDef = {
         { text: "'Comprehensive' means ___", options: ["including everything", "very small", "difficult", "modern"], correct: 0 },
       ],
     },
-    /* VERY HARD — C2 daraja, juda juda qiyin */
+    /* VERY HARD — C2 daraja, juda juda qiyin (300 savolli super qiyin testlar).
+     * Statik 12 ta savol joyida qoladi (_q1.._q12 barqaror), qolgani
+     * GEN_QUESTIONS orqali 300 taga to'ldiriladi (quiz_vhard_*_genN). */
     {
       id: "quiz_vhard_1",
-      title: "Very Hard 1 (C2)",
-      description: "Nodir leksika va idiomalar — faqat ustalar uchun!",
-      difficulty: "hard",
+      title: "VERY HARD 1 — Leksika va idiomalar (C2)",
+      description:
+        "300 ta juda juda qiyin savol: nodir so'zlar, idiomalar, frazeologik fe'llar. Har urinishda 10 tasi tasodifiy tanlanadi. Faqat ustalar uchun!",
+      difficulty: "very-hard",
       questions: [
         { text: "'Perspicacious' most nearly means ___", options: ["shrewd and quick to notice things", "shortsighted", "overly talkative", "physically clumsy"], correct: 0 },
         { text: "'To obfuscate' means to ___", options: ["make something deliberately unclear", "polish a rough surface", "shorten a long text", "forgive a mistake"], correct: 0 },
@@ -784,9 +792,10 @@ const INGLIZ: SubjectDef = {
     },
     {
       id: "quiz_vhard_2",
-      title: "Very Hard 2 (C2)",
-      description: "C2 grammatika: inversion, subjunctive, murakkab tuzilmalar.",
-      difficulty: "hard",
+      title: "VERY HARD 2 — Grammatika (C2)",
+      description:
+        "300 ta juda juda qiyin savol: inversiya, subjunctive, aralash shart gaplari, modal nuanslar va murakkab tuzilmalar. Har urinishda 10 tasi tasodifiy.",
+      difficulty: "very-hard",
       questions: [
         { text: "The board insisted that the CEO ___ present at the hearing.", options: ["be", "is", "was", "will be"], correct: 0 },
         { text: "Had the pilot not reacted so swiftly, the landing ___ catastrophic.", options: ["would have been", "will be", "would be", "had been"], correct: 0 },

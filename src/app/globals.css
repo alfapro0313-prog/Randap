@@ -124,3 +124,9 @@
 .scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* Kirgan foydalanuvchida mehmon landing/kirish bloki bir zumda yashiriladi
+   (landing.tsx dagi inline skript html[data-randap-auth] qo'yadi) */
+html[data-randap-auth="1"] [data-gate-guest] {
+  display: none !important;
+}

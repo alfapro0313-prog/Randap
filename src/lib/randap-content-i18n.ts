@@ -81,6 +81,16 @@ const EN: ContentPack = {
       title: "Vocabulary",
       description: "Translation, synonyms and antonyms — 10 questions.",
     },
+    "ingliz-tili:7": {
+      title: "VERY HARD 1 — Vocabulary & idioms (C2)",
+      description:
+        "300 ruthless questions: rare words, idioms and phrasal verbs. 10 random ones each attempt — experts only!",
+    },
+    "ingliz-tili:8": {
+      title: "VERY HARD 2 — Grammar (C2)",
+      description:
+        "300 ruthless questions: inversion, subjunctive, mixed conditionals and modal nuances. 10 random ones each attempt.",
+    },
     "tarix:0": {
       title: "World history",
       description:
@@ -454,6 +464,16 @@ const RU: ContentPack = {
       title: "Словарный запас",
       description:
         "Перевод, синонимы и антонимы — 10 вопросов.",
+    },
+    "ingliz-tili:7": {
+      title: "VERY HARD 1 — Лексика и идиомы (C2)",
+      description:
+        "300 безжалостных вопросов: редкие слова, идиомы и фразовые глаголы. Каждый раз — 10 случайных. Только для мастеров!",
+    },
+    "ingliz-tili:8": {
+      title: "VERY HARD 2 — Грамматика (C2)",
+      description:
+        "300 безжалостных вопросов: инверсия, сослагательное наклонение, смешанные условные предложения. Каждый раз — 10 случайных.",
     },
     "tarix:0": {
       title: "Всемирная история",

@@ -44,6 +44,7 @@ const DIFF_BADGE: Record<QuizDifficulty, string> = {
   easy: "bg-emerald-100 text-emerald-700",
   middle: "bg-amber-100 text-amber-700",
   hard: "bg-rose-100 text-rose-700",
+  "very-hard": "bg-zinc-900 text-red-400 border border-red-500/40",
 };
 
 export function SectionTile({
@@ -186,6 +187,7 @@ export function SectionDetail({
     ["easy", t("diffEasy")],
     ["middle", t("diffMiddle")],
     ["hard", t("diffHard")],
+    ["very-hard", t("diffVeryHard")],
   ];
 
   return (
@@ -296,7 +298,9 @@ export function SectionDetail({
                     ? t("diffEasy")
                     : quiz.difficulty === "hard"
                       ? t("diffHard")
-                      : t("diffMiddle")}
+                      : quiz.difficulty === "very-hard"
+                        ? t("diffVeryHard")
+                        : t("diffMiddle")}
                 </span>
                 {quiz.kind === "listening" ? (
                   <span className="flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-1 text-xs font-semibold text-sky-700">

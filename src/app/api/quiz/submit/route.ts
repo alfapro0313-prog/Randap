@@ -10,6 +10,7 @@ const DZF_CENTS: Record<string, number> = {
   easy: 20,
   middle: 50,
   hard: 100,
+  "very-hard": 200,
 };
 
 /**

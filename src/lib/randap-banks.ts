@@ -9,6 +9,7 @@ import { genFizika, genKimyo, genMatematika } from "./banks/gen-matfizkim";
 import { genGeografiya } from "./banks/gen-geo";
 import { genAdabiyot, genOnatili } from "./banks/gen-til-adab";
 import { genIngliz, genListening } from "./banks/gen-ingliz";
+import { genVeryHard1, genVeryHard2 } from "./banks/gen-veryhard";
 import type { EngBank } from "./banks/gen-ingliz";
 
 const DIFS = ["easy", "middle", "hard"] as const;
@@ -44,6 +45,10 @@ for (const [id, lvl] of CEFR) MAP[id] = genIngliz(lvl);
 MAP["quiz_ielts_easy"] = genIngliz("ielts-e");
 MAP["quiz_ielts_middle"] = genIngliz("ielts-m");
 MAP["quiz_ielts_hard"] = genIngliz("ielts-h");
+
+/* VERY HARD (C2) — 300 savolga to'ldiriladigan super qiyin ingliz testlari */
+MAP["quiz_vhard_1"] = genVeryHard1();
+MAP["quiz_vhard_2"] = genVeryHard2();
 
 /* Listening (audio tinglash) */
 for (const d of DIFS) {

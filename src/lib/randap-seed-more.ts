@@ -8,7 +8,12 @@
  * Barcha IDlar barqaror — bir necha marta seed qilinsa ham ikki nusxa hosil bo'lmaydi.
  */
 
-export const DIF2 = { easy: "easy", middle: "middle", hard: "hard" } as const;
+export const DIF2 = {
+  easy: "easy",
+  middle: "middle",
+  hard: "hard",
+  "very-hard": "very-hard",
+} as const;
 export type Dif2 = keyof typeof DIF2;
 
 export type Q2 = { text: string; options: string[]; correct: number; audio?: string };
