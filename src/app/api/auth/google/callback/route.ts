@@ -66,7 +66,11 @@ export async function GET(req: Request) {
 
   let saved: { state?: string; deviceKey?: string; lang?: string } = {};
   try {
-    saved = JSON.parse(readCookie(req, OAUTH_COOKIE) || "{}") as typeof saved;
+    // Cookie Next.js tomonidan URL-kodlanadi (%7B%22state%22...) —
+    // qayta o'qishda avval decode qilish shart, aks holda JSON.parse yiqiladi
+    saved = JSON.parse(
+      decodeURIComponent(readCookie(req, OAUTH_COOKIE) || "{}")
+    ) as typeof saved;
   } catch {
     saved = {};
   }
