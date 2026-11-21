@@ -473,6 +473,12 @@ export function LoginView({
         <p className="mt-5 text-center text-xs text-muted-foreground">
           {t("loginBrandTag")}
         </p>
+        <a
+          href="/haqida"
+          className="mt-2 block text-center text-xs font-semibold text-muted-foreground underline-offset-2 hover:underline"
+        >
+          {t("loginAbout")}
+        </a>
       </div>
 
       {/* ---------- Google hisobini tanlash (simulyatsiya) ---------- */}

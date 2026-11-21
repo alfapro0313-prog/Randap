@@ -29,6 +29,17 @@ const DIF = { easy: "easy", middle: "middle", hard: "hard" } as const;
 type Dif = keyof typeof DIF;
 
 type Q = { text: string; options: string[]; correct: number; audio?: string };
+
+/** Statik savol variantlarini aralashtirish — to'g'ri javob doim 1-o'rinda turib qolmasin */
+function shuffleStaticQ(q: Q): Q {
+  const opts = [...q.options];
+  const correctText = opts[q.correct] ?? "";
+  for (let i = opts.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [opts[i], opts[j]] = [opts[j], opts[i]];
+  }
+  return { ...q, options: opts, correct: Math.max(0, opts.indexOf(correctText)) };
+}
 type QuizDef = {
   id: string;
   title: string;
@@ -750,6 +761,47 @@ const INGLIZ: SubjectDef = {
         { text: "'Comprehensive' means ___", options: ["including everything", "very small", "difficult", "modern"], correct: 0 },
       ],
     },
+    /* VERY HARD — C2 daraja, juda juda qiyin */
+    {
+      id: "quiz_vhard_1",
+      title: "Very Hard 1 (C2)",
+      description: "Nodir leksika va idiomalar — faqat ustalar uchun!",
+      difficulty: "hard",
+      questions: [
+        { text: "'Perspicacious' most nearly means ___", options: ["shrewd and quick to notice things", "shortsighted", "overly talkative", "physically clumsy"], correct: 0 },
+        { text: "'To obfuscate' means to ___", options: ["make something deliberately unclear", "polish a rough surface", "shorten a long text", "forgive a mistake"], correct: 0 },
+        { text: "A 'sycophant' is a person who ___", options: ["flatters the powerful for personal gain", "studies ancient fossils", "speaks many languages", "writes satirical plays"], correct: 0 },
+        { text: "'Quixotic' describes a plan that is ___", options: ["idealistic but wildly impractical", "carefully costed and realistic", "illegal under current law", "too boring to discuss"], correct: 0 },
+        { text: "'Laconic' speech uses ___", options: ["very few words", "an extremely loud voice", "endless jokes", "archaic grammar"], correct: 0 },
+        { text: "'Perfidious' behaviour is ___", options: ["deceitful and disloyal", "open and cheerful", "careless but honest", "shy and hesitant"], correct: 0 },
+        { text: "'Punctilious' people are extremely ___", options: ["attentive to small rules and details", "rarely punctual", "fond of wild parties", "afraid of hard work"], correct: 0 },
+        { text: "A 'recalcitrant' student ___", options: ["stubbornly refuses to obey", "arrives early every day", "asks clever questions", "always forgets homework"], correct: 0 },
+        { text: "If two people are 'at daggers drawn', they are ___", options: ["openly hostile to each other", "best of friends", "about to start cooking", "deeply exhausted"], correct: 0 },
+        { text: "'Mendacious' statements are ___", options: ["untruthful", "remarkably short", "full of music", "gentle and forgiving"], correct: 0 },
+        { text: "'To placate' someone is to ___", options: ["calm them down", "deliberately provoke them", "pay them twice", "imitate their style"], correct: 0 },
+        { text: "'Obstreperous' crowds are ___", options: ["noisy and hard to control", "silent and respectful", "thinly spread", "warmly welcoming"], correct: 0 },
+      ],
+    },
+    {
+      id: "quiz_vhard_2",
+      title: "Very Hard 2 (C2)",
+      description: "C2 grammatika: inversion, subjunctive, murakkab tuzilmalar.",
+      difficulty: "hard",
+      questions: [
+        { text: "The board insisted that the CEO ___ present at the hearing.", options: ["be", "is", "was", "will be"], correct: 0 },
+        { text: "Had the pilot not reacted so swiftly, the landing ___ catastrophic.", options: ["would have been", "will be", "would be", "had been"], correct: 0 },
+        { text: "It was the second draft, not the first, ___ convinced the investors.", options: ["that", "who", "what", "which one"], correct: 0 },
+        { text: "Scarcely had the ceremony begun ___ the fire alarm went off.", options: ["when", "than", "that", "then"], correct: 0 },
+        { text: "The committee has yet to ___ a decision on the merger.", options: ["reach", "take up", "arrive", "announce about"], correct: 0 },
+        { text: "Not one of the candidates ___ found suitable, according to the panel.", options: ["was", "were", "have", "are"], correct: 0 },
+        { text: "___ his public reluctance, he privately agreed to chair the session.", options: ["Notwithstanding", "Despite of", "Although", "However"], correct: 0 },
+        { text: "The manuscript, ___ authenticity remains disputed, sold for millions.", options: ["whose", "which", "that", "whom"], correct: 0 },
+        { text: "By this time next year, the bridge ___ for a decade.", options: ["will have been standing", "will stand", "stands", "is standing"], correct: 0 },
+        { text: "She is one of those people who ___ never satisfied.", options: ["are", "is", "was", "has"], correct: 0 },
+        { text: "Little ___ they know that the contract had already been signed.", options: ["did", "do", "were", "have"], correct: 0 },
+        { text: "The defence argued that the evidence ___ obtained unlawfully.", options: ["had been", "has been", "was been", "would be"], correct: 0 },
+      ],
+    },
     /* Listening */
     {
       id: "quiz_listening_easy",
@@ -954,6 +1006,57 @@ async function topUpLegacyQuizzes(): Promise<void> {
 
 let running: Promise<void> | null = null;
 
+/**
+ * Bir martalik tuzatish: eski statik savollarda to'g'ri javob DOIM 1-variant
+ * bo'lib qolgan edi (options aralashtirilmagan). Variantlar aralashtiriladi,
+ * correctIndex qayta hisoblanadi va textEn = text marker qo'yiladi —
+ * keyingi ishga tushirishlarda qayta tegilmaydi (idempotent).
+ */
+async function repairStaticOptions(): Promise<void> {
+  try {
+    const rows = await db.question.findMany({
+      where: { textEn: null },
+      select: { id: true, options: true, correctIndex: true, text: true },
+    });
+    if (!rows.length) return;
+    let fixed = 0;
+    const chunk = 40;
+    for (let i = 0; i < rows.length; i += chunk) {
+      await Promise.all(
+        rows.slice(i, i + chunk).map(async (r) => {
+          let opts: string[] = [];
+          try {
+            opts = JSON.parse(r.options) as string[];
+          } catch {
+            return;
+          }
+          if (!Array.isArray(opts) || opts.length < 2) return;
+          const correctText = opts[r.correctIndex];
+          if (correctText === undefined) return;
+          for (let a = opts.length - 1; a > 0; a--) {
+            const b = Math.floor(Math.random() * (a + 1));
+            [opts[a], opts[b]] = [opts[b], opts[a]];
+          }
+          const newIdx = Math.max(0, opts.indexOf(correctText));
+          await db.question.update({
+            where: { id: r.id },
+            data: {
+              options: JSON.stringify(opts),
+              correctIndex: newIdx,
+              // marker: bu savol aralashtirildi — qayta tegilmaydi
+              textEn: r.text,
+            },
+          });
+          fixed += 1;
+        })
+      );
+    }
+    console.log(`[seed] statik savollar aralashtirildi: ${fixed} ta`);
+  } catch (e) {
+    console.error("[seed] repairStaticOptions xatosi:", e);
+  }
+}
+
 /** Kontent bazada yo'q bo'lsa — bir marta yaratadi. Har safar xavfsiz. */
 export async function ensureContentSeeded(): Promise<void> {
   if (running) return running;
@@ -966,6 +1069,7 @@ export async function ensureContentSeeded(): Promise<void> {
       if (marker) {
         // Asosiy kontent allaqachon bazada — faqat eski 6 testni 300 taga tekshiramiz
         await topUpLegacyQuizzes();
+        await repairStaticOptions();
         return;
       }
 
@@ -1060,7 +1164,7 @@ export async function ensureContentSeeded(): Promise<void> {
             textRu: string | null; textEn: string | null;
             optionsRu: string | null; optionsEn: string | null;
           }> = [
-            ...q.questions.map((qq, i) => ({
+            ...q.questions.map(shuffleStaticQ).map((qq, i) => ({
               id: `${q.id}_q${i + 1}`,
               quizId: q.id,
               text: qq.text,
@@ -1094,6 +1198,7 @@ export async function ensureContentSeeded(): Promise<void> {
         }
       }
       await topUpLegacyQuizzes();
+      await repairStaticOptions();
       const qCount = await db.question.count();
       console.log(`[seed] kontent tayyor: tarix (uz/jahon 7-11), ingliz (CEFR/IELTS/Listening), matematika, fizika, kimyo, geografiya, ona tili, adabiyot + eski 6 test (har biri ${BANK_TARGET} savol) — jami ${qCount} savol`);
     } catch (e) {

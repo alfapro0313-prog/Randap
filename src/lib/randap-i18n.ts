@@ -360,6 +360,7 @@ const en = {
 
   // Login gate (site entry)
   loginBrandTag: "Videos, Shorts, Tests, Learning and Chat — all in one place",
+  loginAbout: "About Randap",
   loginWelcome: "Welcome to Randap",
   loginSub: "To enter the site, write your name, password and Gmail — all are required.",
   loginNameLabel: "Name",
@@ -832,6 +833,7 @@ const ru: Dict = {
 
   // Вход на сайт
   loginBrandTag: "Видео, Shorts, Тесты, Обучение и Чат — всё в одном месте",
+  loginAbout: "О Randap",
   loginWelcome: "Добро пожаловать в Randap",
   loginSub: "Чтобы войти на сайт, напишите имя, пароль и Gmail — обязательны все поля.",
   loginNameLabel: "Имя",
@@ -1299,6 +1301,7 @@ const uz: Dict = {
 
   // Login gate (sayt kirishi)
   loginBrandTag: "Videolar, Shorts, Testlar, O'rganish va Chat — hammasi bir joyda",
+  loginAbout: "Randap haqida",
   loginWelcome: "Randap platformasiga xush kelibsiz",
   loginSub: "Saytga kirish uchun ism, parol va Gmail yozing — hammasi shart.",
   loginNameLabel: "Ism",
