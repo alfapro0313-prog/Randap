@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { SwRegister } from "@/components/randap/sw-register";
@@ -15,13 +16,48 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL = "https://randap.vercel.app";
+
 export const metadata: Metadata = {
-  title: "Randap Video platforma",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Randap — Video platforma | Videolar, Shorts, Testlar, Chat",
+    template: "%s | Randap",
+  },
   description:
-    "Randap — videolar va shorts joylash, ko'rish, layk bosish, izoh qoldirish va obuna bo'lish mumkin bo'lgan video platforma.",
-  keywords: ["Randap", "video", "shorts", "video platforma", "layk", "obuna"],
+    "Randap — O'zbek tilidagi video platforma: videolar va Shorts yuklash hamda ko'rish, layk, izoh, obuna, hamma fandan onlayn testlar, o'rganish darslari va jonli chat. Hammasi bir joyda — randap.vercel.app",
+  keywords: [
+    "randap",
+    "randap video",
+    "randap platforma",
+    "video platforma",
+    "o'zbek video platforma",
+    "shorts",
+    "video yuklash",
+    "video ko'rish",
+    "onlayn test",
+    "testlar",
+    "o'rganish",
+    "chat",
+    "dapzif",
+  ],
+  applicationName: "Randap",
   authors: [{ name: "Randap" }],
+  creator: "Randap",
   manifest: "/manifest.webmanifest",
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   verification: {
     google: "VXb85HgWsMBp_pNu5PhoVKpZeoqxfkYMhh6_n0GipFw",
   },
@@ -34,10 +70,28 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-icon.png" }],
   },
   openGraph: {
-    title: "Randap Video platforma",
-    description: "Videolar va shorts — hammasi bir joyda.",
+    title: "Randap — Video platforma",
+    description:
+      "Videolar, Shorts, testlar, o'rganish va chat — hammasi bir joyda. Randap platformasiga xush kelibsiz!",
     siteName: "Randap",
     type: "website",
+    url: SITE_URL,
+    locale: "uz_UZ",
+    images: [
+      {
+        url: "/og-randap.png",
+        width: 1200,
+        height: 630,
+        alt: "Randap — Video platforma",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Randap — Video platforma",
+    description:
+      "Videolar, Shorts, testlar, o'rganish va chat — hammasi bir joyda.",
+    images: ["/og-randap.png"],
   },
 };
 
@@ -59,6 +113,30 @@ export default function RootLayout({
         {children}
         <Toaster />
         <SwRegister />
+        <Analytics />
+        {/* JSON-LD: Google'ga sayt haqida aniq ma'lumot beradi */}
+        <Script
+          id="jsonld-website"
+          type="application/ld+json"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Randap",
+              alternateName: "Randap Video platforma",
+              url: SITE_URL,
+              description:
+                "Videolar, Shorts, testlar, o'rganish va chat — hammasi bir joyda",
+              inLanguage: "uz",
+              potentialAction: {
+                "@type": "SearchAction",
+                target: `${SITE_URL}/?q={search_term_string}`,
+                "query-input": "required name=search_term_string",
+              },
+            }),
+          }}
+        />
         {adsClient ? (
           <Script
             id="adsense-init"
