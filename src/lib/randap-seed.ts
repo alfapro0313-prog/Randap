@@ -1105,7 +1105,7 @@ const RUS_TILI: SubjectDef = {
       id: "quiz_rus_oson",
       title: "Rus tili — oson (A1)",
       description:
-        "Kundalik so'zlar, alifbo, shaxs olmoshlari, hozirgi va o'tgan zamon asoslari. Boshlovchilar uchun.",
+        "Lug'at va grammatika ARALASH: kundalik so'zlar, ko'plik shakli, fe'l zamomlari, egalik olmoshlari, kelishiklar asoslari, to'g'ri jumla tanlash. Boshlovchilar uchun.",
       difficulty: "easy",
       questions: [
         { text: "Ruscha «salom» qanday yoziladi?", options: ["привет", "превет", "приветь", "привит"], correct: 0 },
@@ -1122,7 +1122,7 @@ const RUS_TILI: SubjectDef = {
       id: "quiz_rus_ortacha",
       title: "Rus tili — o'rtacha (A2+/B1)",
       description:
-        "Kelishiklar, fe'l turlari (вид), harakat fe'llari, «kerak/kerak emas» tuzilmalari. Qiyin darajadan sal past, osondan yuqori.",
+        "Grammatika ustida ish: kelishiklar, fe'l turlari (вид), harakat fe'llari, predloglar, qiyoslash, buyruq mayli, «kerak» tuzilmalari + to'g'ri jumla tanlash. Qiyin darajadan sal past, osondan yuqori.",
       difficulty: "middle",
       questions: [
         { text: "«Я иду в школу» nimani anglatadi?", options: ["Men maktabga boryapman", "Men maktabda o'qiyman", "Men maktabdan qaytdim", "Men maktabga bordim"], correct: 0 },
@@ -1139,7 +1139,7 @@ const RUS_TILI: SubjectDef = {
       id: "quiz_rus_qiyin",
       title: "Rus tili — juda qiyin (C1-C2)",
       description:
-        "Qatnash va avalg'ilosh, paronimlar, frazeologizmlar, kitobiy leksika, murakkab qo'shimchalar. Juda juda qiyin — faqat ustalar uchun!",
+        "Funksional grammatika: управление (fe'l qaysi kelishikni talab qiladi), qatnash va avalg'ilosh, murakkab bog'lovchilar, sonlar qiyshayishi, so'z birikmalari + paronimlar, frazeologizmlar, kitobiy leksika. Juda juda qiyin — faqat ustalar uchun!",
       difficulty: "very-hard",
       questions: [
         { text: "«вопреки прогнозам» nimani anglatadi?", options: ["Prognozlarga qaramay", "Prognoz bo'yicha", "Prognozsiz", "Prognoz uchun"], correct: 0 },
@@ -1347,10 +1347,42 @@ async function purgeRegeneratedEnglishQuestions(): Promise<void> {
   }
 }
 
+/**
+ * MIGRATSİYA v3 (bir marta): rus tili testlari eski LUG'AT-bazli savollari
+ * GRAMMATIKA-boyitilgan yangi bankka almashtiriladi (lug'at ~50%, grammatika
+ * ~50-60%: kelishiklar, вид, harakat fe'llari, управление, qatnash/avalg'ilosh,
+ * sonlar qiyshayishi, to'g'ri jumla tanlash). Belgisi: quiz_rus_oson_gen1
+ * matni yangi bankning 1-savoliga teng bo'lsa — migratsiya bajarilgan.
+ */
+const REGEN_RUS_QUIZ_IDS = ["quiz_rus_oson", "quiz_rus_ortacha", "quiz_rus_qiyin"];
+
+async function purgeRegeneratedRussianQuestions(): Promise<void> {
+  try {
+    const probeId = "quiz_rus_oson_gen1";
+    const probe = await db.question.findUnique({
+      where: { id: probeId },
+      select: { text: true },
+    });
+    const expected = GEN_QUESTIONS["quiz_rus_oson"]?.[0]?.t.uz ?? null;
+    if (probe && expected && probe.text === expected) {
+      return; // yangi bank allaqachon bazada — hech narsa o'chirilmaydi
+    }
+    for (const quizId of REGEN_RUS_QUIZ_IDS) {
+      await db.question.deleteMany({
+        where: { quizId, id: { startsWith: `${quizId}_gen` } },
+      });
+    }
+    console.log("[seed] migratsiya v3: eski rus tili savollari o'chirildi (grammatika-boyitilgan banklar yoziladi)");
+  } catch (e) {
+    console.error("[seed] purgeRegeneratedRussianQuestions xatosi:", e);
+  }
+}
+
 /** Kontent sinxronizatsiyasi — idempotent: mavjud qatorlar o'tkazib yuboriladi,
  * yangilari yaratiladi. Yangi fan/test qo'shilsa ham mavjud bazada paydo bo'ladi. */
 async function seedContent(): Promise<void> {
   await purgeRegeneratedEnglishQuestions();
+  await purgeRegeneratedRussianQuestions();
   for (const s of CONTENT) {
     // Qo'shimcha savollarni mavjud testlarga qo'shib chiqamiz
     const sWithExtras: SubjectDef2 = {

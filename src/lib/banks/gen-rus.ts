@@ -1,9 +1,13 @@
 /**
  * RUS TILI savollar generatori — 3 ta haqiqiy daraja testi:
- *   OSON    (quiz_rus_oson)    — A1: kundalik so'zlar, asosiy grammatika
- *   O'RTACHA(quiz_rus_ortacha) — A2+/B1: kelishiklar, fe'l turlari, harakat fe'llari
- *   QIYIN   (quiz_rus_qiyin)   — C1-C2: qatnash/avalg'ilosh, paronimlar,
+ *   OSON    (quiz_rus_oson)    — A1: lug'at + grammatika ARALASH (ko'plik, zamonlar,
+ *                                olmoshlar, kelishiklar, to'g'ri jumla tanlash)
+ *   O'RTACHA(quiz_rus_ortacha) — A2+/B1: lug'at + grammatika ARALASH (kelishiklar,
+ *                                fe'l turlari, harakat fe'llari, predloglar)
+ *   QIYIN   (quiz_rus_qiyin)   — C1-C2: funksional grammatika (управление, qatnash,
+ *                                avalg'ilosh, sonlar qiyshayishi) + paronimlar,
  *                                frazeologizmlar, kitobiy leksika — juda juda qiyin
+ * HAR BIR testda GRAMMATIKA ~50-60% — faqat lug'at emas!
  * 3 test o'zaro pool va bloklarni UMUMAN almashmaydi (takror yo'q),
  * qo'shimcha himoya: randap-banks.ts dagi oilaviy dedupe.
  */
@@ -19,15 +23,22 @@ import {
 import {
   RUS_ARCHAIC,
   RUS_EASY_GR,
+  RUS_EASY_GR2,
+  RUS_EASY_SENT,
   RUS_EASY_WORDS,
   RUS_HARD_GR,
+  RUS_HARD_GR2,
+  RUS_HARD_SENT,
   RUS_HARD_WORDS,
   RUS_IDIOM,
   RUS_MID_GR,
+  RUS_MID_GR2,
+  RUS_MID_SENT,
   RUS_MID_WORDS,
   RUS_PARONYM,
   type RG,
   type RID,
+  type RS,
 } from "./gen-rus-data";
 
 /* ================= VOKABULARY ================= */
@@ -81,7 +92,9 @@ function vocabBank(prefix: string, pool: Word[]): QGen[] {
     const othersRev = pool
       .filter((x) => x.ru !== w.ru && x.uz !== w.uz)
       .map((x) => ({ uz: x.ru, ru: x.ru, en: x.ru }));
-    for (let k = 0; k < 6; k++) {
+    // 3 shakl: ruscha→o'zbekcha (2) + o'zbekcha→ruscha (1) —
+    // grammatikaga ham joy qolishi uchun lug'at ulushi cheklangan
+    for (let k = 0; k < 3; k++) {
       const r = rngOf(`${prefix}:${w.ru}:${k}`);
       const fwd = k % 2 === 0;
       const ti = k % 3;
@@ -175,38 +188,71 @@ function spellingQs(prefix: string, items: RG[]): QGen[] {
   });
 }
 
+/** FUNKSIONAL GRAMMATIKA: «Qaysi jumla to'g'ri tuzilgan?» —
+ * 4 jumla varianti, 1 tasi grammatik jihatdan to'g'ri. */
+function sentenceQs(prefix: string, items: RS[]): QGen[] {
+  return items.map((it, i) => {
+    const r = rngOf(`${prefix}:${i}:${it.ok}`);
+    const { o, correct } = optionsFor(r, same(it.ok), it.bad.map((x) => same(x)));
+    return {
+      t: {
+        uz: "Qaysi jumla grammatik jihatdan to'g'ri tuzilgan?",
+        ru: "Какое предложение построено грамматически правильно?",
+        en: "Which sentence is grammatically correct?",
+      },
+      o,
+      correct,
+    };
+  });
+}
+
 /* ================= YAKUNIY GENERATORLAR ================= */
 
-/** OSON (A1): ~48 so'z × 6 shakl + 44 grammatika ≈ 330 savol */
+/** OSON (A1): lug'at (144) + grammatika ARALASH (~172) ≈ 316 savol —
+ * grammatika ulushi ~55%: ko'plik, zamomlar, olmoshlar, kelishiklar,
+ * to'g'ri jumla tanlash. */
 export function genRusOson(): QGen[] {
-  const rng = rngOf("rus-oson-mix");
+  const rng = rngOf("rus-oson-mix-v2");
   const all = [
     ...vocabBank("rus-e", RUS_EASY_WORDS),
     ...grammarQs("rus-e-gr1", N.easy1, RUS_EASY_GR.slice(0, 22)),
     ...grammarQs("rus-e-gr2", N.easy2, RUS_EASY_GR.slice(22)),
+    ...grammarQs("rus-e-gr3", N.easy1, RUS_EASY_GR2.slice(0, 60)),
+    ...grammarQs("rus-e-gr4", N.easy2, RUS_EASY_GR2.slice(60)),
+    ...sentenceQs("rus-e-sent", RUS_EASY_SENT),
   ];
   return dedupe(shuffle(rng, all));
 }
 
-/** O'RTACHA (A2+/B1): ~48 so'z × 6 shakl + 52 grammatika ≈ 340 savol */
+/** O'RTACHA (A2+/B1): lug'at (144) + grammatika ARALASH (~176) ≈ 320 savol —
+ * grammatika ulushi ~55%: kelishiklar, вид, harakat fe'llari, qiyoslash,
+ * buyruq mayli, to'g'ri jumla tanlash. */
 export function genRusOrtacha(): QGen[] {
-  const rng = rngOf("rus-mid-mix");
+  const rng = rngOf("rus-mid-mix-v2");
   const all = [
     ...vocabBank("rus-m", RUS_MID_WORDS),
     ...grammarQs("rus-m-gr1", N.mid1, RUS_MID_GR.slice(0, 26)),
     ...grammarQs("rus-m-gr2", N.mid2, RUS_MID_GR.slice(26)),
+    ...grammarQs("rus-m-gr3", N.mid1, RUS_MID_GR2.slice(0, 64)),
+    ...grammarQs("rus-m-gr4", N.mid2, RUS_MID_GR2.slice(64)),
+    ...sentenceQs("rus-m-sent", RUS_MID_SENT),
   ];
   return dedupe(shuffle(rng, all));
 }
 
-/** QIYIN (C1-C2): ~40 so'z × 6 shakl + 40 qiyin grammatika + 21 paronim
- * + 18 frazeologizm + 15 eskicha/imlo ≈ 334 savol — juda juda qiyin */
+/** QIYIN (C1-C2): lug'at (120) + FUNKSIONAL grammatika (~114) + 21 paronim
+ * + 18 frazeologizm + 15 eskicha/imlo ≈ 288-318 savol — juda juda qiyin.
+ * Grammatika ulushi ~60%: управление, qatnash/avalg'ilosh, sonlar
+ * qiyshayishi, so'z birikmalari, to'g'ri jumla tanlash. */
 export function genRusQiyin(): QGen[] {
-  const rng = rngOf("rus-hard-mix");
+  const rng = rngOf("rus-hard-mix-v2");
   const all = [
     ...vocabBank("rus-h", RUS_HARD_WORDS),
     ...grammarQs("rus-h-gr1", N.hard1, RUS_HARD_GR.slice(0, 20)),
     ...grammarQs("rus-h-gr2", N.hard2, RUS_HARD_GR.slice(20)),
+    ...grammarQs("rus-h-gr3", N.hard1, RUS_HARD_GR2.slice(0, 48)),
+    ...grammarQs("rus-h-gr4", N.hard2, RUS_HARD_GR2.slice(48)),
+    ...sentenceQs("rus-h-sent", RUS_HARD_SENT),
     ...grammarQs("rus-h-par", N.hard2, RUS_PARONYM),
     ...idiomQs("rus-h-idiom", RUS_IDIOM),
     ...spellingQs("rus-h-arch", RUS_ARCHAIC),
