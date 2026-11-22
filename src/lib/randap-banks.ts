@@ -9,9 +9,15 @@ import { genFizika, genKimyo, genMatematika } from "./banks/gen-matfizkim";
 import { genGeografiya } from "./banks/gen-geo";
 import { genAdabiyot, genOnatili } from "./banks/gen-til-adab";
 import { genIngliz, genListening } from "./banks/gen-ingliz";
+import {
+  genIeltsEasy2,
+  genIeltsHard2,
+  genIeltsMiddle2,
+  genRealB1,
+  genRealB2,
+} from "./banks/gen-ingliz-b1b2";
 import { genListeningVHard1, genListeningVHard2 } from "./banks/gen-listening-vhard";
 import { genVeryHard1, genVeryHard2 } from "./banks/gen-veryhard";
-import type { EngBank } from "./banks/gen-ingliz";
 
 const DIFS = ["easy", "middle", "hard"] as const;
 
@@ -35,17 +41,17 @@ for (const d of DIFS) {
   MAP[`quiz_adab_${d}`] = genAdabiyot(d);
 }
 
-/* Ingliz tili: CEFR + IELTS */
-const CEFR: Array<[string, EngBank]> = [
-  ["quiz_cefr_a1", "a1"],
-  ["quiz_cefr_a2", "a2"],
-  ["quiz_cefr_b1", "b1"],
-  ["quiz_cefr_b2", "b2"],
-];
-for (const [id, lvl] of CEFR) MAP[id] = genIngliz(lvl);
-MAP["quiz_ielts_easy"] = genIngliz("ielts-e");
-MAP["quiz_ielts_middle"] = genIngliz("ielts-m");
-MAP["quiz_ielts_hard"] = genIngliz("ielts-h");
+/* Ingliz tili: CEFR + IELTS
+ *   A1/A2 — gen-ingliz.ts (o'z bloklari);
+ *   B1/B2 — HAQIQIY daraja banklari (gen-ingliz-b1b2.ts);
+ *   IELTS — har bir darajaga o'z so'z pooli va bloklari (takror yo'q). */
+MAP["quiz_cefr_a1"] = genIngliz("a1");
+MAP["quiz_cefr_a2"] = genIngliz("a2");
+MAP["quiz_cefr_b1"] = genRealB1();
+MAP["quiz_cefr_b2"] = genRealB2();
+MAP["quiz_ielts_easy"] = genIeltsEasy2();
+MAP["quiz_ielts_middle"] = genIeltsMiddle2();
+MAP["quiz_ielts_hard"] = genIeltsHard2();
 
 /* VERY HARD (C2) — 300 savolga to'ldiriladigan super qiyin ingliz testlari */
 MAP["quiz_vhard_1"] = genVeryHard1();
@@ -61,6 +67,39 @@ for (const d of DIFS) {
 }
 
 export { BANK_TARGET };
+
+/* Ingliz oilasi bo'yicha global cross-quiz dedupe:
+ * bir xil savol (matn + javob + audio) ikki xil testda qayta tushmaydi.
+ * Tarif: audio (listening) ham kalitga kiritilgan. */
+const ENGLISH_FAMILY_ORDER = [
+  "quiz_cefr_a1",
+  "quiz_cefr_a2",
+  "quiz_cefr_b1",
+  "quiz_cefr_b2",
+  "quiz_ielts_easy",
+  "quiz_ielts_middle",
+  "quiz_ielts_hard",
+  "quiz_listening_easy",
+  "quiz_listening_middle",
+  "quiz_listening_hard",
+  "quiz_listening_vhard_1",
+  "quiz_listening_vhard_2",
+  "quiz_vhard_1",
+  "quiz_vhard_2",
+];
+
+const seenGlobal = new Set<string>();
+for (const quizId of ENGLISH_FAMILY_ORDER) {
+  const arr = MAP[quizId];
+  if (!arr) continue;
+  MAP[quizId] = arr.filter((q) => {
+    const correctVal = q.o[q.correct]?.uz ?? "";
+    const key = `${q.t.uz}|${correctVal}|${q.audio ?? ""}`;
+    if (seenGlobal.has(key)) return false;
+    seenGlobal.add(key);
+    return true;
+  });
+}
 
 /** Barcha generatsiya qilingan savollar (quizId bo'yicha) */
 export const GEN_QUESTIONS: Record<string, QGen[]> = MAP;

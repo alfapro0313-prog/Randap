@@ -14,6 +14,9 @@ import type { ChatLang, ChatMessageItem, ChatProfileItem } from "@/lib/randap-ty
 import type { ShopData } from "@/lib/randap-types";
 import { cn } from "@/lib/utils";
 
+/** Yozish maydonining maksimal balandligi (px) — undan keyin ichida scroll */
+const INPUT_MAX_H = 128;
+
 type ChatWindowProps = {
   deviceKey: string;
   conversationId: string;
@@ -74,6 +77,7 @@ export function ChatWindow({
   const stickRef = useRef(true);
   const lastTypingRef = useRef(0);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Do'kon stikerlari — panel ochilganda yuklanadi
   useEffect(() => {
@@ -190,6 +194,15 @@ export function ChatWindow({
       setSending(false);
     }
   }
+
+  // Yozish maydoni matnga qarab avtomatik o'sadi — uzun xat ham to'liq
+  // ko'rinadi, hech narsa chetga chiqmaydi (telefon uchun ham)
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, INPUT_MAX_H)}px`;
+  }, [input]);
 
   function onInputChange(value: string) {
     setInput(value);
@@ -344,7 +357,7 @@ export function ChatWindow({
           : "";
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="flex h-full min-h-0 w-full min-w-0 flex-col">
       {/* Header: avatar + ism + holat; random chatda Next/Back tugmalari */}
       <div className="flex items-center gap-2 border-b border-border bg-card px-2 py-2.5 sm:px-4">
         <button
@@ -641,7 +654,7 @@ export function ChatWindow({
                 disabled={uploading}
                 aria-label={t.transferTitle}
                 title={t.transferTitle}
-                className="flex size-10 shrink-0 items-center justify-center rounded-full text-xl text-muted-foreground transition-colors hover:bg-secondary"
+                className="flex size-9 shrink-0 items-center justify-center rounded-full text-xl text-muted-foreground transition-colors hover:bg-secondary sm:size-10"
               >
                 💸
               </button>
@@ -650,7 +663,7 @@ export function ChatWindow({
               onClick={() => setShowStickers((prev) => !prev)}
               aria-label={t.stickers}
               className={cn(
-                "flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
+                "flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:size-10",
                 showStickers && "bg-secondary text-foreground"
               )}
             >
@@ -660,7 +673,7 @@ export function ChatWindow({
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
               aria-label={t.photo}
-              className="flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              className="flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:size-10"
             >
               {uploading ? (
                 <Loader2 className="size-5 animate-spin" aria-hidden="true" />
@@ -695,7 +708,8 @@ export function ChatWindow({
               maxLength={2000}
               placeholder={t.messagePlaceholder}
               aria-label={t.messagePlaceholder}
-              className="max-h-32 min-h-10 flex-1 resize-none rounded-2xl border border-border bg-background px-3.5 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+              ref={inputRef}
+              className="max-h-32 min-h-10 w-full min-w-0 flex-1 resize-none overflow-y-auto rounded-2xl border border-border bg-background px-3.5 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sky-500/40"
             />
 
             <button
@@ -708,7 +722,7 @@ export function ChatWindow({
               }}
               disabled={!input.trim() || sending}
               aria-label={t.send}
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-sky-600 text-white transition-colors hover:bg-sky-700 disabled:opacity-40"
+              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-sky-600 text-white transition-colors hover:bg-sky-700 disabled:opacity-40 sm:size-10"
             >
               <SendHorizontal className="size-5" aria-hidden="true" />
             </button>

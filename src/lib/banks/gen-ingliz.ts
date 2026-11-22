@@ -72,7 +72,7 @@ const WORDS_A2: Word[] = [
   W("coat", "palto", "пальто"),
 ];
 
-const WORDS_B1: Word[] = [
+export const WORDS_B1: Word[] = [
   W("improve", "yaxshilamoq", "улучшать"), W("decide", "qaror qilmoq", "решать"),
   W("describe", "tavsiflamoq", "описывать"), W("explain", "tushuntirmoq", "объяснять"),
   W("remember", "eslab qolmoq", "помнить"), W("forget", "unutmoq", "забывать"),
@@ -101,7 +101,7 @@ const WORDS_B1: Word[] = [
   W("wish", "tilamoq", "желать"), W("invite", "taklif qilmoq", "приглашать"),
 ];
 
-const WORDS_B2: Word[] = [
+export const WORDS_B2: Word[] = [
   W("achieve", "erishmoq", "достигать"), W("analyze", "tahlil qilmoq", "анализировать"),
   W("available", "mavjud", "доступный"), W("benefit", "foyda", "польза"),
   W("contribute", "hissa qo'shmoq", "вносить вклад"), W("create", "yaratmoq", "создавать"),
@@ -335,8 +335,8 @@ function genEnglishBank(level: "a1" | "a2" | "b1" | "b2" | "ielts-e" | "ielts-m"
     WQ_IDX = k;
     for (const w of pool) out.push(wordQ(rng, w, k % 2 === 1));
   }
-  if (level === "a1" || level === "a2" || level === "ielts-e") {
-    // Raqamlar, hafta kunlari, oylar, qarama-qarshi so'zlar
+  if (level === "a1") {
+    // Raqamlar, hafta kunlari, oylar, qarama-qarshi so'zlar — FAQAT A1
     const NUMS = [["one","bir","один"],["two","ikki","два"],["three","uch","три"],["four","to'rt","четыре"],["five","besh","пять"],["six","olti","шесть"],["seven","yetti","семь"],["eight","sakkiz","восемь"],["nine","to'qqiz","девять"],["ten","o'n","десять"]];
     const DAYS = [["Monday","dushanba","понедельник"],["Tuesday","seshanba","вторник"],["Wednesday","chorshanba","среда"],["Thursday","payshanba","четверг"],["Friday","juma","пятница"],["Saturday","shanba","суббота"],["Sunday","yakshanba","воскресенье"]];
     const MONTHS = [["January","yanvar","январь"],["February","fevral","февраль"],["March","mart","март"],["April","aprel","апрель"],["May","may","май"],["June","iyun","июнь"],["July","iyul","июль"],["August","avgust","август"],["September","sentabr","сентябрь"],["October","oktabr","октябрь"],["November","noyabr","ноябрь"],["December","dekabr","декабрь"]];
@@ -404,8 +404,9 @@ function genEnglishBank(level: "a1" | "a2" | "b1" | "b2" | "ielts-e" | "ielts-m"
       }
     }
   }
-  if (level === "a2" || level === "b1" || level === "b2" || level.startsWith("ielts")) {
-    // Present Simple 3-shaxs
+  if (level === "a2") {
+    // Present Simple 3-shaxs, Past Simple, predloglar, ko'plik — FAQAT A2
+    // (b1/b2/ielts uchun haqiqiy daraja banklari gen-ingliz-b1b2.ts da)
     const P3: Array<[string, string]> = [
       ["play", "plays"], ["watch", "watches"], ["read", "reads"], ["write", "writes"],
       ["walk", "walks"], ["work", "works"], ["study", "studies"], ["go", "goes"],
@@ -448,36 +449,35 @@ function genEnglishBank(level: "a1" | "a2" | "b1" | "b2" | "ielts-e" | "ielts-m"
       }
     }
   }
-  if (level === "b1" || level === "b2" || level === "ielts-m" || level === "ielts-h") {
-    // Qiyosiy daraja
-    for (let k = 0; k < 2; k++) {
-      for (const [adj, comp] of COMPARATIVES) {
-        out.push(blankQ(rng, `This box is ___ (${adj}) than that one.`, comp, [`${adj}er`, `more ${adj}`, `${adj}est`].filter((x) => x !== comp)));
-      }
-    }
-  }
   return dedupe(out);
 }
 
 /* ================= LISTENING ================= */
 
 const HOUR_WORDS = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
-const MIN_WORDS: Array<[string, string]> = [["", "o'clock"], ["fifteen", "15"], ["thirty", "30"], ["forty-five", "45"]];
+const MIN_WORDS: Array<[string, string]> = [
+  ["o'clock", "00"], ["oh five", "05"], ["ten", "10"], ["fifteen", "15"],
+  ["twenty", "20"], ["twenty-five", "25"], ["thirty", "30"], ["thirty-five", "35"],
+  ["forty", "40"], ["forty-five", "45"], ["fifty", "50"], ["fifty-five", "55"],
+];
 
-function timeAudio(h: number, mi: number): string {
+function timeAudio(h: number, mi: number, dif: string): string {
   const hw = HOUR_WORDS[h - 1] as string;
   const [mw] = MIN_WORDS[mi] as [string, string];
   const part = mi === 0 ? `${hw} o'clock` : `${hw} ${mw}`;
-  return `It is ${part} now.`;
+  // Har bir darajada audio matn farqli — testlar orasida savollar takrorlanmaydi
+  if (dif === "easy") return `It is ${part} now.`;
+  if (dif === "middle") return `The current time is exactly ${part}. Please write it down.`;
+  return `Could you tell me what time it is? — Certainly, my watch shows ${part} sharp.`;
 }
 
 function genListeningBank(dif: string): QGen[] {
   const rng = rngOf(`listen-${dif}`);
   const out: QGen[] = [];
-  // Vaqt
+  // Vaqt (12 soat × 12 daqiqa varianti — ko'plab unique kombinatsiya)
   for (let i = 0; i < 130; i++) {
     const h = rangeInt(rng, 1, 12);
-    const mi = rangeInt(rng, 0, 3);
+    const mi = rangeInt(rng, 0, MIN_WORDS.length - 1);
     const label = mi === 0 ? `${h}:00` : `${h}:${(MIN_WORDS[mi] as [string, string])[1]}`;
     const { o, correct } = optionsFor(
       rng,
@@ -492,7 +492,7 @@ function genListeningBank(dif: string): QGen[] {
       },
       o,
       correct,
-      audio: timeAudio(h, mi),
+      audio: timeAudio(h, mi, dif),
     });
   }
   // Joy
@@ -527,6 +527,7 @@ function genListeningBank(dif: string): QGen[] {
   for (let i = 0; i < 96; i++) {
     const [place, ans, distr] = PLACES[i % PLACES.length] as [string, L3, L3[]];
     const name = ["Anna", "my brother", "my sister", "Tom", "Mr. Brown", "my uncle", "Lola", "my friend"][(i >> 2) % 8] as string;
+    const Name = name.charAt(0).toUpperCase() + name.slice(1);
     const { o, correct } = optionsFor(rng, ans, distr);
     out.push({
       t: {
@@ -536,7 +537,12 @@ function genListeningBank(dif: string): QGen[] {
       },
       o,
       correct,
-      audio: `${name.charAt(0).toUpperCase() + name.slice(1)} works in a ${place} near the city center.`,
+      audio:
+        dif === "easy"
+          ? `${Name} works in a ${place} near the city center.`
+          : dif === "middle"
+            ? `${Name} has worked in a ${place} in the city centre for five years and really enjoys it.`
+            : `If you ask ${name} where he or she earns a living, the answer will be: in a ${place} located downtown.`,
     });
   }
   for (let i = 0; i < 96; i++) {
@@ -544,6 +550,7 @@ function genListeningBank(dif: string): QGen[] {
     const distr = JOBS.filter((x) => x[0] !== job).map((x) => x[1]);
     const { o, correct } = optionsFor(rng, ans, distr);
     const name = ["Anna", "Mr. Smith", "Mrs. Brown", "My uncle", "Tom", "My aunt", "Mr. Lee", "Aziza"][(i >> 2) % 8] as string;
+    const Name = name.charAt(0).toUpperCase() + name.slice(1);
     out.push({
       t: {
         uz: "Audioni tinglang: (shaxs)ning kasbi nima?",
@@ -552,14 +559,20 @@ function genListeningBank(dif: string): QGen[] {
       },
       o,
       correct,
-      audio: `${name} is ${job} and works five days a week.`,
+      audio:
+        dif === "easy"
+          ? `${Name} is ${job} and works five days a week.`
+          : dif === "middle"
+            ? `${Name} has recently started working as ${job} at a well-known company.`
+            : `Many people wonder what ${name} does for a living; in fact, ${name} is ${job}.`,
     });
   }
-  // Raqamlar
-  const NUMW = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+  // Raqamlar (8 shaxs × 10×8 kombinatsiya — unique)
+  const NUMW = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+  const NUM_WHO = ["Anna", "Tom", "Lola", "Aziz", "My cousin", "Our neighbour", "My classmate", "My friend"];
   for (let i = 0; i < 90; i++) {
-    const n = rangeInt(rng, 2, 9);
-    const m = rangeInt(rng, 1, 6);
+    const n = rangeInt(rng, 2, 11);
+    const m = rangeInt(rng, 1, 8);
     const { o, correct } = optionsFor(
       rng,
       same(String(n)),
@@ -573,7 +586,12 @@ function genListeningBank(dif: string): QGen[] {
       },
       o,
       correct,
-      audio: `I have ${NUMW[n - 1]} brothers and ${NUMW[m - 1]} sister${m > 1 ? "s" : ""}.`,
+      audio:
+        dif === "easy"
+          ? `${NUM_WHO[i % NUM_WHO.length]} has ${NUMW[n - 1]} brothers and ${NUMW[m - 1]} sister${m > 1 ? "s" : ""}.`
+          : dif === "middle"
+            ? `In ${NUM_WHO[i % NUM_WHO.length]}'s family there are ${NUMW[n - 1]} brothers and ${NUMW[m - 1]} sister${m > 1 ? "s" : ""}, and they all get along well.`
+            : `Let me introduce ${NUM_WHO[i % NUM_WHO.length]}'s family properly: there are ${NUMW[n - 1]} brothers and, in addition, ${NUMW[m - 1]} sister${m > 1 ? "s" : ""} who live abroad.`,
     });
   }
   // Ranglar va narsalar (barcha darajalar)
@@ -601,7 +619,12 @@ function genListeningBank(dif: string): QGen[] {
       },
       o,
       correct,
-      audio: `My ${adj} ${thing} is ${cw}, and I like it very much.`,
+      audio:
+        dif === "easy"
+          ? `My ${adj} ${thing} is ${cw}, and I like it very much.`
+          : dif === "middle"
+            ? `The ${thing} I bought yesterday turned out to be ${cw}, and it suits me perfectly.`
+            : `If you are wondering about the colour of my ${thing}, I should mention that it is ${cw}, although I once preferred another one.`,
     });
   }
   // Xarid: nima oldi, qancha to'ladi
@@ -628,7 +651,12 @@ function genListeningBank(dif: string): QGen[] {
       },
       o,
       correct,
-      audio: `${who === "I" ? "At the market I" : who === "We" ? "At the market we" : `${who} at the market`} bought two kilos of ${item} for breakfast.`,
+      audio:
+        dif === "easy"
+          ? `${who === "I" ? "At the market I" : who === "We" ? "At the market we" : `${who} at the market`} bought two kilos of ${item} for breakfast.`
+          : dif === "middle"
+            ? `At the grocery store, ${who.toLowerCase()} picked up two kilos of ${item} for breakfast this morning.`
+            : `Before heading home, ${who.toLowerCase()} stopped at the market and bought two kilos of ${item}, which we are going to cook for breakfast.`,
     });
   }
   // Maktab: qaysi fan
@@ -653,7 +681,12 @@ function genListeningBank(dif: string): QGen[] {
       },
       o,
       correct,
-      audio: `On ${day} the first lesson is ${sub}, and the second one is chemistry in the laboratory.`,
+      audio:
+        dif === "easy"
+          ? `On ${day} the first lesson is ${sub}, and the second one is chemistry in the laboratory.`
+          : dif === "middle"
+            ? `According to the timetable, the lesson on ${day} starts with ${sub}, followed by chemistry in the laboratory.`
+            : `Pupils were informed that the schedule for ${day} begins with ${sub}, and the second period will take place in the chemistry laboratory.`,
     });
   }
   // Yo'nalish
@@ -677,7 +710,12 @@ function genListeningBank(dif: string): QGen[] {
       },
       o,
       correct,
-      audio: `Excuse me, when you reach ${lm}, please ${d} and you will see the post office.`,
+      audio:
+        dif === "easy"
+          ? `Excuse me, when you reach ${lm}, please ${d} and you will see the post office.`
+          : dif === "middle"
+            ? `To get to the post office, walk straight until you arrive at ${lm}, and then ${d}.`
+            : `Allow me to give you detailed directions: once you get to ${lm}, you should ${d}, and the post office will be right in front of you.`,
     });
   }
   // Oilaviy holat
@@ -690,6 +728,7 @@ function genListeningBank(dif: string): QGen[] {
   for (let i = 0; i < 64; i++) {
     const [j, ans] = FAMS[i % FAMS.length] as [string, L3];
     const who = ["my father", "my mother", "my elder brother", "my aunt", "my grandfather", "my cousin", "my uncle", "my sister"][(i >> 2) % 8] as string;
+    const Who = who.charAt(0).toUpperCase() + who.slice(1);
     const distr = FAMS.filter((x) => x[0] !== j).map((x) => x[1]);
     const { o, correct } = optionsFor(rng, ans, distr);
     out.push({
@@ -700,7 +739,12 @@ function genListeningBank(dif: string): QGen[] {
       },
       o,
       correct,
-      audio: `${who.charAt(0).toUpperCase() + who.slice(1)} is ${j}, and ${who.startsWith("my") ? "he" : "she"} works six days a week.`,
+      audio:
+        dif === "easy"
+          ? `${Who} is ${j}, and ${who.startsWith("my") ? "he" : "she"} works six days a week.`
+          : dif === "middle"
+            ? `${Who} has been ${j} for many years, and the whole family is proud of that.`
+            : `People often ask about ${who}'s profession: ${who} is ${j} and has kept this job for over a decade.`,
     });
   }
   if (dif !== "easy") {
@@ -725,7 +769,12 @@ function genListeningBank(dif: string): QGen[] {
         },
         o,
         correct,
-        audio: `Today in ${city} it is ${w}, so take an umbrella if you go out.`,
+        audio:
+        dif === "easy"
+          ? `Today in ${city} it is ${w}, so take an umbrella if you go out.`
+          : dif === "middle"
+            ? `Here is the weather report: in ${city} today it is ${w}, and an umbrella is strongly advised.`
+            : `Forecasters warn that conditions in ${city} today are ${w}, so an umbrella would certainly be advisable if you plan to go out.`,
       });
     }
     // Narxlar
@@ -744,7 +793,12 @@ function genListeningBank(dif: string): QGen[] {
         },
         o,
         correct,
-        audio: `A large cup of tea costs ${price + 2000} soums and a small cup costs ${price} soums.`,
+        audio:
+        dif === "easy"
+          ? `A large cup of tea costs ${price + 2000} soums and a small cup costs ${price} soums.`
+          : dif === "middle"
+            ? `Please note the new menu prices: a small cup of tea is ${price} soums, while a large one costs ${price + 2000} soums.`
+            : `Due to recent changes, the small tea now costs ${price} soums, compared with ${price + 2000} soums for the large size.`,
       });
     }
     // Ikkita fakt
@@ -764,7 +818,12 @@ function genListeningBank(dif: string): QGen[] {
         },
         o,
         correct,
-        audio: `The museum opens at ${HOUR_WORDS[h - 1]} o'clock in the morning and closes at ${HOUR_WORDS[h2 - 1]} o'clock in the evening.`,
+        audio:
+        dif === "easy"
+          ? `The museum opens at ${HOUR_WORDS[h - 1]} o'clock in the morning and closes at ${HOUR_WORDS[h2 - 1]} o'clock in the evening.`
+          : dif === "middle"
+            ? `Here are the opening hours: the museum welcomes visitors from ${HOUR_WORDS[h - 1]} o'clock in the morning until ${HOUR_WORDS[h2 - 1]} o'clock in the evening.`
+            : `A recorded message states that the museum's doors open at ${HOUR_WORDS[h - 1]} o'clock each morning and close at ${HOUR_WORDS[h2 - 1]} o'clock in the evening.`,
       });
     }
   }

@@ -1221,9 +1221,52 @@ async function repairStaticOptions(): Promise<void> {
   }
 }
 
+/**
+ * MIGRATSİYA v2 (bir marta): ingliz darajalaridagi eski generatsiya savollari
+ * o'chiriladi — ular boshqa darajalar bilan TAKRORLANGAN va juda oson edi.
+ * Yangi banklar (haqiqiy B1/B2/IELTS + darajaga xos listening audiosi) o'rniga
+ * yoziladi. Versiya belgisi: quiz_cefr_b1_gen1 matni yangi bankning 1-savoliga
+ * teng bo'lsa — migratsiya allaqachon bajarilgan, hech narsa o'chirilmaydi.
+ */
+const REGEN_QUIZ_IDS = [
+  "quiz_cefr_a1",
+  "quiz_cefr_a2",
+  "quiz_cefr_b1",
+  "quiz_cefr_b2",
+  "quiz_ielts_easy",
+  "quiz_ielts_middle",
+  "quiz_ielts_hard",
+  "quiz_listening_easy",
+  "quiz_listening_middle",
+  "quiz_listening_hard",
+];
+
+async function purgeRegeneratedEnglishQuestions(): Promise<void> {
+  try {
+    const probeId = "quiz_cefr_b1_gen1";
+    const probe = await db.question.findUnique({
+      where: { id: probeId },
+      select: { text: true },
+    });
+    const expected = GEN_QUESTIONS["quiz_cefr_b1"]?.[0]?.t.uz ?? null;
+    if (probe && expected && probe.text === expected) {
+      return; // migratsiya bajarilgan — eski bazani saqlab qolamiz
+    }
+    for (const quizId of REGEN_QUIZ_IDS) {
+      await db.question.deleteMany({
+        where: { quizId, id: { startsWith: `${quizId}_gen` } },
+      });
+    }
+    console.log("[seed] migratsiya v2: eski ingliz daraja savollari o'chirildi (yangi banklar yoziladi)");
+  } catch (e) {
+    console.error("[seed] purgeRegeneratedEnglishQuestions xatosi:", e);
+  }
+}
+
 /** Kontent sinxronizatsiyasi — idempotent: mavjud qatorlar o'tkazib yuboriladi,
  * yangilari yaratiladi. Yangi fan/test qo'shilsa ham mavjud bazada paydo bo'ladi. */
 async function seedContent(): Promise<void> {
+  await purgeRegeneratedEnglishQuestions();
   for (const s of CONTENT) {
     // Qo'shimcha savollarni mavjud testlarga qo'shib chiqamiz
     const sWithExtras: SubjectDef2 = {
