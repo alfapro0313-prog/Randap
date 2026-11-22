@@ -9,6 +9,8 @@ const DEVICE_KEY_STORAGE = "randap_device_key";
 const BASE_DEVICE_KEY_STORAGE = "randap_base_device_key";
 /** Saytga kirish sessiyasi (login gate) — ism + Gmail */
 export const SESSION_STORAGE = "randap_session";
+/** Sessiya o'zgarganda (login/logout) yuboriladi — statistikaga ham xabar beradi */
+export const SESSION_EVENT = "randap-session-changed";
 
 export type LoginSession = {
   name: string;
@@ -39,6 +41,7 @@ export function writeSession(session: LoginSession) {
     // Hisob kaliti — barcha ma'lumotlar endi shu kalit atrofida saqlanadi:
     // boshqa gmail bilan kirsa eski ma'lumotlar ko'rinmaydi
     if (session.accountKey) setDeviceKey(session.accountKey);
+    window.dispatchEvent(new Event(SESSION_EVENT));
   } catch {
     // ignore
   }
@@ -49,6 +52,7 @@ export function clearSession() {
     window.localStorage.removeItem(SESSION_STORAGE);
     // Chiqishda qurilma asosiy kalitiga qaytadi (login formasi uchun)
     setDeviceKey(getBaseDeviceKey());
+    window.dispatchEvent(new Event(SESSION_EVENT));
   } catch {
     // ignore
   }

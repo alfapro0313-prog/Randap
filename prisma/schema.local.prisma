@@ -305,6 +305,36 @@ model Account {
   updatedAt    DateTime  @updatedAt
 }
 
+/* ---------- Sayt statistikasi (admin panel) ---------- */
+
+/// Har bir sahifa ko'rishi — "jami ko'rishlar" va "noyob mehmonlar" hisobi.
+/// Anonim mehmonlar ham sanaladi (visitorId = qurilmaning o'zgarmas kaliti).
+model SiteVisit {
+  id        String   @id @default(cuid())
+  visitorId String
+  /// Ko'rilgan sahifa ("/", "/haqida", ...)
+  path      String
+  /// Kirgan foydalanuvchi accountKey (login bo'lsa, aks holda null)
+  userKey   String?
+  createdAt DateTime @default(now())
+
+  @@index([visitorId])
+  @@index([createdAt])
+}
+
+/// Hozir saytda kim bor (online) — brauzer har 60 soniyada "yurak urishi"
+/// yuboradi. Online = oxirgi 3 daqiqada ping yuborgan qurilmalar.
+model Presence {
+  id        String   @id @default(cuid())
+  visitorId String   @unique
+  userKey   String?
+  path      String   @default("")
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@index([updatedAt])
+}
+
 /// Do'kondan olingan narsalar (stikerlar, avatar rasmi)
 model OwnedItem {
   id        String   @id @default(cuid())

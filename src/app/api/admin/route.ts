@@ -19,9 +19,99 @@ import { isAdminGmail } from "@/lib/randap-admin";
 /** Doimiy blok — 9999-yilgacha (deyarli abadiy) */
 const PERMANENT_MS = 253402300000000;
 
+/** "Online" oynasi — oxirgi 3 daqiqada ping yuborgan qurilmalar */
+const ONLINE_MS = 3 * 60 * 1000;
+
 function blockExpiry(hours: number): Date {
   if (!hours || hours <= 0) return new Date(PERMANENT_MS);
   return new Date(Date.now() + hours * 60 * 60 * 1000);
+}
+
+/**
+ * Sayt statistikasi (admin panel "Statistika" tabi):
+ *  - jami sahifa ko'rishlari + noyob mehmonlar (SiteVisit);
+ *  - oxirgi 24 soatdagi mehmonlar;
+ *  - HOZIR ONLINE: oxirgi 3 daqiqada yurak urishi bo'lgan qurilmalar
+ *    (kirgan foydalanuvchilar ism+gmail bilan, anonimlar alohida sanaladi);
+ *  - oxirgi 7 kunlik kunlik ko'rish/mehmon grafigi uchun ma'lumot.
+ */
+async function buildSiteStats() {
+  const nowMs = Date.now();
+  const onlineSince = new Date(nowMs - ONLINE_MS);
+  const daySince = new Date(nowMs - 24 * 60 * 60 * 1000);
+
+  const [totalViews, visitorGroups, dayGroups, presences] = await Promise.all([
+    db.siteVisit.count(),
+    db.siteVisit.groupBy({ by: ["visitorId"], _count: { _all: true } }),
+    db.siteVisit.groupBy({
+      by: ["visitorId"],
+      where: { createdAt: { gte: daySince } },
+    }),
+    db.presence.findMany({ where: { updatedAt: { gte: onlineSince } } }),
+  ]);
+
+  // Oxirgi 7 kun: har kun uchun ko'rishlar + noyob mehmonlar (UTC kunlar)
+  const days = await Promise.all(
+    Array.from({ length: 7 }, (_, i) => {
+      const start = new Date(nowMs - (6 - i) * 24 * 60 * 60 * 1000);
+      start.setUTCHours(0, 0, 0, 0);
+      const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+      return db.siteVisit
+        .groupBy({
+          by: ["visitorId"],
+          where: { createdAt: { gte: start, lt: end } },
+          _count: { _all: true },
+        })
+        .then((groups) => ({
+          date: start.toISOString().slice(0, 10),
+          views: groups.reduce((sum, g) => sum + g._count._all, 0),
+          visitors: groups.length,
+        }));
+    })
+  );
+
+  // Online kirgan foydalanuvchilar — ism/gmail bilan
+  const onlineKeys = [
+    ...new Set(
+      presences
+        .map((p) => p.userKey)
+        .filter((k): k is string => !!k)
+    ),
+  ];
+  const onlineAccounts = onlineKeys.length
+    ? await db.account.findMany({
+        where: { accountKey: { in: onlineKeys } },
+        select: { accountKey: true, name: true, gmail: true },
+      })
+    : [];
+  const nameByKey = new Map(onlineAccounts.map((a) => [a.accountKey, a]));
+  const seenKey = new Set<string>();
+  const onlineUsers = presences
+    .filter((p) => p.userKey && nameByKey.has(p.userKey))
+    .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+    .flatMap((p) => {
+      if (!p.userKey || seenKey.has(p.userKey)) return [];
+      seenKey.add(p.userKey);
+      const acct = nameByKey.get(p.userKey)!;
+      return [
+        {
+          name: acct.name,
+          gmail: acct.gmail,
+          path: p.path,
+          at: new Date(p.updatedAt).getTime(),
+        },
+      ];
+    });
+  const onlineGuests = presences.filter((p) => !p.userKey).length;
+
+  return {
+    totalViews,
+    totalVisitors: visitorGroups.length,
+    visitors24h: dayGroups.length,
+    onlineGuests,
+    onlineUsers,
+    days,
+  };
 }
 
 export async function GET(req: Request) {
@@ -44,6 +134,14 @@ export async function GET(req: Request) {
       where: { resolvedAt: null },
     });
 
+    // Statistika xato bersa ham panel ochilib qoladi (stats null bo'ladi)
+    let stats: Awaited<ReturnType<typeof buildSiteStats>> | null = null;
+    try {
+      stats = await buildSiteStats();
+    } catch (statsError) {
+      console.error("/api/admin stats error:", statsError);
+    }
+
     return NextResponse.json({
       ok: true,
       accounts: accounts.map((a) => ({
@@ -60,6 +158,7 @@ export async function GET(req: Request) {
         blockReason: a.blockReason ?? null,
       })),
       openComplaints: complaintCount,
+      stats,
     });
   } catch (error) {
     console.error("/api/admin GET error:", error);

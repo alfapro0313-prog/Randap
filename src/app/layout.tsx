@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { SwRegister } from "@/components/randap/sw-register";
+import { VisitTracker } from "@/components/randap/visit-tracker";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -116,6 +117,7 @@ export default function RootLayout({
         {children}
         <Toaster />
         <SwRegister />
+        <VisitTracker />
         <Analytics />
         {/* JSON-LD: Google'ga sayt haqida aniq ma'lumot beradi */}
         <Script

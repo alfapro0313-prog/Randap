@@ -3,8 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   Ban,
+  BarChart3,
   Check,
   CheckCircle2,
+  Clock,
+  Eye,
   Loader2,
   MessageSquareWarning,
   RefreshCw,
@@ -12,11 +15,12 @@ import {
   ShieldCheck,
   Trash2,
   Users,
+  Wifi,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useLang } from "./lang-provider";
 import { activeBlockMs, ADMIN_GMAIL, formatLeft, remainingMs } from "@/lib/randap-admin";
-import { timeAgo } from "@/lib/randap-i18n";
+import { compactCount, langLocale, timeAgo } from "@/lib/randap-i18n";
 import { cn } from "@/lib/utils";
 
 type AdminAccount = {
@@ -40,16 +44,33 @@ type AdminComplaint = {
   resolvedAt: number | null;
 };
 
+type AdminStats = {
+  totalViews: number;
+  totalVisitors: number;
+  visitors24h: number;
+  onlineGuests: number;
+  onlineUsers: Array<{
+    name: string;
+    gmail: string;
+    path: string;
+    at: number;
+  }>;
+  days: Array<{ date: string; views: number; visitors: number }>;
+};
+
 /**
  * ADMIN PANEL — faqat sayt egasi ko'radi (sidebar "Admin" tugmasi orqali).
+ *  - Statistika: jami sahifa ko'rishlar, noyob mehmonlar, HOZIR ONLINE
+ *    ro'yxati (ism+gmail bilan) va oxirgi 7 kunlik grafik;
  *  - Kirganlar: kim, qachon, necha marta kirgan + 3 soatga bloklash;
  *  - Shikoyatlar: profil ichidan yozilgan shikoyatlar (yechish/o'chirish).
  */
 export function AdminView({ deviceKey }: { deviceKey: string }) {
   const { t, lang } = useLang();
-  const [tab, setTab] = useState<"users" | "complaints">("users");
+  const [tab, setTab] = useState<"stats" | "users" | "complaints">("stats");
   const [accounts, setAccounts] = useState<AdminAccount[] | null>(null);
   const [complaints, setComplaints] = useState<AdminComplaint[] | null>(null);
+  const [stats, setStats] = useState<AdminStats | null>(null);
   const [busy, setBusy] = useState("");
   // Ochilgan blok formasi: qaysi gmail + tanlangan muddat + sabab
   const [blockForm, setBlockForm] = useState<{
@@ -64,8 +85,12 @@ export function AdminView({ deviceKey }: { deviceKey: string }) {
         `/api/admin?deviceKey=${encodeURIComponent(deviceKey)}`
       );
       const data = await res.json();
-      if (data.ok) setAccounts(data.accounts as AdminAccount[]);
-      else setAccounts([]);
+      if (data.ok) {
+        setAccounts(data.accounts as AdminAccount[]);
+        if (data.stats) setStats(data.stats as AdminStats);
+      } else {
+        setAccounts([]);
+      }
     } catch {
       setAccounts([]);
     }
@@ -91,6 +116,14 @@ export function AdminView({ deviceKey }: { deviceKey: string }) {
     }, 0);
     return () => window.clearTimeout(id);
   }, [loadUsers, loadComplaints]);
+
+  // Statistika tabi ochiq turganda har 30 soniyada avto-yangilash —
+  // "hozir online" ro'yxati tirik bo'lib turadi
+  useEffect(() => {
+    if (tab !== "stats") return;
+    const id = window.setInterval(() => void loadUsers(), 30000);
+    return () => window.clearInterval(id);
+  }, [tab, loadUsers]);
 
   async function setBlock(
     gmail: string,
@@ -205,7 +238,21 @@ export function AdminView({ deviceKey }: { deviceKey: string }) {
       </div>
 
       {/* Tablar */}
-      <div className="flex gap-2" role="tablist">
+      <div className="flex flex-wrap gap-2" role="tablist">
+        <button
+          role="tab"
+          aria-selected={tab === "stats"}
+          onClick={() => setTab("stats")}
+          className={cn(
+            "flex min-h-[40px] items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors",
+            tab === "stats"
+              ? "bg-primary text-primary-foreground"
+              : "border border-border text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <BarChart3 className="size-4" aria-hidden="true" />
+          {t("adminTabStats")}
+        </button>
         <button
           role="tab"
           aria-selected={tab === "users"}
@@ -240,6 +287,186 @@ export function AdminView({ deviceKey }: { deviceKey: string }) {
           ) : null}
         </button>
       </div>
+
+      {/* --- STATISTIKA --- */}
+      {tab === "stats" ? (
+        stats === null ? (
+          <div className="flex justify-center py-16">
+            <Loader2 className="size-8 animate-spin text-muted-foreground" aria-hidden="true" />
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {/* Kartalar: jami ko'rish / noyob mehmonlar / 24 soat / online */}
+            {(() => {
+              const onlineCount = stats.onlineUsers.length + stats.onlineGuests;
+              const cards = [
+                {
+                  icon: Eye,
+                  label: t("statTotalViews"),
+                  value: stats.totalViews,
+                  online: false,
+                },
+                {
+                  icon: Users,
+                  label: t("statUniqueVisitors"),
+                  value: stats.totalVisitors,
+                  online: false,
+                },
+                {
+                  icon: Clock,
+                  label: t("statVisitors24h"),
+                  value: stats.visitors24h,
+                  online: false,
+                },
+                {
+                  icon: Wifi,
+                  label: t("statOnlineNow"),
+                  value: onlineCount,
+                  online: true,
+                },
+              ];
+              return (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {cards.map((c) => (
+                    <div
+                      key={c.label}
+                      className={cn(
+                        "rounded-2xl border bg-card p-4",
+                        c.online ? "border-emerald-500/40" : "border-border"
+                      )}
+                    >
+                      <div className="flex items-center gap-2">
+                        <c.icon
+                          className={cn(
+                            "size-4 shrink-0",
+                            c.online ? "text-emerald-500" : "text-muted-foreground"
+                          )}
+                          aria-hidden="true"
+                        />
+                        <p className="truncate text-xs font-semibold text-muted-foreground">
+                          {c.label}
+                        </p>
+                      </div>
+                      <p
+                        className={cn(
+                          "mt-2 text-2xl font-bold tabular-nums",
+                          c.online ? "text-emerald-500" : "text-foreground"
+                        )}
+                      >
+                        {compactCount(c.value, lang)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {/* Oxirgi 7 kunlik grafik */}
+            <div className="rounded-2xl border border-border bg-card p-5">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="size-4 text-muted-foreground" aria-hidden="true" />
+                <p className="text-sm font-semibold text-foreground">
+                  {t("statLast7Days")}
+                </p>
+              </div>
+              <div className="mt-4 flex items-end gap-1.5 sm:gap-3">
+                {stats.days.map((d) => {
+                  const maxViews = Math.max(1, ...stats.days.map((x) => x.views));
+                  const height = Math.max(4, Math.round((d.views / maxViews) * 100));
+                  const label = new Intl.DateTimeFormat(langLocale(lang), {
+                    day: "numeric",
+                    month: "short",
+                  }).format(new Date(`${d.date}T12:00:00Z`));
+                  return (
+                    <div
+                      key={d.date}
+                      className="flex min-w-0 flex-1 flex-col items-center gap-1.5"
+                    >
+                      <div
+                        className="flex h-28 w-full items-end"
+                        title={`${label}: ${t("statTooltipViews", { n: d.views })}, ${t(
+                          "statTooltipVisitors",
+                          { n: d.visitors }
+                        )}`}
+                      >
+                        <div
+                          className="w-full rounded-t-lg bg-primary/80 transition-colors hover:bg-primary"
+                          style={{ height: `${height}%` }}
+                        />
+                      </div>
+                      <span className="max-w-full truncate text-[10px] text-muted-foreground">
+                        {label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="mt-3 text-[11px] text-muted-foreground">
+                {t("statChartHint")}
+              </p>
+            </div>
+
+            {/* HOZIR ONLINE — kim turganini ko'rish */}
+            <div className="rounded-2xl border border-border bg-card p-5">
+              <div className="flex items-center gap-2">
+                <span className="relative flex size-2.5 shrink-0">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex size-2.5 rounded-full bg-emerald-500" />
+                </span>
+                <p className="text-sm font-semibold text-foreground">
+                  {t("statOnlineNow")}
+                </p>
+                <span className="ml-auto rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-bold text-emerald-600">
+                  {stats.onlineUsers.length + stats.onlineGuests}
+                </span>
+              </div>
+
+              {stats.onlineUsers.length + stats.onlineGuests === 0 ? (
+                <p className="mt-4 rounded-xl bg-secondary/50 p-4 text-center text-sm text-muted-foreground">
+                  {t("statOnlineNone")}
+                </p>
+              ) : (
+                <div className="mt-4 flex flex-col gap-2">
+                  {stats.onlineUsers.map((u) => (
+                    <div
+                      key={u.gmail}
+                      className="flex items-center gap-3 rounded-xl bg-secondary/50 p-3"
+                    >
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
+                        {(u.name.trim()[0] ?? "R").toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-foreground">
+                          {u.name}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground" dir="ltr">
+                          {u.gmail}
+                        </p>
+                      </div>
+                      <span className="shrink-0 text-[11px] text-muted-foreground">
+                        {timeAgo(new Date(u.at).toISOString(), lang)}
+                      </span>
+                    </div>
+                  ))}
+                  {stats.onlineGuests > 0 ? (
+                    <div className="flex items-center gap-3 rounded-xl border border-dashed border-border p-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold text-muted-foreground">
+                        <Eye className="size-4" aria-hidden="true" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {t("statOnlineGuests")}:{" "}
+                        <span className="font-bold text-foreground">
+                          {stats.onlineGuests}
+                        </span>
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      ) : null}
 
       {/* --- KIRGANLAR --- */}
       {tab === "users" ? (
