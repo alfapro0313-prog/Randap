@@ -1,7 +1,8 @@
 "use client";
 
 import { Check, LogOut, Settings, X } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { LANGS } from "@/lib/randap-i18n";
 import { clearSession, getDeviceKey } from "@/lib/randap-client";
 import { useLang } from "./lang-provider";
@@ -24,6 +25,10 @@ export function SettingsGear({
   const { t } = useLang();
   const [open, setOpen] = useState(false);
   const { lang, setLang } = useLang();
+  // Portal — header'dagi backdrop-blur "fixed" oynani header'ga qisib,
+  // tillarni ekranning tepasiga chiqarib yuborardi. Body'ga render qilamiz.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const handleLogout = useCallback(() => {
     try {
@@ -54,7 +59,7 @@ export function SettingsGear({
         <Settings className={iconClassName ?? "size-5"} aria-hidden="true" />
       </button>
 
-      {open ? (
+      {open && mounted ? createPortal(
         <div
           className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4"
           role="dialog"
@@ -120,7 +125,8 @@ export function SettingsGear({
               </p>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       ) : null}
     </>
   );

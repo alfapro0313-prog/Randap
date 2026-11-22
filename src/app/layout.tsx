@@ -97,6 +97,9 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#0a0a0a",
+  // Mobilda klaviatura ochilganda layout viewport kichrayadi — chat
+  // input klaviatura ortida qolib, yozilayotgan matn ko'rinmay qolmasligi uchun
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({

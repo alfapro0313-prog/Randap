@@ -523,7 +523,7 @@ export function ChatApp({ deviceKey, focusConversationId }: ChatAppProps) {
         </div>
       </div>
 
-      <div className="flex h-[calc(100dvh-215px)] min-h-[440px] overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="flex h-[calc(100dvh-215px)] overflow-hidden rounded-2xl border border-border bg-card sm:min-h-[440px]">
         {/* Chap ustun — profil, qidiruv, random chat, ro'yxatlar */}
         <div
           className={cn(

@@ -18,6 +18,11 @@ import {
 } from "./banks/gen-ingliz-b1b2";
 import { genListeningVHard1, genListeningVHard2 } from "./banks/gen-listening-vhard";
 import { genVeryHard1, genVeryHard2 } from "./banks/gen-veryhard";
+import {
+  genRusOson,
+  genRusOrtacha,
+  genRusQiyin,
+} from "./banks/gen-rus";
 
 const DIFS = ["easy", "middle", "hard"] as const;
 
@@ -66,6 +71,11 @@ for (const d of DIFS) {
   MAP[`quiz_listening_${d}`] = genListening(d);
 }
 
+/* RUS TILI — haqiqiy darajalar: oson (A1), o'rtacha (A2+/B1), qiyin (C1-C2) */
+MAP["quiz_rus_oson"] = genRusOson();
+MAP["quiz_rus_ortacha"] = genRusOrtacha();
+MAP["quiz_rus_qiyin"] = genRusQiyin();
+
 export { BANK_TARGET };
 
 /* Ingliz oilasi bo'yicha global cross-quiz dedupe:
@@ -95,6 +105,65 @@ for (const quizId of ENGLISH_FAMILY_ORDER) {
   MAP[quizId] = arr.filter((q) => {
     const correctVal = q.o[q.correct]?.uz ?? "";
     const key = `${q.t.uz}|${correctVal}|${q.audio ?? ""}`;
+    if (seenGlobal.has(key)) return false;
+    seenGlobal.add(key);
+    return true;
+  });
+}
+
+/* Tarix oilasi — sinflar/darajalar orasida bir xil savol qaytmaydi */
+const HISTORY_ORDER: string[] = [];
+for (const kind of ["uz", "jahon"] as const) {
+  for (const g of [7, 8, 9, 10, 11]) {
+    for (const d of DIFS) HISTORY_ORDER.push(`quiz_${kind}_${g}_${d}`);
+  }
+}
+for (const quizId of HISTORY_ORDER) {
+  const arr = MAP[quizId];
+  if (!arr) continue;
+  MAP[quizId] = arr.filter((q) => {
+    const correctVal = q.o[q.correct]?.uz ?? "";
+    const key = `${q.t.uz}|${correctVal}`;
+    if (seenGlobal.has(key)) return false;
+    seenGlobal.add(key);
+    return true;
+  });
+}
+
+/* Fanlar oilasi (matematika, fizika, kimyo, geografiya, ona tili, adabiyot):
+ * oson/o'rtacha/qiyin darajalar orasida bir xil savol qaytmaydi */
+const SCIENCE_ORDER = [
+  "quiz_mate_easy", "quiz_mate_middle", "quiz_mate_hard",
+  "quiz_fiz_easy", "quiz_fiz_middle", "quiz_fiz_hard",
+  "quiz_kim_easy", "quiz_kim_middle", "quiz_kim_hard",
+  "quiz_geo_easy", "quiz_geo_middle", "quiz_geo_hard",
+  "quiz_til_easy", "quiz_til_middle", "quiz_til_hard",
+  "quiz_adab_easy", "quiz_adab_middle", "quiz_adab_hard",
+];
+for (const quizId of SCIENCE_ORDER) {
+  const arr = MAP[quizId];
+  if (!arr) continue;
+  MAP[quizId] = arr.filter((q) => {
+    const correctVal = q.o[q.correct]?.uz ?? "";
+    const key = `${q.t.uz}|${correctVal}`;
+    if (seenGlobal.has(key)) return false;
+    seenGlobal.add(key);
+    return true;
+  });
+}
+
+/* Rus tili oilasi — 3 test bir-biridan mutlaqo farqli */
+const RUSSIAN_ORDER = [
+  "quiz_rus_oson",
+  "quiz_rus_ortacha",
+  "quiz_rus_qiyin",
+];
+for (const quizId of RUSSIAN_ORDER) {
+  const arr = MAP[quizId];
+  if (!arr) continue;
+  MAP[quizId] = arr.filter((q) => {
+    const correctVal = q.o[q.correct]?.uz ?? "";
+    const key = `${q.t.uz}|${correctVal}`;
     if (seenGlobal.has(key)) return false;
     seenGlobal.add(key);
     return true;

@@ -1072,6 +1072,89 @@ const INGLIZ: SubjectDef = {
   ],
 };
 
+/* ================= RUS TILI (oson / o'rtacha / juda qiyin) ================= */
+
+const RUS_TILI: SubjectDef = {
+  slug: "rus-tili",
+  name: "Rus tili",
+  description:
+    "Rus tili grammatikasi va leksikasi — oson (A1), o'rtacha (A2+/B1) va juda qiyin (C1-C2) darajalarda. Har bir testda 300 savol bankidan tasodifiy 10 tasi beriladi.",
+  icon: "languages",
+  color: "violet",
+  order: 12,
+  lessons: [
+    {
+      id: "lesson-rus-1",
+      title: "Rus alifbosi va o'qish qoidalari",
+      summary: "33 harf, jarangsizlashuv va urg'u — ruscha o'qishni tez o'rgatish.",
+      durationMin: 8,
+      content:
+        "Rus alifbosi 33 harfdan iborat: 10 unlinskiy (а, о, у, э, ы, и, е, ё, ю, я), 21 undosh va 2 belgi (ь, ъ). Harf va tovush bir xil emas: е, ё, ю, я ikki tovushni beradi (ye/yo/yu/ya) va oldingi undoshni yumshatadi: «брат» (aka) va «брать» (olmoq) qatorida р va р' har xil o'qiladi.\n\nJarangsizlashuv: so'z oxirida jarangli undosh jarangsizlashadi: «город» (shahar) oxirida «т» deb, «дуб» — «п» deb o'qiladi. -ого/-его qo'shimchalari «-ovo/-evo» deb o'qiladi: «красного» — «krasnavo».\n\nUrg'u rus tilida juda muhim: urg'u joyi ma'noni o'zgartiradi — «зáмок» (qal'a) va «замóк» (qulf). Urg'u belgisi yozilmaydi, shuning uchun so'zlarni faqat gap ichida, tovush bilan yodlash eng samarali usul. Har yangi so'zni baland ovozda 3 marta o'qing va 1 gap tuzing.",
+    },
+    {
+      id: "lesson-rus-2",
+      title: "Rus tilidagi 6 ta kelishik",
+      summary: "Kim? Nima? Kimni? Nimagа? — kelishiklarning qisqa yo'riqnomasi.",
+      durationMin: 9,
+      content:
+        "Rus tilida 6 ta kelishik bor va ot so'z qo'shimchalari bilan o'zgaradi. 1) Именительный (kim? nima?) — asosiy shakl: стол. 2) Родительный (kimning? nimaning?) — qaratqich va «yo'q» ma'nosida: нет стола. 3) Дательный (kimga? nimaga?) — yo'nalish va sovg'a: даю столу. 4) Винительный (kimni? nimani?) — harakat obyekti: вижу стол. 5) Творительный (kim bilan? nima bilan?) — vosita: пишу ручкой. 6) Предложенный (kimda? nimada? kim haqida?) — joy va mavzu: на столе, о работе.\n\nAmaliy maslahat: bir vaqtda hamma kelishikni yodlash shart emas. Avval Винительный va Предложный — ular gapirda eng ko'p uchraydi. Har bir kelishik uchun 1 ta iborani «asbob» qilib oling: «у меня есть» (menda bor), «нет денег» (pul yo'q), «иду в школу» (maktabga boraman), «говорю о работе» (ish haqida gapiraman).\n\nTestlarda aynan shu qo'llash (управление) asosiy xato manbai: «оплатить поездку» (PREDLOG YO'Q) lekin «заплатить ЗА поездку», «позвонить другу» (к YO'Q). Shu juftliklarni ro'yxat qilib yodlang — C1 darajadagi eng ko'p so'ralgan mavzu.",
+    },
+  ],
+  quizzes: [
+    {
+      id: "quiz_rus_oson",
+      title: "Rus tili — oson (A1)",
+      description:
+        "Kundalik so'zlar, alifbo, shaxs olmoshlari, hozirgi va o'tgan zamon asoslari. Boshlovchilar uchun.",
+      difficulty: "easy",
+      questions: [
+        { text: "Ruscha «salom» qanday yoziladi?", options: ["привет", "превет", "приветь", "привит"], correct: 0 },
+        { text: "«Kitob» so'zining ruscha tarjimasi qaysi?", options: ["книга", "книжка", "тетрадь", "страница"], correct: 0 },
+        { text: "«Спасибо» qaysi ma'noda ishlatiladi?", options: ["Rahmat", "Kechirasiz", "Salom", "Xayr"], correct: 0 },
+        { text: "«пять» nechani bildiradi?", options: ["5", "4", "6", "15"], correct: 0 },
+        { text: "Ruscha «oshxona» so'zi qaysi?", options: ["кухня", "купол", "куст", "кукла"], correct: 0 },
+        { text: "«Меня зовут...» nimani anglatadi?", options: ["Mening ismim...", "Men kelaman...", "Men yashayman...", "Menda bor..."], correct: 0 },
+        { text: "«дом» so'zi nimani anglatadi?", options: ["Uy", "Yo'l", "Dengiz", "Shahar"], correct: 0 },
+        { text: "«С новым годом!» nimani anglatadi?", options: ["Yangi yil muborak!", "Xayrli tong!", "Omad tilayman!", "Rahmat!"], correct: 0 },
+      ],
+    },
+    {
+      id: "quiz_rus_ortacha",
+      title: "Rus tili — o'rtacha (A2+/B1)",
+      description:
+        "Kelishiklar, fe'l turlari (вид), harakat fe'llari, «kerak/kerak emas» tuzilmalari. Qiyin darajadan sal past, osondan yuqori.",
+      difficulty: "middle",
+      questions: [
+        { text: "«Я иду в школу» nimani anglatadi?", options: ["Men maktabga boryapman", "Men maktabda o'qiyman", "Men maktabdan qaytdim", "Men maktabga bordim"], correct: 0 },
+        { text: "«Мне нужно идти» nimani anglatadi?", options: ["Menga borishim kerak", "Men bormoqchiman", "Men bordim", "Menga borish mumkin"], correct: 0 },
+        { text: "Qaysi so'z «do'st» ma'nosini bildiradi?", options: ["друг", "другой", "дружба", "другом"], correct: 0 },
+        { text: "«вчера» qaysi zamonga ishora qiladi?", options: ["O'tgan zamonga", "Hozirgi zamonga", "Kelasi zamonga", "Kelajakka"], correct: 0 },
+        { text: "«Мы говорили о работе» — qaysi kelishik?", options: ["Предложный", "Винительный", "Родительный", "Творительный"], correct: 0 },
+        { text: "«У меня есть время» nimani anglatadi?", options: ["Menda vaqt bor", "Menda vaqt yo'q", "Menga vaqt kerak", "Men vaqtni topdim"], correct: 0 },
+        { text: "«каждый день» nimani anglatadi?", options: ["Har kuni", "Bir kuni", "Kecha", "Ertaga"], correct: 0 },
+        { text: "«Я могу говорить по-русски» nimani anglatadi?", options: ["Men ruscha gapira olaman", "Men ruscha gaplashaman", "Men ruscha o'rganaman", "Men ruscha yozaman"], correct: 0 },
+      ],
+    },
+    {
+      id: "quiz_rus_qiyin",
+      title: "Rus tili — juda qiyin (C1-C2)",
+      description:
+        "Qatnash va avalg'ilosh, paronimlar, frazeologizmlar, kitobiy leksika, murakkab qo'shimchalar. Juda juda qiyin — faqat ustalar uchun!",
+      difficulty: "very-hard",
+      questions: [
+        { text: "«вопреки прогнозам» nimani anglatadi?", options: ["Prognozlarga qaramay", "Prognoz bo'yicha", "Prognozsiz", "Prognoz uchun"], correct: 0 },
+        { text: "«уклониться от ответа» nimani anglatadi?", options: ["Javobdan bo'shqolmoq", "Javob berishga shoshilmoq", "Javobni takrorlamoq", "Javobni yozmoq"], correct: 0 },
+        { text: "«двусмысленный» so'zi nimani anglatadi?", options: ["Ikki ma'noli", "Bema'ni", "Qisqa", "Aniq"], correct: 0 },
+        { text: "«суетиться» nimani anglatadi?", options: ["Ortiqcha shoshilmoq, g'arq bo'lmoq", "Tinchlanmoq", "Istirohat qilmoq", "Dam olmoq"], correct: 0 },
+        { text: "«перебивать собеседника» nimani anglatadi?", options: ["Suhbatdoshning so'zini bo'lmoq", "Suhbatdoshni kutmoq", "Suhbatdoshni olqishlamoq", "Suhbatni yopmoq"], correct: 0 },
+        { text: "«мнимый» so'zining ma'nosi qaysi?", options: ["Xayoliy, haqiqiy bo'lmagan", "Keng qamrovli", "Halol", "Mukammal"], correct: 0 },
+        { text: "«преувеличивать» nimani anglatadi?", options: ["Ortiqcha kattalashtirmoq", "Kichraytirmoq", "Aniq aytmoq", "Inkornoq"], correct: 0 },
+        { text: "«на седьмом небе от счастья» nimani anglatadi?", options: ["Bekendikdek xursand bo'lmoq", "G'azablanmoq", "Hayron qolmoq", "Xafa bo'lmoq"], correct: 0 },
+      ],
+    },
+  ],
+};
+
 /* ================= SEED (idempotent) ================= */
 
 const CONTENT: SubjectDef[] = [
@@ -1079,6 +1162,7 @@ const CONTENT: SubjectDef[] = [
   JAHON_TARIXI,
   INGLIZ,
   ...NEW_SUBJECTS,
+  RUS_TILI,
 ];
 
 /** Yangi kontent ham seed qilinishi uchun marker yangi testga ko'chirildi.

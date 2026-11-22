@@ -62,6 +62,11 @@ const EN: ContentPack = {
       description:
         "Classical and modern Uzbek literature — three difficulty levels.",
     },
+    "rus-tili": {
+      name: "Russian language",
+      description:
+        "Russian grammar and vocabulary — easy (A1), intermediate (A2+/B1) and very hard (C1-C2) levels.",
+    },
   },
   quizzes: {
     "matematika:0": {
@@ -100,6 +105,21 @@ const EN: ContentPack = {
       title: "History of Uzbekistan",
       description:
         "The Timurids, the Silk Road and independence — 10 questions.",
+    },
+    "rus-tili:0": {
+      title: "Russian — Easy (A1)",
+      description:
+        "Everyday words, alphabet, personal pronouns, present and past tense basics.",
+    },
+    "rus-tili:1": {
+      title: "Russian — Intermediate (A2+/B1)",
+      description:
+        "Cases, verb aspects, verbs of motion, 'must/need' structures.",
+    },
+    "rus-tili:2": {
+      title: "Russian — Very Hard (C1-C2)",
+      description:
+        "Participles, paronyms, idioms, bookish vocabulary. For masters only!",
     },
   },
   lessons: {
@@ -444,6 +464,11 @@ const RU: ContentPack = {
       description:
         "Классическая и современная узбекская литература — три уровня сложности.",
     },
+    "rus-tili": {
+      name: "Русский язык",
+      description:
+        "Грамматика и лексика русского языка — лёгкий (A1), средний (A2+/B1) и очень сложный (C1-C2) уровни.",
+    },
   },
   quizzes: {
     "matematika:0": {
@@ -484,6 +509,21 @@ const RU: ContentPack = {
       title: "История Узбекистана",
       description:
         "Тимуриды, Шёлковый путь и независимость — 10 вопросов.",
+    },
+    "rus-tili:0": {
+      title: "Русский — лёгкий (A1)",
+      description:
+        "Бытовые слова, алфавит, личные местоимения, основы настоящего и прошедшего времени.",
+    },
+    "rus-tili:1": {
+      title: "Русский — средний (A2+/B1)",
+      description:
+        "Падежи, виды глагола, глаголы движения, конструкции «надо/нужно».",
+    },
+    "rus-tili:2": {
+      title: "Русский — очень сложный (C1-C2)",
+      description:
+        "Причастия и деепричастия, паронимы, фразеологизмы, книжная лексика. Только для мастеров!",
     },
   },
   lessons: {

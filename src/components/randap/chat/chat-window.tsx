@@ -654,7 +654,7 @@ export function ChatWindow({
                 disabled={uploading}
                 aria-label={t.transferTitle}
                 title={t.transferTitle}
-                className="flex size-9 shrink-0 items-center justify-center rounded-full text-xl text-muted-foreground transition-colors hover:bg-secondary sm:size-10"
+                className="flex size-8 shrink-0 items-center justify-center rounded-full text-lg text-muted-foreground transition-colors hover:bg-secondary sm:size-10 sm:text-xl"
               >
                 💸
               </button>
@@ -663,7 +663,7 @@ export function ChatWindow({
               onClick={() => setShowStickers((prev) => !prev)}
               aria-label={t.stickers}
               className={cn(
-                "flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:size-10",
+                "flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:size-10",
                 showStickers && "bg-secondary text-foreground"
               )}
             >
@@ -673,7 +673,7 @@ export function ChatWindow({
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
               aria-label={t.photo}
-              className="flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:size-10"
+              className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:size-10"
             >
               {uploading ? (
                 <Loader2 className="size-5 animate-spin" aria-hidden="true" />
@@ -709,7 +709,7 @@ export function ChatWindow({
               placeholder={t.messagePlaceholder}
               aria-label={t.messagePlaceholder}
               ref={inputRef}
-              className="max-h-32 min-h-10 w-full min-w-0 flex-1 resize-none overflow-y-auto rounded-2xl border border-border bg-background px-3.5 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+              className="max-h-32 min-h-10 w-full min-w-0 flex-1 resize-none overflow-y-auto rounded-2xl border border-border bg-background px-3 py-2 text-[16px] leading-snug text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sky-500/40 sm:px-3.5 sm:text-sm"
             />
 
             <button
