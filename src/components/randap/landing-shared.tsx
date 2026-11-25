@@ -136,6 +136,49 @@ export function FaqBlock({
   );
 }
 
+/**
+ * BOSH SAHIFA FOOTERI — barcha ochiq bo'limlarga havolalar.
+ * SEO: bosh sahifadan landing sahifalarga ichki havolalar tarmog'i
+ * (Googlebot sahifalarni havolalar orqali tezroq topadi va indekslaydi).
+ * Server component — har kimga (mehmon, a'zo, Googlebot) ko'rinadi.
+ */
+export function HomeLinksFooter() {
+  return (
+    <footer className="mx-auto w-full max-w-3xl px-4 pb-10 pt-6">
+      <section
+        aria-label="Randap bo'limlari"
+        className="rounded-2xl border border-border bg-card p-5"
+      >
+        <h2 className="text-base font-bold text-foreground">
+          Randap bo&apos;limlari
+        </h2>
+        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+          Videolar va Shorts, onlayn testlar, o&apos;rganish darslari, jonli
+          chat, DZF do&apos;koni, ballar va reyting — hammasi bir joyda, bepul.
+        </p>
+        <nav
+          aria-label="Sayt bo'limlari xaritasi"
+          className="mt-4 flex flex-wrap gap-2"
+        >
+          {LANDING_LINKS.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="inline-flex min-h-[40px] items-center rounded-full border border-border bg-background px-4 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/60"
+            >
+              {l.title}
+            </Link>
+          ))}
+        </nav>
+        <p className="mt-4 text-xs text-muted-foreground">
+          © {new Date().getFullYear()} Randap — o&apos;zbek tilidagi bepul
+          o&apos;rganish va ko&apos;ngilochar platforma.
+        </p>
+      </section>
+    </footer>
+  );
+}
+
 /** FAQPage JSON-LD — Google uchun strukturaviy ma'lumot */
 export function faqJsonLd(faq: Array<{ q: string; a: string }>) {
   return {
